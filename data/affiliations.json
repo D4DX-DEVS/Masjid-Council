@@ -1,0 +1,190 @@
+[
+  {
+    "affiliationNumber": "MAF1758696285090354",
+    "name": "test",
+    "mosqueType": "മഹല്ലി പള്ളി",
+    "mahallaType": "പൂർണ മഹല്ല്",
+    "establishedYear": 2021,
+    "address": [
+      {
+        "address": "dscdscssvsv",
+        "district": "sdvsdvsv",
+        "pincode": 23213,
+        "phone": 5566778899,
+        "email": "n@gmail.com",
+        "website": "https://fonts.google.com/selection/embed"
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "sdcdscs",
+        "district": "sdvsdvfsv"
+      }
+    ],
+    "facilities": [
+      "മദ്രസ",
+      "സകാത്ത് സെല്‍"
+    ],
+    "hasCemetery": false,
+    "mosqueCapacity": "232",
+    "mosqueArea": "123",
+    "fridayMaleAttendance": "2",
+    "fridayFemaleAttendance": "2",
+    "finance": [
+      {
+        "assets": "sdcscsdcsc",
+        "incomeSource": "svsdvsvs",
+        "monthlyExpense": "1231"
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": true,
+        "recordsKept": [
+          "അസറ്റ് രജിസ്റ്റർ",
+          "വിവാഹ മോചന രജിസ്റ്റര്‍"
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "123",
+        "lastYearExpense": "123"
+      }
+    ],
+    "commmunityServices": [
+      "പലിശരഹിത നിധി",
+      "ബ്ലഡ് ബാങ്ക്"
+    ],
+    "otherCommunityServices": [
+      "wfddscfsdc"
+    ],
+    "committees": [
+      {
+        "committeeType": "അസോസിയേഷൻ",
+        "president": [
+          {
+            "name": "sdsd",
+            "phone": "5566778899",
+            "email": "https://fonts.google.com/selection/embed"
+          }
+        ],
+        "secretary": [
+          {
+            "name": "sdvsv",
+            "phone": "5566778899",
+            "email": "https://fonts.google.com/selection/embed"
+          }
+        ],
+        "workers": [
+          {
+            "age": "22",
+            "salary": "2323",
+            "qualification": "dfdfdf",
+            "remarks": "dscsd",
+            "working": "dcsdvcsv",
+            "otherStateWorkers": true,
+            "LegalOtherStateWorkers": true
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T06:44:45.090Z",
+    "updatedAt": "2025-09-24T06:44:45.090Z"
+  },
+  {
+    "affiliationNumber": "MAF1758696610966917",
+    "name": "test",
+    "mosqueType": "",
+    "mahallaType": "പൂർണ മഹല്ല്",
+    "establishedYear": 3434,
+    "address": [
+      {
+        "address": "new test kdcsdvdv(H)kvndv",
+        "district": "sdfdsfsf",
+        "pincode": 3424,
+        "phone": 91,
+        "email": "n@gmail.com",
+        "website": "https://fonts.google.com/selection/embed"
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "sdcdsc",
+        "district": "dcdsvsdv"
+      }
+    ],
+    "facilities": [
+      "ഡിജിറ്റൽ ലൈബ്രറി",
+      "വനിതാ വേദി"
+    ],
+    "hasCemetery": true,
+    "mosqueCapacity": "212",
+    "mosqueArea": "12",
+    "fridayMaleAttendance": "12",
+    "fridayFemaleAttendance": "12",
+    "finance": [
+      {
+        "assets": "dscsdcss",
+        "incomeSource": "dvsdvsvsv",
+        "monthlyExpense": "21"
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": true,
+        "recordsKept": [
+          "വിവാഹ മോചന രജിസ്റ്റര്‍",
+          "ഖബര്‍ രജിസ്റ്റ്റ്‍"
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "23123",
+        "lastYearExpense": "123103"
+      }
+    ],
+    "commmunityServices": [
+      "പലിശരഹിത നിധി",
+      "ബ്ലഡ് ബാങ്ക്",
+      "മെഡിക്കൽ ഹെൽപ്",
+      "കരിയർ ഹെൽപ് സെൻ്റർ"
+    ],
+    "otherCommunityServices": [
+      "asdscsdc"
+    ],
+    "committees": [
+      {
+        "committeeType": "അസോസിയേഷൻ",
+        "president": [
+          {
+            "name": "aasf",
+            "phone": "1122334455",
+            "email": "v@gmail.com"
+          }
+        ],
+        "secretary": [
+          {
+            "name": "sdfsf",
+            "phone": "1122334455",
+            "email": "v@gmail.com"
+          }
+        ],
+        "workers": [
+          {
+            "age": "21",
+            "salary": "12",
+            "qualification": "ddcd",
+            "remarks": "dvcv",
+            "working": "vdvdvdv",
+            "otherStateWorkers": true,
+            "LegalOtherStateWorkers": true
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T06:50:10.966Z",
+    "updatedAt": "2025-09-24T06:50:10.966Z"
+  }
+]
