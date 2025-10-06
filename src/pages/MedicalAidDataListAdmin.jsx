@@ -143,7 +143,7 @@ const MedicalAidDataListAdmin = () => {
                 <table className="w-full">
                   <thead style={{ backgroundColor: '#6db14e' }}>
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Medical Aid Number</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Application ID</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Mosque Name</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Location</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Status</th>
@@ -160,7 +160,7 @@ const MedicalAidDataListAdmin = () => {
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-900">
-                            {medicalAid.medicalAidNumber || `#${String(index + 1).padStart(3, '0')}`}
+                            {medicalAid.trackingId || medicalAid.medicalAidNumber || `#${String(index + 1).padStart(3, '0')}`}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">

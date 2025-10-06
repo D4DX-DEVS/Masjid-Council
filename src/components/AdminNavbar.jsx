@@ -76,9 +76,9 @@ const AdminNavbar = () => {
                 Home
               </button>
               <button
-                onClick={() => handleNavigation('/affliation-list-admin')}
+                onClick={() => handleNavigation('/affiliation-list-admin')}
                 className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 px-3 py-2 ${
-                  isActive('/affliation-list-admin')
+                  isActive('/affiliation-list-admin')
                     ? 'text-green-600'
                     : 'text-black hover:text-green-600'
                 }`}
@@ -174,7 +174,7 @@ const AdminNavbar = () => {
                   <button
                     onClick={() => handleNavigation('/affliation-list-admin')}
                     className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 block px-3 py-2 w-full text-left ${
-                      isActive('/affliation-list-admin')
+                      isActive('/affiliation-list-admin')
                         ? 'text-green-600'
                         : 'text-black hover:text-green-600'
                     }`}

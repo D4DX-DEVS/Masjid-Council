@@ -10,23 +10,23 @@ import { useNavigate } from 'react-router-dom';
 
 const applications = [
   {
-    title: 'Mosque Affiliation',
+    title: 'Masjid Affiliation',
     malayalam: 'മസ്ജിദ് അഫിലിയേഷൻ',
-    description: 'Apply for mosque affiliation with Masjid Council Kerala',
+    description: 'Apply for masjid affiliation with Masjid Council Kerala',
     icon: <Home className="w-5 h-5 text-white" />,
     bgColor: 'bg-[#8cbb58]',
   },
   {
     title: 'Imam Muaddin Welfare Fund',
     malayalam: 'ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി',
-    description: 'Apply for welfare assistance for mosque staff',
+    description: 'Apply for welfare assistance for masjid staff',
     icon: <UserRound className="w-5 h-5 text-white" />,
     bgColor: 'bg-[#8cbb58]',
   },
   {
-    title: 'Mosque Fund',
+    title: 'Masjid Fund',
     malayalam: 'മസ്ജിദ് ഫണ്ട്',
-    description: 'Apply for financial assistance for mosque maintenance and repairs',
+    description: 'Apply for financial assistance for masjid maintenance and repairs',
     icon: <Building2 className="w-5 h-5 text-white" />,
     bgColor: 'bg-[#8cbb58]',
   },
@@ -50,11 +50,11 @@ const HeroSection = () => {
   
 
   const handleNavigation = (title) => {
-    if (title === 'Mosque Affiliation') {
+    if (title === 'Masjid Affiliation') {
       navigate('/affiliation');
     } else if (title === 'Imam Muaddin Welfare Fund') {
       navigate('/medical-aid');
-    } else if (title === 'Mosque Fund') {
+    } else if (title === 'Masjid Fund') {
       navigate('/mosque-fund');
     }
   };

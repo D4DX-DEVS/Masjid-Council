@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
 import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import StatusChangeModal from '../components/StatusChangeModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,10 +14,13 @@ const SuperAdminMedicalAidDetails = () => {
   const [error, setError] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
   const [actionLoading, setActionLoading] = useState(false);
+  const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
+  const [statusChangeLoading, setStatusChangeLoading] = useState(false);
 
   useEffect(() => {
     // Get the medical aid ID from location state
@@ -69,6 +73,58 @@ const SuperAdminMedicalAidDetails = () => {
     setAlertMessage('');
   };
 
+  // Status Change Functions
+  const handleStatusChangeClick = () => {
+    setShowStatusChangeModal(true);
+  };
+
+  const handleStatusChange = async (newStatus, rejectionReason) => {
+    setStatusChangeLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowStatusChangeModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/superadmin/welfare-fund/${formData._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          rejectionReason: rejectionReason || null
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert(`Medical aid status changed to ${newStatus} successfully!`, 'success');
+        setShowStatusChangeModal(false);
+        // Update the local state
+        setFormData({ 
+          ...formData, 
+          status: newStatus, 
+          rejectionReason: rejectionReason || null,
+          updatedAt: new Date()
+        });
+      } else {
+        showAlert('Failed to change status: ' + data.message, 'error');
+        setShowStatusChangeModal(false);
+      }
+    } catch (error) {
+      console.error('Status change error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowStatusChangeModal(false);
+    } finally {
+      setStatusChangeLoading(false);
+    }
+  };
+
   const handleConfirmClick = () => {
     setShowConfirmModal(true);
   };
@@ -119,6 +175,11 @@ const SuperAdminMedicalAidDetails = () => {
   };
 
   const handleReject = async () => {
+    if (!rejectionReason.trim()) {
+      showAlert('Please provide a reason for rejection.', 'error');
+      return;
+    }
+
     setActionLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
@@ -135,7 +196,8 @@ const SuperAdminMedicalAidDetails = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          status: 'rejected'
+          status: 'rejected',
+          rejectionReason: rejectionReason.trim()
         })
       });
 
@@ -144,8 +206,9 @@ const SuperAdminMedicalAidDetails = () => {
       if (data.success) {
         showAlert('Medical aid application rejected successfully!', 'success');
         setShowRejectModal(false);
+        setRejectionReason('');
         // Update the local state
-        setFormData({ ...formData, status: 'rejected' });
+        setFormData({ ...formData, status: 'rejected', rejectionReason: rejectionReason.trim() });
       } else {
         showAlert('Failed to reject application: ' + data.message, 'error');
         setShowRejectModal(false);
@@ -244,22 +307,22 @@ const SuperAdminMedicalAidDetails = () => {
       <SuperAdminNavbar />
       <div className="p-4">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
-          <div className="flex items-center gap-3">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+            <div className="flex items-center gap-3">
               <button 
-              onClick={handleBack}
-              className="p-2 hover:bg-green-700 rounded-full transition-colors"
+                onClick={handleBack}
+                className="p-2 hover:bg-green-700 rounded-full transition-colors"
               >
-              <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5" />
               </button>
-                <div>
-              <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
-              <p className="text-green-100 text-sm">Medical Aid Application Details</p>
-              <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
+              <div>
+                <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
+                <p className="text-green-100 text-sm">Medical Aid Application Details</p>
+                <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
+              </div>
             </div>
           </div>
-        </div>
 
         <div className="space-y-6">
           {/* Application Summary */}
@@ -472,26 +535,189 @@ const SuperAdminMedicalAidDetails = () => {
           {/* Super Admin Actions */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Super Admin Actions</h2>
-            <div className="flex justify-between mt-4">
-              <button 
-                onClick={handleApprove}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors"
-              >
-                <CheckCircle className="w-5 h-5" />
-                Approve Application
-              </button>
-              <button 
-                onClick={handleReject}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors"
-              >
-                <XCircle className="w-5 h-5" />
-                Reject Application
-              </button>
+            
+            {/* Show buttons only if status is pending */}
+            {formData.status === 'pending' ? (
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleConfirmClick}
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Approve Application
+                </button>
+                <button 
+                  onClick={handleRejectClick}
+                  className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Reject Application
+                </button>
+              </div>
+            ) : (
+              /* Show simple status if already processed */
+              <div className="text-center py-4">
+                {formData.status === 'approved' ? (
+                  <div className="flex items-center justify-center gap-2 text-green-600">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="font-medium">Application Approved</span>
+                  </div>
+                ) : formData.status === 'rejected' ? (
+                  <div className="flex items-center justify-center gap-2 text-red-600">
+                    <XCircle className="w-5 h-5" />
+                    <span className="font-medium">Application Rejected</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 text-yellow-600">
+                    <AlertCircle className="w-5 h-5" />
+                    <span className="font-medium">Application Pending</span>
+                  </div>
+                )}
+                {/* Status Change Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={handleStatusChangeClick}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow transition-colors"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Change Status
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <CheckCircle className="w-8 h-8 text-green-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-900">Confirm Approval</h3>
             </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to approve this medical aid application? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Approving...
+                  </div>
+                ) : (
+                  'Approve Application'
+                )}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <XCircle className="w-8 h-8 text-red-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-900">Confirm Rejection</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Are you sure you want to reject this medical aid application? This action cannot be undone.
+            </p>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rejection Reason *
+              </label>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Please provide a reason for rejection..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                rows={3}
+                required
+              />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectionReason('');
+                }}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleReject}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Rejecting...
+                  </div>
+                ) : (
+                  'Reject Application'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {showAlertModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              {alertType === 'success' && <CheckCircle className="w-8 h-8 text-green-600 mr-3" />}
+              {alertType === 'error' && <XCircle className="w-8 h-8 text-red-600 mr-3" />}
+              {alertType === 'warning' && <AlertCircle className="w-8 h-8 text-yellow-600 mr-3" />}
+              <h3 className="text-lg font-semibold text-gray-900">
+                {alertType === 'success' && 'Success'}
+                {alertType === 'error' && 'Error'}
+                {alertType === 'warning' && 'Warning'}
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">{alertMessage}</p>
+            <div className="flex justify-end">
+              <button
+                onClick={closeAlert}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Change Modal */}
+      <StatusChangeModal
+        isOpen={showStatusChangeModal}
+        onClose={() => setShowStatusChangeModal(false)}
+        currentStatus={formData?.status}
+        onStatusChange={handleStatusChange}
+        loading={statusChangeLoading}
+        formType="Medical Aid"
+      />
     </div>
   );
 };

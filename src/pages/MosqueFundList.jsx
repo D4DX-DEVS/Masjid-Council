@@ -12,6 +12,7 @@ const MosqueFundList = () => {
   const [error, setError] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
@@ -161,6 +162,11 @@ const MosqueFundList = () => {
   };
 
   const handleReject = async () => {
+    if (!rejectionReason.trim()) {
+      showAlert('Please provide a reason for rejection.', 'error');
+      return;
+    }
+
     setActionLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
@@ -177,7 +183,8 @@ const MosqueFundList = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          status: 'rejected'
+          status: 'rejected',
+          rejectionReason: rejectionReason.trim()
         })
       });
 
@@ -186,8 +193,9 @@ const MosqueFundList = () => {
       if (data.success) {
         showAlert('Mosque fund application rejected successfully!', 'success');
         setShowRejectModal(false);
+        setRejectionReason('');
         // Update the local state
-        setFormData({ ...formData, status: 'rejected' });
+        setFormData({ ...formData, status: 'rejected', rejectionReason: rejectionReason.trim() });
       } else {
         showAlert('Failed to reject application: ' + data.message, 'error');
         setShowRejectModal(false);
@@ -617,14 +625,30 @@ const MosqueFundList = () => {
                 <h3 className="text-lg font-medium text-gray-900">Confirm Rejection</h3>
               </div>
             </div>
-            <div className="mb-6">
+            <div className="mb-4">
               <p className="text-sm text-gray-500">
                 Are you sure you want to reject this mosque fund application? This action cannot be undone.
               </p>
             </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rejection Reason *
+              </label>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Please provide a reason for rejection..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                rows={3}
+                required
+              />
+            </div>
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() => setShowRejectModal(false)}
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectionReason('');
+                }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
                 disabled={actionLoading}
               >

@@ -10,7 +10,7 @@ import MosqueFundForm from './pages/MosqueFundForm';
 import AdminLogin from './pages/AdminLogin';
 import SuperAdminLogin from './pages/SuperAdminLogin';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
-import AffiliationFormLit from './pages/AffiliationFormList';
+import AffiliationFormList from './pages/AffiliationFormList';
 import AffiliationFormListAdmin from './pages/AffiliationFormListAdmin';
 import AdminHome from './pages/AdminHome';
 import MedicalAidDataList from './pages/MedicalAidDataList';
@@ -30,8 +30,8 @@ const Layout = () => {
   const location = useLocation();
 
   const adminRoutes = [
-    '/affliation-list',
-    '/affliation-list-admin',
+    '/affiliation-list',
+    '/affiliation-list-admin',
     '/admin-home',
     '/medical-list',
     '/medical-list-admin',
@@ -73,8 +73,8 @@ const Layout = () => {
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/superadmin-login" element={<SuperAdminLogin />} />
         <Route path="/superadmin-dashboard" element={<SuperAdminDashboard />} />
-        <Route path="/affliation-list" element={<AffiliationFormLit />} />
-        <Route path="/affliation-list-admin" element={<AffiliationFormListAdmin />} />
+        <Route path="/affiliation-list" element={<AffiliationFormList />} />
+        <Route path="/affiliation-list-admin" element={<AffiliationFormListAdmin />} />
         <Route path="/admin-home" element={<AdminHome />} />
         <Route path="/medical-list" element={<MedicalAidDataList />} />
         <Route path="/medical-list-admin" element={<MedicalAidDataListAdmin />} />

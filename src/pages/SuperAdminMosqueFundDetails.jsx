@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
 import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import StatusChangeModal from '../components/StatusChangeModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,10 +14,13 @@ const SuperAdminMosqueFundDetails = () => {
   const [error, setError] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
   const [actionLoading, setActionLoading] = useState(false);
+  const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
+  const [statusChangeLoading, setStatusChangeLoading] = useState(false);
 
   useEffect(() => {
     // Get the mosque fund ID from location state
@@ -69,6 +73,58 @@ const SuperAdminMosqueFundDetails = () => {
     setAlertMessage('');
   };
 
+  // Status Change Functions
+  const handleStatusChangeClick = () => {
+    setShowStatusChangeModal(true);
+  };
+
+  const handleStatusChange = async (newStatus, rejectionReason) => {
+    setStatusChangeLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowStatusChangeModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/superadmin/mosque-fund/${formData._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          rejectionReason: rejectionReason || null
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert(`Mosque fund status changed to ${newStatus} successfully!`, 'success');
+        setShowStatusChangeModal(false);
+        // Update the local state
+        setFormData({ 
+          ...formData, 
+          status: newStatus, 
+          rejectionReason: rejectionReason || null,
+          updatedAt: new Date()
+        });
+      } else {
+        showAlert('Failed to change status: ' + data.message, 'error');
+        setShowStatusChangeModal(false);
+      }
+    } catch (error) {
+      console.error('Status change error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowStatusChangeModal(false);
+    } finally {
+      setStatusChangeLoading(false);
+    }
+  };
+
   const handleConfirmClick = () => {
     setShowConfirmModal(true);
   };
@@ -119,6 +175,11 @@ const SuperAdminMosqueFundDetails = () => {
   };
 
   const handleReject = async () => {
+    if (!rejectionReason.trim()) {
+      showAlert('Please provide a reason for rejection.', 'error');
+      return;
+    }
+
     setActionLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
@@ -135,7 +196,8 @@ const SuperAdminMosqueFundDetails = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          status: 'rejected'
+          status: 'rejected',
+          rejectionReason: rejectionReason.trim()
         })
       });
 
@@ -144,8 +206,9 @@ const SuperAdminMosqueFundDetails = () => {
       if (data.success) {
         showAlert('Mosque fund application rejected successfully!', 'success');
         setShowRejectModal(false);
+        setRejectionReason('');
         // Update the local state
-        setFormData({ ...formData, status: 'rejected' });
+        setFormData({ ...formData, status: 'rejected', rejectionReason: rejectionReason.trim() });
       } else {
         showAlert('Failed to reject application: ' + data.message, 'error');
         setShowRejectModal(false);
@@ -575,6 +638,16 @@ const SuperAdminMosqueFundDetails = () => {
                     <span className="font-medium">Application Pending</span>
                   </div>
                 )}
+                {/* Status Change Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={handleStatusChangeClick}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow transition-colors"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Change Status
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -628,12 +701,28 @@ const SuperAdminMosqueFundDetails = () => {
               <XCircle className="w-8 h-8 text-red-600 mr-3" />
               <h3 className="text-lg font-semibold text-gray-900">Confirm Rejection</h3>
             </div>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-4">
               Are you sure you want to reject this mosque fund application? This action cannot be undone.
             </p>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rejection Reason *
+              </label>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Please provide a reason for rejection..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                rows={3}
+                required
+              />
+            </div>
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setShowRejectModal(false)}
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectionReason('');
+                }}
                 className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 disabled={actionLoading}
               >
@@ -684,6 +773,16 @@ const SuperAdminMosqueFundDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Status Change Modal */}
+      <StatusChangeModal
+        isOpen={showStatusChangeModal}
+        onClose={() => setShowStatusChangeModal(false)}
+        currentStatus={formData?.status}
+        onStatusChange={handleStatusChange}
+        loading={statusChangeLoading}
+        formType="Mosque Fund"
+      />
     </div>
   );
 };

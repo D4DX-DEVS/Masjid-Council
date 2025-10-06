@@ -146,7 +146,7 @@ const SuperAdminMosqueFundList = () => {
                   <thead style={{ backgroundColor: '#6db14e' }}>
                     <tr>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                        Application Number
+                        Application ID
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">
                         Mosque Name
@@ -172,7 +172,7 @@ const SuperAdminMosqueFundList = () => {
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-900">
-                            {mosqueFund._id?.slice(-8) || `#${String(index + 1).padStart(3, '0')}`}
+                            {mosqueFund.trackingId || mosqueFund._id?.slice(-8) || `#${String(index + 1).padStart(3, '0')}`}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
 import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import StatusChangeModal from '../components/StatusChangeModal';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const SuperAdminAffiliationDetails = () => {
   const location = useLocation();
@@ -11,22 +14,49 @@ const SuperAdminAffiliationDetails = () => {
   const [error, setError] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
   const [actionLoading, setActionLoading] = useState(false);
+  const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
+  const [statusChangeLoading, setStatusChangeLoading] = useState(false);
 
   useEffect(() => {
     // Get affiliation data from navigation state or fetch by ID
-    if (location.state?.affiliation) {
-      setAffiliation(location.state.affiliation);
-      setLoading(false);
+    const affiliationId = location.state?.affiliation?._id;
+    
+    if (affiliationId) {
+      fetchAffiliationDetails(affiliationId);
     } else {
-      // If no data in state, you might want to fetch by ID from URL params
       setError('No affiliation data found');
       setLoading(false);
     }
   }, [location.state]);
+
+  const fetchAffiliationDetails = async (id) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setAffiliation(data.data);
+      } else {
+        setError(data.message || 'Failed to fetch affiliation details');
+      }
+    } catch (error) {
+      console.error('Fetch affiliation details error:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBack = () => {
     navigate(-1);
@@ -41,6 +71,58 @@ const SuperAdminAffiliationDetails = () => {
   const closeAlert = () => {
     setShowAlertModal(false);
     setAlertMessage('');
+  };
+
+  // Status Change Functions
+  const handleStatusChangeClick = () => {
+    setShowStatusChangeModal(true);
+  };
+
+  const handleStatusChange = async (newStatus, rejectionReason) => {
+    setStatusChangeLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowStatusChangeModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/superadmin/affiliation/${affiliation._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          rejectionReason: rejectionReason || null
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert(`Affiliation status changed to ${newStatus} successfully!`, 'success');
+        setShowStatusChangeModal(false);
+        // Update the local state
+        setAffiliation({ 
+          ...affiliation, 
+          status: newStatus, 
+          rejectionReason: rejectionReason || null,
+          updatedAt: new Date()
+        });
+      } else {
+        showAlert('Failed to change status: ' + data.message, 'error');
+        setShowStatusChangeModal(false);
+      }
+    } catch (error) {
+      console.error('Status change error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowStatusChangeModal(false);
+    } finally {
+      setStatusChangeLoading(false);
+    }
   };
 
   const handleConfirmClick = () => {
@@ -93,6 +175,11 @@ const SuperAdminAffiliationDetails = () => {
   };
 
   const handleReject = async () => {
+    if (!rejectionReason.trim()) {
+      showAlert('Please provide a reason for rejection.', 'error');
+      return;
+    }
+
     setActionLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
@@ -109,7 +196,8 @@ const SuperAdminAffiliationDetails = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          status: 'rejected'
+          status: 'rejected',
+          rejectionReason: rejectionReason.trim()
         })
       });
 
@@ -118,8 +206,9 @@ const SuperAdminAffiliationDetails = () => {
       if (data.success) {
         showAlert('Affiliation application rejected successfully!', 'success');
         setShowRejectModal(false);
+        setRejectionReason('');
         // Update the local state
-        setAffiliation({ ...affiliation, status: 'rejected' });
+        setAffiliation({ ...affiliation, status: 'rejected', rejectionReason: rejectionReason.trim() });
       } else {
         showAlert('Failed to reject application: ' + data.message, 'error');
         setShowRejectModal(false);
@@ -552,6 +641,16 @@ const SuperAdminAffiliationDetails = () => {
                    affiliation.status === 'rejected' ? '❌ Rejected' : 
                    '❓ Unknown Status'}
                 </span>
+                {/* Status Change Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={handleStatusChangeClick}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow transition-colors"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Change Status
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -617,14 +716,30 @@ const SuperAdminAffiliationDetails = () => {
                 <h3 className="text-lg font-medium text-gray-900">Confirm Rejection</h3>
               </div>
             </div>
-            <div className="mb-6">
+            <div className="mb-4">
               <p className="text-sm text-gray-500">
                 Are you sure you want to reject this mosque affiliation application? This action cannot be undone.
               </p>
             </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rejection Reason *
+              </label>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Please provide a reason for rejection..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                rows={3}
+                required
+              />
+            </div>
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() => setShowRejectModal(false)}
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectionReason('');
+                }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
                 disabled={actionLoading}
               >
@@ -685,6 +800,16 @@ const SuperAdminAffiliationDetails = () => {
         </div>
       </div>
       )}
+
+      {/* Status Change Modal */}
+      <StatusChangeModal
+        isOpen={showStatusChangeModal}
+        onClose={() => setShowStatusChangeModal(false)}
+        currentStatus={affiliation?.status}
+        onStatusChange={handleStatusChange}
+        loading={statusChangeLoading}
+        formType="Affiliation"
+      />
     </div>
   );
 };

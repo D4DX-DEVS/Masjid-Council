@@ -125,95 +125,101 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  // Fetch districts and areas from external APIs
-  const fetchDropdownData = async () => {
+  // Fetch districts from external API using new Malarvadi pattern
+  const fetchDistricts = async () => {
     setLoadingDropdowns(true);
     try {
-      // Fetch districts
-      const districtsResponse = await fetch('http://localhost:5000/api/mosqueAffiliation/external/districts');
-      const districtsData = await districtsResponse.json();
-      if (districtsData.success && districtsData.data && districtsData.data.data && Array.isArray(districtsData.data.data)) {
-        setDistricts(districtsData.data.data);
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
+      const result = await response.json();
+      
+      if (result.success && result.districts && Array.isArray(result.districts)) {
+        setDistricts(result.districts);
       } else {
-        console.warn('Failed to fetch districts from API, using fallback data');
         setDistricts(getFallbackDistricts());
       }
-
-      // Fetch areas
-      const areasResponse = await fetch('http://localhost:5000/api/mosqueAffiliation/external/areas');
-      const areasData = await areasResponse.json();
-      if (areasData.success && areasData.data && areasData.data.data && Array.isArray(areasData.data.data)) {
-        setAreas(areasData.data.data);
-        setFilteredAreas(areasData.data.data); // Initialize with all areas
-      } else {
-        console.warn('Failed to fetch areas from API, using fallback data');
-        const fallbackAreas = getFallbackAreas();
-        setAreas(fallbackAreas);
-        setFilteredAreas(fallbackAreas);
-      }
     } catch (error) {
-      console.error('Error fetching dropdown data:', error);
-      console.warn('Using fallback data for districts and areas');
-      const fallbackAreas = getFallbackAreas();
       setDistricts(getFallbackDistricts());
-      setAreas(fallbackAreas);
-      setFilteredAreas(fallbackAreas);
     } finally {
       setLoadingDropdowns(false);
     }
   };
 
+  // Fetch areas for a specific district using new Malarvadi pattern
+  const fetchAreasForDistrict = async (districtId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
+      const result = await response.json();
+      
+      if (result.success && result.areas && Array.isArray(result.areas)) {
+        setFilteredAreas(result.areas);
+        return result.areas;
+      } else {
+        const fallbackAreas = getFallbackAreas();
+        setFilteredAreas(fallbackAreas);
+        return fallbackAreas;
+      }
+    } catch (error) {
+      const fallbackAreas = getFallbackAreas();
+      setFilteredAreas(fallbackAreas);
+      return fallbackAreas;
+    }
+  };
+
   // Fallback data for districts
   const getFallbackDistricts = () => [
-    { id: 1, name: 'Kozhikode', districtName: 'Kozhikode' },
-    { id: 2, name: 'Malappuram', districtName: 'Malappuram' },
-    { id: 3, name: 'Kannur', districtName: 'Kannur' },
-    { id: 4, name: 'Kasaragod', districtName: 'Kasaragod' },
-    { id: 5, name: 'Wayanad', districtName: 'Wayanad' },
-    { id: 6, name: 'Thrissur', districtName: 'Thrissur' },
-    { id: 7, name: 'Ernakulam', districtName: 'Ernakulam' },
-    { id: 8, name: 'Kottayam', districtName: 'Kottayam' },
-    { id: 9, name: 'Alappuzha', districtName: 'Alappuzha' },
-    { id: 10, name: 'Pathanamthitta', districtName: 'Pathanamthitta' },
-    { id: 11, name: 'Kollam', districtName: 'Kollam' },
-    { id: 12, name: 'Thiruvananthapuram', districtName: 'Thiruvananthapuram' },
-    { id: 13, name: 'Palakkad', districtName: 'Palakkad' },
-    { id: 14, name: 'Idukki', districtName: 'Idukki' }
+    { id: 1, title: 'Kozhikode', name: 'Kozhikode' },
+    { id: 2, title: 'Malappuram', name: 'Malappuram' },
+    { id: 3, title: 'Kannur', name: 'Kannur' },
+    { id: 4, title: 'Kasaragod', name: 'Kasaragod' },
+    { id: 5, title: 'Wayanad', name: 'Wayanad' },
+    { id: 6, title: 'Thrissur', name: 'Thrissur' },
+    { id: 7, title: 'Ernakulam', name: 'Ernakulam' },
+    { id: 8, title: 'Kottayam', name: 'Kottayam' },
+    { id: 9, title: 'Alappuzha', name: 'Alappuzha' },
+    { id: 10, title: 'Pathanamthitta', name: 'Pathanamthitta' },
+    { id: 11, title: 'Kollam', name: 'Kollam' },
+    { id: 12, title: 'Thiruvananthapuram', name: 'Thiruvananthapuram' },
+    { id: 13, title: 'Palakkad', name: 'Palakkad' },
+    { id: 14, title: 'Idukki', name: 'Idukki' }
   ];
 
   // Fallback data for areas
   const getFallbackAreas = () => [
-    { id: 1, name: 'Kozhikode City', areaName: 'Kozhikode City' },
-    { id: 2, name: 'Feroke', areaName: 'Feroke' },
-    { id: 3, name: 'Koyilandy', areaName: 'Koyilandy' },
-    { id: 4, name: 'Vadakara', areaName: 'Vadakara' },
-    { id: 5, name: 'Thiruvambady', areaName: 'Thiruvambady' },
-    { id: 6, name: 'Koduvally', areaName: 'Koduvally' },
-    { id: 7, name: 'Balussery', areaName: 'Balussery' },
-    { id: 8, name: 'Perambra', areaName: 'Perambra' },
-    { id: 9, name: 'Thiruvallur', areaName: 'Thiruvallur' },
-    { id: 10, name: 'Elathur', areaName: 'Elathur' }
+    { id: 1, title: 'Kozhikode City', name: 'Kozhikode City' },
+    { id: 2, title: 'Feroke', name: 'Feroke' },
+    { id: 3, title: 'Koyilandy', name: 'Koyilandy' },
+    { id: 4, title: 'Vadakara', name: 'Vadakara' },
+    { id: 5, title: 'Thiruvambady', name: 'Thiruvambady' },
+    { id: 6, title: 'Koduvally', name: 'Koduvally' },
+    { id: 7, title: 'Balussery', name: 'Balussery' },
+    { id: 8, title: 'Perambra', name: 'Perambra' },
+    { id: 9, title: 'Thiruvallur', name: 'Thiruvallur' },
+    { id: 10, title: 'Elathur', name: 'Elathur' }
   ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'district') {
-      // When district changes, filter areas and reset area selection
-      
-      const filtered = areas.filter(area => 
-        (area.district && area.district.title === value) || 
-        (area.district && area.district.title === '') || 
-        !area.district
-      );
-      
-      setFilteredAreas(filtered);
-      
+      // When district changes, fetch areas for that district using new API
       setFormData({
         ...formData,
         district: value,
         area: '' // Reset area when district changes
       });
+      
+      // Find the district ID to fetch areas
+      const selectedDistrict = districts.find(d => 
+        (d.title || d.name) === value
+      );
+      
+      if (selectedDistrict && selectedDistrict.id) {
+        fetchAreasForDistrict(selectedDistrict.id);
+      } else {
+        // If no district ID found, use fallback areas
+        const fallbackAreas = getFallbackAreas();
+        setFilteredAreas(fallbackAreas);
+      }
     } else if (name === 'phoneNumber') {
       // When phone number changes, auto-generate password
       const phoneNumber = value.replace(/\D/g, ''); // Remove non-digits
@@ -251,8 +257,8 @@ const SuperAdminDashboard = () => {
     try {
       const token = localStorage.getItem('superAdminToken');
       const url = editingAdmin 
-        ? `http://localhost:5000/api/superadmin/admin/${editingAdmin._id}`
-        : 'http://localhost:5000/api/superadmin/admin';
+        ? `${API_BASE_URL}/api/superadmin/admin/${editingAdmin._id}`
+        : `${API_BASE_URL}/api/superadmin/admin`;
       
       const method = editingAdmin ? 'PUT' : 'POST';
       
@@ -297,16 +303,20 @@ const SuperAdminDashboard = () => {
       area: admin.area
     });
     setShowModal(true);
-    fetchDropdownData();
+    fetchDistricts();
     
     // Filter areas based on the admin's district
     if (admin.district) {
-      const filtered = areas.filter(area => 
-        (area.district && area.district.title === admin.district) || 
-        (area.district && area.district.title === '') || 
-        !area.district
+      const selectedDistrict = districts.find(d => 
+        (d.title || d.name) === admin.district
       );
-      setFilteredAreas(filtered);
+      
+      if (selectedDistrict && selectedDistrict.id) {
+        fetchAreasForDistrict(selectedDistrict.id);
+      } else {
+        const fallbackAreas = getFallbackAreas();
+        setFilteredAreas(fallbackAreas);
+      }
     }
   };
 
@@ -317,7 +327,7 @@ const SuperAdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('superAdminToken');
-      const response = await fetch(`http://localhost:5000/api/superadmin/admin/${adminId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/superadmin/admin/${adminId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -362,7 +372,7 @@ const SuperAdminDashboard = () => {
       area: ''
     });
     setShowModal(true);
-    fetchDropdownData();
+    fetchDistricts();
     // Reset filtered areas to show all areas initially
     setFilteredAreas(areas);
   };
@@ -385,10 +395,6 @@ const SuperAdminDashboard = () => {
     );
   }
 
-  // Derived stats
-  const uniqueDistricts = Array.from(new Set(admins.map(a => (a.district || '').trim()).filter(Boolean)));
-  const uniqueAreas = Array.from(new Set(admins.map(a => (a.area || '').trim()).filter(Boolean)));
-
   return (
     <div className="min-h-screen bg-gray-50">
       <SuperAdminNavbar />
@@ -400,10 +406,8 @@ const SuperAdminDashboard = () => {
             <div className="text-center">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">സൂപ്പർ അഡ്മിൻ ഡാഷ്ബോർഡ്</h1>
               <div className="w-24 h-1 bg-emerald-600 mx-auto rounded-full"></div>
-              {/* <p className="text-gray-600 mt-4">Manage admins and monitor system activities</p> */}
             </div>
           </div>
-
 
           {/* Quick Actions */}
           <div className="mb-8">
@@ -589,8 +593,6 @@ const SuperAdminDashboard = () => {
               </div>
             </div>
 
-
-
             {/* Admins Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full rounded-lg overflow-hidden">
@@ -720,10 +722,10 @@ const SuperAdminDashboard = () => {
                      required
                      disabled={loadingDropdowns}
                    >
-                     <option value="">Select District</option>
+                     <option value="">{loadingDropdowns ? "Loading..." : "Select District"}</option>
                      {Array.isArray(districts) && districts.map((district) => (
-                       <option key={district.id || district._id} value={district.title || district.name || district.districtName}>
-                         {district.title || district.name || district.districtName}
+                       <option key={district.id || district._id} value={district.title || district.name}>
+                         {district.title || district.name}
                        </option>
                      ))}
                    </select>
@@ -745,8 +747,8 @@ const SuperAdminDashboard = () => {
                        {!formData.district ? 'Select district first' : 'Select Area'}
                      </option>
                      {Array.isArray(filteredAreas) && filteredAreas.map((area) => (
-                       <option key={area.id || area._id} value={area.title || area.name || area.areaName}>
-                         {area.title || area.name || area.areaName}
+                       <option key={area.id || area._id} value={area.title || area.name}>
+                         {area.title || area.name}
                        </option>
                      ))}
                    </select>
