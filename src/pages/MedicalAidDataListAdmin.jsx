@@ -143,7 +143,7 @@ const MedicalAidDataListAdmin = () => {
                 <table className="w-full">
                   <thead style={{ backgroundColor: '#6db14e' }}>
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Application ID</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Tracking ID</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Mosque Name</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Location</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Status</th>

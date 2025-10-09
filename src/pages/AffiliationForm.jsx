@@ -863,7 +863,7 @@ const AffiliationForm = () => {
       if (result.success) {
         showSuccessModal(
           "അപേക്ഷ സമർപ്പിച്ചു!",
-          result.data.affiliationNumber || 'N/A'
+          result.data.trackingId || result.data.affiliationNumber || 'N/A'
         );
         // Reset form after successful submission
         setFormData({
@@ -1183,11 +1183,12 @@ const AffiliationForm = () => {
                     value={formData.phone}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Only allow digits
-                      if (/^\d*$/.test(value)) {
+                      // Only allow digits and limit to 10 digits
+                      if (/^\d*$/.test(value) && value.length <= 10) {
                         handleInputChange("phone", value);
                       }
                     }}
+                    maxLength="10"
                     className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       validationErrors.phone
                         ? "border-red-500"
@@ -1816,13 +1817,14 @@ const AffiliationForm = () => {
                       type="tel"
                       placeholder="മൊബൈൽ"
                       value={formData.president.mobile}
-                      onChange={(e) =>
-                        handleNestedInputChange(
-                          "president",
-                          "mobile",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Only allow digits and limit to 10 digits
+                        if (/^\d*$/.test(value) && value.length <= 10) {
+                          handleNestedInputChange("president", "mobile", value);
+                        }
+                      }}
+                      maxLength="10"
                       className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         validationErrors["president.mobile"]
                           ? "border-red-500"
@@ -1876,13 +1878,14 @@ const AffiliationForm = () => {
                       type="tel"
                       placeholder="മൊബൈൽ"
                       value={formData.secretary.mobile}
-                      onChange={(e) =>
-                        handleNestedInputChange(
-                          "secretary",
-                          "mobile",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Only allow digits and limit to 10 digits
+                        if (/^\d*$/.test(value) && value.length <= 10) {
+                          handleNestedInputChange("secretary", "mobile", value);
+                        }
+                      }}
+                      maxLength="10"
                       className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         validationErrors["secretary.mobile"]
                           ? "border-red-500"

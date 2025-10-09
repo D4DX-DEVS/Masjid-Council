@@ -161,7 +161,10 @@ const AffiliationFormListAdmin = () => {
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-900">
-                            {affiliation.trackingId || affiliation.affiliationNumber || `#${String(index + 1).padStart(3, '0')}`}
+                            {affiliation.status === 'approved' 
+                              ? affiliation.affiliationNumber || `#${String(index + 1).padStart(3, '0')}`
+                              : affiliation.trackingId || affiliation.affiliationNumber || `#${String(index + 1).padStart(3, '0')}`
+                            }
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">

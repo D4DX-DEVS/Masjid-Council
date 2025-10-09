@@ -66,6 +66,17 @@ const MosqueFundForm = () => {
   const [units, setUnits] = useState([]);
   const [loadingDropdowns, setLoadingDropdowns] = useState(false);
 
+  // State for auto-fill functionality
+  const [loadingAffiliation, setLoadingAffiliation] = useState(false);
+  const [affiliationTimeout, setAffiliationTimeout] = useState(null);
+  const [autoFilledFields, setAutoFilledFields] = useState({
+    mosqueName: false,
+    address: false,
+    district: false,
+    area: false
+    // Note: jamathIslami is NOT auto-filled - user must select manually
+  });
+
   // Custom alert states
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
@@ -343,9 +354,174 @@ const MosqueFundForm = () => {
     { id: 5, title: 'Unit 5', name: 'Unit 5' }
   ];
 
+  // Auto-fill function for mosque data by affiliation number
+  const fetchMosqueByAffiliation = async (affiliationNumber) => {
+    if (!affiliationNumber || affiliationNumber.length < 7) return;
+    
+    try {
+      setLoadingAffiliation(true);
+      
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/${affiliationNumber}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const mosqueData = result.data;
+        const districtName = mosqueData.address?.[0]?.district || '';
+        const areaName = mosqueData.jamathArea?.[0]?.area || '';
+        
+        console.log('Auto-fill data:', {
+          mosqueName: mosqueData.name,
+          district: districtName,
+          area: areaName,
+          jamathIslami: mosqueData.jamathArea?.[0]?.district
+        });
+        
+        // Auto-fill form fields
+        setFormData(prev => ({
+          ...prev,
+          mosqueName: mosqueData.name || '',
+          address: mosqueData.address?.[0]?.address || '',
+          district: districtName,
+          area: areaName
+          // Note: jamathIslami is NOT auto-filled - user must select manually
+        }));
+        
+        // Mark fields as auto-filled (read-only) - EXCLUDING jamathIslami
+        setAutoFilledFields({
+          mosqueName: !!mosqueData.name,
+          address: !!mosqueData.address?.[0]?.address,
+          district: !!districtName,
+          area: !!areaName
+          // jamathIslami is NOT auto-filled - user must select manually
+        });
+        
+        // If district is found, fetch areas for that district to populate dropdown
+        if (districtName) {
+          console.log('Processing district:', districtName);
+          const selectedDistrict = districts.find(d => 
+            (d.title || d.name) === districtName
+          );
+          
+          console.log('Selected district:', selectedDistrict);
+          
+          if (selectedDistrict && selectedDistrict.id) {
+            // Fetch areas for the district
+            try {
+              console.log('Fetching areas for district ID:', selectedDistrict.id);
+              const fetchedAreas = await fetchAreasForDistrict(selectedDistrict.id);
+              
+              // Wait for areas to be loaded, then set the area
+              setTimeout(async () => {
+                console.log('Setting area after areas loaded:', areaName);
+                setFormData(prev => ({
+                  ...prev,
+                  area: areaName
+                }));
+                
+                // After area is set, fetch units for that area
+                if (areaName) {
+                  console.log('Fetching units for area:', areaName);
+                  try {
+                    // Find the area ID to fetch units from the fetched areas
+                    const selectedArea = fetchedAreas.find(a => 
+                      (a.title || a.name) === areaName
+                    );
+                    
+                    if (selectedArea && selectedArea.id) {
+                      console.log('Fetching units for area ID:', selectedArea.id);
+                      await fetchUnitsForArea(selectedArea.id);
+                    } else {
+                      console.log('Area not found in fetched areas, using fallback units');
+                      const fallbackUnits = getFallbackUnits();
+                      setUnits(fallbackUnits);
+                    }
+                  } catch (error) {
+                    console.error('Error fetching units:', error);
+                    const fallbackUnits = getFallbackUnits();
+                    setUnits(fallbackUnits);
+                  }
+                }
+              }, 200);
+            } catch (error) {
+              console.error('Error fetching areas:', error);
+              // Use fallback areas if API fails
+              const fallbackAreas = getFallbackAreas();
+              setAreas(fallbackAreas);
+            }
+          } else {
+            // If district not found in dropdown, use fallback areas
+            console.log('District not found in dropdown, using fallback areas');
+            const fallbackAreas = getFallbackAreas();
+            setAreas(fallbackAreas);
+            
+            // Set area after fallback areas are set
+            setTimeout(async () => {
+              console.log('Setting area with fallback areas:', areaName);
+              setFormData(prev => ({
+                ...prev,
+                area: areaName
+              }));
+              
+              // After area is set, fetch units for that area
+              if (areaName) {
+                console.log('Fetching units for area with fallback areas:', areaName);
+                try {
+                  // Find the area ID to fetch units from fallback areas
+                  const selectedArea = fallbackAreas.find(a => 
+                    (a.title || a.name) === areaName
+                  );
+                  
+                  if (selectedArea && selectedArea.id) {
+                    console.log('Fetching units for area ID:', selectedArea.id);
+                    await fetchUnitsForArea(selectedArea.id);
+                  } else {
+                    console.log('Area not found in fallback areas, using fallback units');
+                    const fallbackUnits = getFallbackUnits();
+                    setUnits(fallbackUnits);
+                  }
+                } catch (error) {
+                  console.error('Error fetching units:', error);
+                  const fallbackUnits = getFallbackUnits();
+                  setUnits(fallbackUnits);
+                }
+              }
+            }, 100);
+          }
+        }
+        
+        // Show success message
+        showCustomAlert('മസ്ജിദ് വിവരങ്ങൾ ഓട്ടോ ഫിൽ ചെയ്തു!', 'success');
+      } else {
+        showCustomAlert('അഫിലിയേഷൻ നമ്പർ കണ്ടെത്താൻ കഴിഞ്ഞില്ല', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching mosque data:', error);
+      showCustomAlert('വിവരങ്ങൾ ലോഡ് ചെയ്യുന്നതിൽ പിശക് സംഭവിച്ചു', 'error');
+    } finally {
+      setLoadingAffiliation(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
+    
+    // Handle affiliation number with auto-fill
+    if (name === 'mckAffiliation') {
+      // Clear existing timeout
+      if (affiliationTimeout) {
+        clearTimeout(affiliationTimeout);
+      }
+      
+      // Set new timeout for auto-fill
+      const newTimeout = setTimeout(() => {
+        if (value && value.length >= 7) {
+          fetchMosqueByAffiliation(value);
+        }
+      }, 500); // 500ms delay after user stops typing
+      
+      setAffiliationTimeout(newTimeout);
+    }
     
     if (name === 'district') {
       // When district changes, fetch areas for that district
@@ -410,9 +586,15 @@ const MosqueFundForm = () => {
     return emailRegex.test(email);
   };
 
-  // Fetch districts when form is shown
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
+
+  // Scroll to top when form is shown
   useEffect(() => {
     if (showForm) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       fetchDistricts();
     }
   }, [showForm]);
@@ -685,7 +867,32 @@ const MosqueFundForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                എം സി കെ അഫിലിയേഷൻ നമ്പർ <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="mckAffiliation"
+                  value={formData.mckAffiliation}
+                  onChange={handleInputChange}
+                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    validationErrors.mckAffiliation ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  required
+                />
+                {loadingAffiliation && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 മസ്ജിദിന്റെ പേര് <span className="text-red-500">*</span>
+                {autoFilledFields.mosqueName && (
+                  <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
+                )}
               </label>
               <input
                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -693,23 +900,10 @@ const MosqueFundForm = () => {
                 name="mosqueName"
                 value={formData.mosqueName}
                 onChange={handleInputChange}
+                readOnly={autoFilledFields.mosqueName}
                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  validationErrors.mosqueName ? 'border-red-500' : 'border-gray-300'
-                }`}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                എം സി കെ അഫിലിയേഷൻ നമ്പർ <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="mckAffiliation"
-                value={formData.mckAffiliation}
-                onChange={handleInputChange}
-                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  validationErrors.mckAffiliation ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.mosqueName ? 'border-red-500' : 
+                  autoFilledFields.mosqueName ? 'border-green-300 bg-green-50' : 'border-gray-300'
                 }`}
                 required
               />
@@ -719,14 +913,19 @@ const MosqueFundForm = () => {
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               വിലാസം <span className="text-red-500">*</span>
+              {autoFilledFields.address && (
+                <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
+              )}
             </label>
             <textarea
               name="address"
               value={formData.address}
               onChange={handleInputChange}
+              readOnly={autoFilledFields.address}
               rows="3"
               className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                validationErrors.address ? 'border-red-500' : 'border-gray-300'
+                validationErrors.address ? 'border-red-500' : 
+                autoFilledFields.address ? 'border-green-300 bg-green-50' : 'border-gray-300'
               }`}
               required
             />
@@ -775,16 +974,20 @@ const MosqueFundForm = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ജില്ല <span className="text-red-500">*</span>
+                {autoFilledFields.district && (
+                  <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
+                )}
               </label>
               <select
                 name="district"
                 value={formData.district}
                 onChange={handleInputChange}
                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  validationErrors.district ? 'border-red-500' : 'border-gray-300'
+                  validationErrors.district ? 'border-red-500' : 
+                  autoFilledFields.district ? 'border-green-300 bg-green-50' : 'border-gray-300'
                 }`}
                 required
-                disabled={loadingDropdowns}
+                disabled={loadingDropdowns || autoFilledFields.district}
                 style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
               >
                 <option value="">{loadingDropdowns ? "ലോഡ് ചെയ്യുന്നു..." : "ജില്ല തിരഞ്ഞെടുക്കുക"}</option>
@@ -798,13 +1001,18 @@ const MosqueFundForm = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഏരിയ
+                {autoFilledFields.area && (
+                  <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
+                )}
               </label>
               <select
                 name="area"
                 value={formData.area}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={loadingDropdowns || !formData.district}
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  autoFilledFields.area ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                }`}
+                disabled={loadingDropdowns || !formData.district || autoFilledFields.area}
                 style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
               >
                 <option value="">

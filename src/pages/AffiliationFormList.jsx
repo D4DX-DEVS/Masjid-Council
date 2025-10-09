@@ -229,7 +229,12 @@ const AffiliationFormList = () => {
             <div>
               <h1 className="text-xl font-bold">മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ</h1>
               <p className="text-green-100 text-sm">Mosque Affiliation Application Details</p>
-              <p className="text-green-200 text-xs">Affiliation Number: {formData.affiliationNumber}</p>
+              <p className="text-green-200 text-xs">
+                {formData.status === 'approved' 
+                  ? `Affiliation Number: ${formData.affiliationNumber}` 
+                  : `Tracking ID: ${formData.trackingId || formData.affiliationNumber}`
+                }
+              </p>
             </div>
           </div>
         </div>
