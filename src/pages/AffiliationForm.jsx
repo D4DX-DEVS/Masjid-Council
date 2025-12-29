@@ -1010,7 +1010,7 @@ const AffiliationForm = () => {
                     value="മഹല്ലി പള്ളി"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    മഹല്ലി പള്ളി
+                    മഹല്ല് പള്ളി
                   </option>
                   <option
                     value="ജുമുഅത്ത് പള്ളി"

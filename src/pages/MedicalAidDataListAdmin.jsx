@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import AdminSidebar from "../components/AdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -89,29 +90,23 @@ const MedicalAidDataListAdmin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header and Controls Section */}
-        <div className="flex items-center justify-between mb-6">
-          {/* Header Section - Left Side */}
-          <div className="text-left">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി
-            </h1>
-            <div className="w-64 h-1 bg-gradient-to-r from-[#5a8a42] to-[#6ba54f] rounded-full ml-4"></div>
+    <div className="min-h-screen bg-gray-50 flex">
+      <AdminSidebar />
+      
+      <div className="flex-1 min-w-0">
+        <div className="p-8">
+          {/* Search and Filter Controls */}
+          <div className="flex justify-end mb-6">
+            <SearchFilterControls
+              data={medicalAids}
+              onFilteredDataChange={handleFilteredDataChange}
+              searchFields={['mosqueName', 'trackingId', 'medicalAidNumber', 'district', 'area']}
+              filterFields={['status', 'district']}
+              uniqueFieldValues={{
+                district: uniqueDistricts
+              }}
+            />
           </div>
-
-          {/* Search and Filter Controls - Right Side */}
-          <SearchFilterControls
-            data={medicalAids}
-            onFilteredDataChange={handleFilteredDataChange}
-            searchFields={['mosqueName']}
-            filterFields={['status', 'district']}
-            uniqueFieldValues={{
-              district: uniqueDistricts
-            }}
-          />
-        </div>
 
 
         {/* Main Content Card */}
@@ -130,7 +125,7 @@ const MedicalAidDataListAdmin = () => {
           {loading && (
             <div className="p-6">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
                 <p className="mt-4 text-gray-600">Loading medical aid applications...</p>
               </div>
             </div>
@@ -160,7 +155,7 @@ const MedicalAidDataListAdmin = () => {
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-900">
-                            {medicalAid.trackingId || medicalAid.medicalAidNumber || `#${String(index + 1).padStart(3, '0')}`}
+                            {medicalAid.trackingId || medicalAid._id?.slice(-8) || `#${String(index + 1).padStart(3, '0')}`}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -250,8 +245,7 @@ const MedicalAidDataListAdmin = () => {
           )}
 
         </div>
-
-
+        </div>
       </div>
     </div>
   );

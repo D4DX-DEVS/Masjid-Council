@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import AdminSidebar from "../components/AdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -91,29 +92,23 @@ const AffiliationFormListAdmin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header and Controls Section */}
-        <div className="flex items-center justify-between mb-6">
-          {/* Header Section - Left Side */}
-          <div className="text-left">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              മസ്ജിദ് അഫിലിയേഷനുള്ള അപേക്ഷ
-            </h1>
-            <div className="w-64 h-1 bg-gradient-to-r from-[#5a8a42] to-[#6ba54f] rounded-full ml-4"></div>
+    <div className="min-h-screen bg-gray-50 flex">
+      <AdminSidebar />
+      
+      <div className="flex-1 min-w-0">
+        <div className="p-8">
+          {/* Search and Filter Controls */}
+          <div className="flex justify-end mb-6">
+            <SearchFilterControls
+              data={affiliations}
+              onFilteredDataChange={handleFilteredDataChange}
+              searchFields={['name', 'affiliationNumber', 'trackingId', 'address.0.district', 'jamathArea.0.area']}
+              filterFields={['status', 'address.0.district']}
+              uniqueFieldValues={{
+                'address.0.district': uniqueDistricts
+              }}
+            />
           </div>
-
-          {/* Search and Filter Controls - Right Side */}
-          <SearchFilterControls
-            data={affiliations}
-            onFilteredDataChange={handleFilteredDataChange}
-            searchFields={['name']}
-            filterFields={['status', 'district']}
-            uniqueFieldValues={{
-              district: uniqueDistricts
-            }}
-          />
-        </div>
 
         {/* Main Content Card */}
         <div className="bg-white shadow-xl rounded-2xl overflow-hidden border-0">
@@ -256,8 +251,7 @@ const AffiliationFormListAdmin = () => {
           )}
 
         </div>
-
-
+        </div>
       </div>
     </div>
   );

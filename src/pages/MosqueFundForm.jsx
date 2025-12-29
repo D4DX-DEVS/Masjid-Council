@@ -818,11 +818,18 @@ const MosqueFundForm = () => {
           <strong style={{ fontFamily: "Anek Malayalam Variable" }}>NB:</strong> അപേക്ഷയോടൊപ്പമുള്ള മാർഗനിർദ്ദേശങ്ങളിൽ സൂചിപ്പിച്ച രേഖകൾ അപേക്ഷയോടൊപ്പം സമർപ്പിക്കേണ്ടതാണ്.
         </div>
 
-        <div className="text-right mt-4">
+        <div className="flex justify-between items-center mt-4">
           <button 
-          style={{ fontFamily: "Anek Malayalam Variable" }}
+            style={{ fontFamily: "Anek Malayalam Variable" }}
+            onClick={() => navigate('/')}
+            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            ← ഹോമിലേക്ക് മടങ്ങുക
+          </button>
+          <button 
+            style={{ fontFamily: "Anek Malayalam Variable" }}
             onClick={() => setShowForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             നിർദേശങ്ങൾ വായിച്ചു, അപേക്ഷ പൂരിപ്പിക്കുക
           </button>

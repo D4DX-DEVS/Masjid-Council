@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Shield, Info, ArrowRight } from 'lucide-react';
+import { Home, Info, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import adminLogin from '../assets/adminLogin.jpg';
@@ -61,6 +61,10 @@ const AdminLogin = () => {
     navigate('/superadmin-login');
   };
 
+  const handleGoHome = () => {
+    navigate('/');
+  };
+
   return (
     <div 
       className="min-h-screen flex items-center justify-center p-4 relative"
@@ -75,6 +79,17 @@ const AdminLogin = () => {
     >
       {/* Overlay to reduce image opacity */}
       <div className="absolute inset-0 bg-white/70"></div>
+
+      {/* Home Button (Top Right) */}
+      <button
+        type="button"
+        onClick={handleGoHome}
+        title="Go to Home"
+        aria-label="Go to Home"
+        className="absolute top-5 right-5 z-30 inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 text-gray-700 hover:text-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+      >
+        <Home className="h-5 w-5" />
+      </button>
       
       <div className="max-w-md w-full relative z-20 ml-auto mr-18 mt-4">
         {/* Header */}

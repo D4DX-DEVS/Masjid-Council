@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import AdminNavbar from './components/AdminNavbar';
 import Home from './pages/Home';
 import About from './pages/About';
 import AffiliationForm from './pages/AffiliationForm';
@@ -63,7 +62,7 @@ const Layout = () => {
 
   return (
     <>
-      {!isAdminLogin && !isSuperAdminLogin && !isFormRoute && (isAdminRoute ? <AdminNavbar /> : isSuperAdminRoute ? null : <Navbar />)}
+      {!isAdminLogin && !isSuperAdminLogin && !isFormRoute && (isAdminRoute ? null : isSuperAdminRoute ? null : <Navbar />)}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />

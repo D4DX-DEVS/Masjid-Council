@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SuperAdminNavbar from "../components/SuperAdminNavbar";
+import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -90,30 +90,23 @@ const SuperAdminMedicalAidList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <SuperAdminNavbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header and Controls Section */}
-        <div className="flex items-center justify-between mb-6">
-          {/* Header Section - Left Side */}
-          <div className="text-left">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി
-            </h1>
-            <div className="w-64 h-1 bg-gradient-to-r from-[#5a8a42] to-[#6ba54f] rounded-full ml-4"></div>
+    <div className="min-h-screen bg-gray-50 flex">
+      <SuperAdminSidebar />
+      
+      <div className="flex-1 min-w-0">
+        <div className="p-8">
+          {/* Search and Filter Controls */}
+          <div className="flex justify-end mb-6">
+            <SearchFilterControls
+              data={medicalAids}
+              onFilteredDataChange={handleFilteredDataChange}
+              searchFields={['mosqueName', 'trackingId', 'medicalAidNumber', 'district', 'area']}
+              filterFields={['status', 'district']}
+              uniqueFieldValues={{
+                district: uniqueDistricts
+              }}
+            />
           </div>
-
-          {/* Search and Filter Controls - Right Side */}
-          <SearchFilterControls
-            data={medicalAids}
-            onFilteredDataChange={handleFilteredDataChange}
-            searchFields={['mosqueName']}
-            filterFields={['status', 'district']}
-            uniqueFieldValues={{
-              district: uniqueDistricts
-            }}
-          />
-        </div>
 
         {/* Main Content Card */}
         <div className="bg-white shadow-xl rounded-2xl overflow-hidden border-0">
@@ -252,6 +245,7 @@ const SuperAdminMedicalAidList = () => {
             </div>
           )}
 
+        </div>
         </div>
       </div>
     </div>

@@ -172,7 +172,7 @@ const AdminNavbar = () => {
                     Home
                   </button>
                   <button
-                    onClick={() => handleNavigation('/affliation-list-admin')}
+                    onClick={() => handleNavigation('/affiliation-list-admin')}
                     className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 block px-3 py-2 w-full text-left ${
                       isActive('/affiliation-list-admin')
                         ? 'text-green-600'
