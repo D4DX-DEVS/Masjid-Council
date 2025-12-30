@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
@@ -19,10 +19,10 @@ const SuperAdminMosqueFundList = () => {
   }, []);
 
   // Handle filtered data from SearchFilterControls
-  const handleFilteredDataChange = (filteredData) => {
+  const handleFilteredDataChange = useCallback((filteredData) => {
     setFilteredMosqueFunds(filteredData);
     setCurrentPage(1); // Reset to first page when filters change
-  };
+  }, []);
 
   const fetchMosqueFunds = async () => {
     try {
@@ -77,7 +77,19 @@ const SuperAdminMosqueFundList = () => {
   };
 
   // Get unique districts for filter dropdown
-  const uniqueDistricts = [...new Set(mosqueFunds.map(mosqueFund => mosqueFund.district).filter(Boolean))];
+  const uniqueDistricts = useMemo(
+    () => [...new Set(mosqueFunds.map((mosqueFund) => mosqueFund.district).filter(Boolean))],
+    [mosqueFunds]
+  );
+
+  // Memoize SearchFilterControls props to avoid infinite update loops
+  const searchFields = useMemo(
+    () => ["mosqueName", "trackingId", "mosqueFundNumber", "mckAffiliation", "district", "area"],
+    []
+  );
+  const filterFields = useMemo(() => ["status", "district"], []);
+  const uniqueFieldValues = useMemo(() => ({ district: uniqueDistricts }), [uniqueDistricts]);
+  const filterFieldLabels = useMemo(() => ({ status: "Status", district: "District" }), []);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredMosqueFunds.length / itemsPerPage);
@@ -101,11 +113,10 @@ const SuperAdminMosqueFundList = () => {
             <SearchFilterControls
               data={mosqueFunds}
               onFilteredDataChange={handleFilteredDataChange}
-              searchFields={['mosqueName', 'trackingId', 'mosqueFundNumber', 'mckAffiliation', 'district', 'area']}
-              filterFields={['status', 'district']}
-              uniqueFieldValues={{
-                district: uniqueDistricts
-              }}
+              searchFields={searchFields}
+              filterFields={filterFields}
+              uniqueFieldValues={uniqueFieldValues}
+              filterFieldLabels={filterFieldLabels}
             />
           </div>
 

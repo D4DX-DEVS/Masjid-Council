@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Search, Filter, X } from "lucide-react";
 
 const SearchFilterControls = ({ 
@@ -6,24 +6,49 @@ const SearchFilterControls = ({
   onFilteredDataChange, 
   searchFields = ['mosqueName'], 
   filterFields = ['status', 'district'],
-  uniqueFieldValues = {}
+  uniqueFieldValues = {},
+  filterFieldLabels = {} // New prop for custom labels
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
-  const [filters, setFilters] = useState({});
-
-  // Initialize filters based on filterFields
+  
+  // Temporary filters (user's selection before applying)
+  const [tempFilters, setTempFilters] = useState({});
+  
+  // Applied filters (actually used for filtering)
+  const [appliedFilters, setAppliedFilters] = useState({});
+  
+  // Track if filters have been initialized
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Use ref to store the callback to avoid dependency issues
+  const onFilteredDataChangeRef = useRef(onFilteredDataChange);
+  
+  // Update ref when callback changes
   useEffect(() => {
-    const initialFilters = {};
-    filterFields.forEach(field => {
-      initialFilters[field] = 'all';
-    });
-    setFilters(initialFilters);
-  }, [filterFields]);
+    onFilteredDataChangeRef.current = onFilteredDataChange;
+  }, [onFilteredDataChange]);
 
-  // Filter and search logic
+  // Initialize filters based on filterFields - only once
   useEffect(() => {
+    if (!isInitialized) {
+      const initialFilters = {};
+      filterFields.forEach(field => {
+        initialFilters[field] = 'all';
+      });
+      setTempFilters(initialFilters);
+      setAppliedFilters(initialFilters);
+      setIsInitialized(true);
+    }
+  }, [filterFields, isInitialized]);
+
+  const getNestedValue = useCallback((obj, path) => {
+    return path.split('.').reduce((current, key) => current?.[key], obj);
+  }, []);
+
+  // Memoize the filtered data computation
+  const filteredData = useMemo(() => {
     let filtered = data || [];
 
     // Search functionality
@@ -36,56 +61,76 @@ const SearchFilterControls = ({
       );
     }
 
-    // Filter functionality
+    // Filter functionality - using appliedFilters
     filterFields.forEach(field => {
-      if (filters[field] && filters[field] !== 'all') {
+      if (appliedFilters[field] && appliedFilters[field] !== 'all') {
         filtered = filtered.filter(item => {
           const fieldValue = getNestedValue(item, field);
-          return fieldValue === filters[field];
+          return fieldValue === appliedFilters[field];
         });
       }
     });
 
-    onFilteredDataChange(filtered);
-  }, [data, searchTerm, filters, searchFields, filterFields, onFilteredDataChange]);
+    return filtered;
+  }, [data, searchTerm, appliedFilters, searchFields, filterFields, getNestedValue]);
 
-  const getNestedValue = (obj, path) => {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
-  };
-
-  const toggleSearch = () => {
-    setShowSearch(!showSearch);
-    if (!showSearch) {
-      setShowFilter(false);
+  // Send filtered data to parent whenever it changes
+  useEffect(() => {
+    if (isInitialized && onFilteredDataChangeRef.current) {
+      onFilteredDataChangeRef.current(filteredData);
     }
-  };
+  }, [filteredData, isInitialized]);
 
-  const toggleFilter = () => {
-    setShowFilter(!showFilter);
-    if (!showFilter) {
-      setShowSearch(false);
-    }
-  };
+  const toggleSearch = useCallback(() => {
+    setShowSearch(prev => !prev);
+    setShowFilter(false);
+  }, []);
 
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({
+  const toggleFilter = useCallback(() => {
+    setShowFilter(prev => !prev);
+    setShowSearch(false);
+  }, []);
+
+  const handleFilterChange = useCallback((field, value) => {
+    setTempFilters(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
 
-  const getUniqueValues = (field) => {
+  const applyFilters = useCallback(() => {
+    setAppliedFilters({ ...tempFilters });
+  }, [tempFilters]);
+
+  const resetFilters = useCallback(() => {
+    const initialFilters = {};
+    filterFields.forEach(field => {
+      initialFilters[field] = 'all';
+    });
+    setTempFilters(initialFilters);
+    setAppliedFilters(initialFilters);
+  }, [filterFields]);
+
+  const getUniqueValues = useCallback((field) => {
     if (uniqueFieldValues[field]) {
       return uniqueFieldValues[field];
     }
     return [...new Set(data?.map(item => getNestedValue(item, field)).filter(Boolean))];
-  };
+  }, [uniqueFieldValues, data, getNestedValue]);
 
-  const getSearchPlaceholder = () => {
+  const getSearchPlaceholder = useCallback(() => {
     if (searchFields.includes('mosqueName')) return 'Search by mosque name...';
     if (searchFields.includes('name')) return 'Search by name...';
     return 'Search...';
-  };
+  }, [searchFields]);
+
+  const getFilterLabel = useCallback((field) => {
+    if (filterFieldLabels[field]) {
+      return filterFieldLabels[field];
+    }
+    // Default label formatting
+    return field.charAt(0).toUpperCase() + field.slice(1);
+  }, [filterFieldLabels]);
 
   return (
     <div className="flex items-center gap-4 h-12">
@@ -134,16 +179,16 @@ const SearchFilterControls = ({
           </button>
         ) : (
           <div className="flex items-center gap-2 animate-in slide-in-from-right-4 duration-500">
-            <div className="flex gap-2 bg-white p-2 rounded-lg shadow-lg border border-gray-300 h-10 items-center">
+            <div className="flex gap-3 bg-white p-3 rounded-lg shadow-lg border border-gray-300 items-center">
               {filterFields.map(field => (
                 <select
                   key={field}
-                  value={filters[field] || 'all'}
+                  value={tempFilters[field] || 'all'}
                   onChange={(e) => handleFilterChange(field, e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-8"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 min-w-[150px]"
                 >
                   <option value="all">
-                    All {field.charAt(0).toUpperCase() + field.slice(1)}
+                    All {getFilterLabel(field)}
                   </option>
                   {getUniqueValues(field).map(value => (
                     <option key={value} value={value}>
@@ -152,6 +197,22 @@ const SearchFilterControls = ({
                   ))}
                 </select>
               ))}
+              
+              {/* Apply and Reset Buttons */}
+              <div className="flex gap-2 ml-2 border-l border-gray-300 pl-3">
+                <button
+                  onClick={applyFilters}
+                  className="px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors h-9 font-medium"
+                >
+                  Apply
+                </button>
+                <button
+                  onClick={resetFilters}
+                  className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors h-9 font-medium"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
             <button
               onClick={() => setShowFilter(false)}

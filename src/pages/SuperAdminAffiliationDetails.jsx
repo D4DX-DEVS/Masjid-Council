@@ -81,9 +81,9 @@ const SuperAdminAffiliationDetails = () => {
   const handleStatusChange = async (newStatus, rejectionReason) => {
     setStatusChangeLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('superAdminToken') || localStorage.getItem('adminToken');
       if (!token) {
-        showAlert('No admin token found. Please login again.', 'error');
+        showAlert('No super admin token found. Please login again.', 'error');
         setShowStatusChangeModal(false);
         return;
       }
@@ -132,9 +132,9 @@ const SuperAdminAffiliationDetails = () => {
   const handleConfirm = async () => {
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('superAdminToken') || localStorage.getItem('adminToken');
       if (!token) {
-        showAlert('No admin token found. Please login again.', 'error');
+        showAlert('No super admin token found. Please login again.', 'error');
         setShowConfirmModal(false);
         return;
       }
@@ -182,9 +182,9 @@ const SuperAdminAffiliationDetails = () => {
 
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('superAdminToken') || localStorage.getItem('adminToken');
       if (!token) {
-        showAlert('No admin token found. Please login again.', 'error');
+        showAlert('No super admin token found. Please login again.', 'error');
         setShowRejectModal(false);
         return;
       }

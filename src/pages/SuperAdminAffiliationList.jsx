@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
@@ -19,10 +19,10 @@ const SuperAdminAffiliationList = () => {
   }, []);
 
   // Handle filtered data from SearchFilterControls
-  const handleFilteredDataChange = (filteredData) => {
+  const handleFilteredDataChange = useCallback((filteredData) => {
     setFilteredAffiliations(filteredData);
     setCurrentPage(1); // Reset to first page when filters change
-  };
+  }, []);
 
   const fetchAffiliations = async () => {
     try {
@@ -77,9 +77,47 @@ const SuperAdminAffiliationList = () => {
   };
 
   // Get unique districts for filter dropdown
-  const uniqueDistricts = [...new Set(affiliations.map(affiliation => 
-    affiliation.address && affiliation.address[0] ? affiliation.address[0].district : null
-  ).filter(Boolean))];
+  const uniqueDistricts = useMemo(
+    () =>
+      [
+        ...new Set(
+          affiliations
+            .map((affiliation) =>
+              affiliation.address && affiliation.address[0]
+                ? affiliation.address[0].district
+                : null
+            )
+            .filter(Boolean)
+        ),
+      ],
+    [affiliations]
+  );
+
+  // Memoize SearchFilterControls props to avoid infinite update loops
+  const searchFields = useMemo(
+    () => [
+      "name",
+      "affiliationNumber",
+      "trackingId",
+      "address.0.district",
+      "jamathArea.0.area",
+    ],
+    []
+  );
+  const filterFields = useMemo(() => ["status", "address.0.district"], []);
+  const uniqueFieldValues = useMemo(
+    () => ({
+      "address.0.district": uniqueDistricts,
+    }),
+    [uniqueDistricts]
+  );
+  const filterFieldLabels = useMemo(
+    () => ({
+      status: "Status",
+      "address.0.district": "District",
+    }),
+    []
+  );
 
   // Pagination logic
   const totalPages = Math.ceil(filteredAffiliations.length / itemsPerPage);
@@ -102,11 +140,10 @@ const SuperAdminAffiliationList = () => {
             <SearchFilterControls
               data={affiliations}
               onFilteredDataChange={handleFilteredDataChange}
-              searchFields={['name', 'affiliationNumber', 'trackingId', 'address.0.district', 'jamathArea.0.area']}
-              filterFields={['status', 'address.0.district']}
-              uniqueFieldValues={{
-                'address.0.district': uniqueDistricts
-              }}
+              searchFields={searchFields}
+              filterFields={filterFields}
+              uniqueFieldValues={uniqueFieldValues}
+              filterFieldLabels={filterFieldLabels}
             />
           </div>
 

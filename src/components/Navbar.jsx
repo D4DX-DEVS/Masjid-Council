@@ -127,7 +127,7 @@ const Navbar = () => {
                 className="text-black text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105"
                 style={cinzelFont}
               >
-                Form
+                Applications
               </button>
               <button
                 onClick={handleAboutClick}
