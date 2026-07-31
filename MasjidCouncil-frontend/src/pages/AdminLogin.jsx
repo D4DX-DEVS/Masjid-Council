@@ -66,15 +66,10 @@ const AdminLogin = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4 relative"
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative bg-[#97cee2] bg-no-repeat bg-[position:left_top] bg-cover md:bg-fixed md:bg-[length:57%]"
       style={{
-        backgroundImage: `url(${adminLogin})`,
-        backgroundSize: '57%',
-        backgroundPosition: 'left top',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-        backgroundColor: '#97cee2'
+        backgroundImage: `url(${adminLogin})`
       }}
     >
       {/* Overlay to reduce image opacity */}
@@ -91,14 +86,14 @@ const AdminLogin = () => {
         <Home className="h-5 w-5" />
       </button>
       
-      <div className="max-w-md w-full relative z-20 ml-auto mr-18 mt-4">
+      <div className="max-w-md w-full relative z-20 mx-auto md:ml-auto md:mr-18 mt-4 bg-white/80 md:bg-transparent rounded-xl p-4 sm:p-6 md:p-0">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center mb-4 mr-16">
-            <img src={logo} alt="Masjid Council Kerala" className="h-16 w-auto mr-4" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-center mb-4 md:mr-16">
+            <img src={logo} alt="Masjid Council Kerala" className="h-12 sm:h-16 w-auto mr-3 sm:mr-4" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Admin Login</h1>
-              <p className="text-gray-600">അഡ്മിൻ ലോഗിൻ</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Admin Login</h1>
+              <p className="text-sm sm:text-base text-gray-600">അഡ്മിൻ ലോഗിൻ</p>
             </div>
           </div>
           <div className="w-16 h-1 bg-green-500 mx-auto mt-3 rounded-full"></div>
@@ -145,11 +140,11 @@ const AdminLogin = () => {
             </p>
           </div>
 
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               type="submit"
               disabled={loading}
-              className="w-48 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full sm:w-48 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
             >
               {loading ? (
                 <>
@@ -163,7 +158,7 @@ const AdminLogin = () => {
             
             <button
               type="button"
-              className="w-40 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full sm:w-40 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
               onClick={handleSuperAdminClick}
             >
               <span className="text-sm">Super Admin</span>
@@ -173,7 +168,7 @@ const AdminLogin = () => {
         </form>
 
         {/* Login Instructions */}
-        <div className="mt-6 p-6 bg-blue-50 rounded-lg border border-blue-100">
+        <div className="mt-6 p-4 sm:p-6 bg-blue-50 rounded-lg border border-blue-100">
           <div className="flex items-center mb-4">
             <div className="bg-blue-100 p-2 rounded-full mr-3">
               <Info className="h-4 w-4 text-blue-600" />

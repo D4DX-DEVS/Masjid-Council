@@ -71,14 +71,9 @@ const SuperAdminLogin = () => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-6 lg:p-8 relative pt-20"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 relative pt-20 bg-[#adc5cc] bg-no-repeat bg-[position:left_top] bg-cover md:bg-fixed md:bg-[length:40%]"
       style={{
         backgroundImage: `url(${loginSuper})`,
-        backgroundSize: '40%',
-        backgroundPosition: 'left top',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-        backgroundColor: '#adc5cc'
       }}
     >
       {/* Overlay to reduce image opacity */}
@@ -87,7 +82,7 @@ const SuperAdminLogin = () => {
 
 
       {/* Main Content */}
-      <div className="max-w-md w-full relative z-20 ml-180 -mt-24">
+      <div className="max-w-md w-full relative z-20 mx-auto md:ml-180 md:-mt-24">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             {error}
@@ -96,13 +91,13 @@ const SuperAdminLogin = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Professional Header Section */}
-          <div className="flex items-center justify-start mb-10 -ml-20">
+          <div className="flex items-center justify-center md:justify-start mb-6 sm:mb-10 md:-ml-20">
             <img 
               src={logo} 
               alt="Masjid Council Kerala" 
-              className="h-20 w-auto mr-8"
+              className="h-14 sm:h-20 w-auto mr-4 sm:mr-8"
             />
-            <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: 'Cinzel, serif' }}>Super Admin Login</h1>
+            <h1 className="text-xl sm:text-3xl font-black text-gray-900" style={{ fontFamily: 'Cinzel, serif' }}>Super Admin Login</h1>
           </div>
           <div>
             <input
@@ -110,7 +105,7 @@ const SuperAdminLogin = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="w-80 border-2 border-[#80a6b0] rounded-full px-6 py-3 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
+              className="w-full md:w-80 border-2 border-[#80a6b0] rounded-full px-5 sm:px-6 py-2.5 sm:py-3 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
               placeholder="Enter username"
               required
             />
@@ -123,13 +118,13 @@ const SuperAdminLogin = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-80 border-2 border-[#80a6b0] rounded-full px-6 py-3 pr-14 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
+                className="w-full md:w-80 border-2 border-[#80a6b0] rounded-full px-5 sm:px-6 py-2.5 sm:py-3 pr-14 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
                 placeholder="Enter password"
                 required
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-36 flex items-center"
+                className="absolute inset-y-0 right-0 pr-5 md:pr-36 flex items-center"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -144,7 +139,7 @@ const SuperAdminLogin = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-64 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ml-10"
+            className="w-full md:w-64 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 md:ml-10"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
@@ -152,7 +147,7 @@ const SuperAdminLogin = () => {
       </div>
       
       {/* Arabic text at bottom */}
-      <div className="absolute bottom-6 right-74 text-right mb-12">
+      <div className="hidden md:block absolute bottom-6 right-74 text-right mb-12">
         <p className="text-3xl text-gray-700 font-medium" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>
           وَأَنَّ ٱلْمَسَٰجِدَ لِلَّهِ فَلَا تَدْعُواْ مَعَ ٱللَّهِ أَحَدًا
         </p>

@@ -112,33 +112,31 @@ const Navbar = () => {
       {/* Main navbar content - matching hero section alignment */}
       <nav className="bg-white shadow-lg backdrop-blur-sm bg-white/95">
         <div className="px-4 md:px-8 lg:px-16">
-          <div className="mx-auto max-w-7xl flex items-center justify-between py-6">
+          <div className="mx-auto max-w-7xl flex items-center justify-between gap-2 py-3 md:py-6">
             {/* Logo and Text */}
-            <div className="flex items-center space-x-3">
-              <div className="w-32 h-10 rounded-full flex items-center justify-center">
-              <img src={logo} alt="Masjid Council Kerala" className="h-15 w-24" />
-              </div>
+            <div className="flex items-center">
+              <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto md:h-12 shrink-0" />
             </div>
 
             {/* Center Navigation Buttons */}
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center gap-3 sm:gap-6 md:space-x-8 min-w-0">
               <button
                 onClick={handleFormClick}
-                className="text-black text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105"
+                className="text-black text-xs sm:text-sm md:text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 style={cinzelFont}
               >
                 Applications
               </button>
               <button
                 onClick={handleAboutClick}
-                className="text-black text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105"
+                className="text-black text-xs sm:text-sm md:text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 style={cinzelFont}
               >
                 About
               </button>
               <button
                 onClick={handleContactClick}
-                className="text-black text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105"
+                className="text-black text-xs sm:text-sm md:text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 style={cinzelFont}
               >
                 Contact
@@ -148,7 +146,7 @@ const Navbar = () => {
             {/* Admin Login Button - Icon Only */}
             <button
               onClick={handleLoginClick}
-              className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 group"
+              className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 group"
               title="Admin Login"
             >
               <LogIn className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />

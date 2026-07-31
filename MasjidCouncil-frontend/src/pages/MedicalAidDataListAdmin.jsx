@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
+import { ListSkeleton } from "../components/Skeleton";
+import MobileRecordCards from "../components/MobileRecordCards";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -106,7 +108,7 @@ const MedicalAidDataListAdmin = () => {
       <AdminSidebar />
       
       <div className="flex-1 min-w-0">
-        <div className="p-8">
+        <div className="p-4 sm:p-8 pb-24 md:pb-8">
           {/* Search and Filter Controls */}
           <div className="flex justify-end mb-6">
             <SearchFilterControls
@@ -133,19 +135,26 @@ const MedicalAidDataListAdmin = () => {
           )}
 
           {/* Loading State */}
-          {loading && (
-            <div className="p-6">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading medical aid applications...</p>
-              </div>
-            </div>
-          )}
+          {loading && <ListSkeleton />}
 
           {/* Medical Aid List */}
           {!loading && !error && (
             <div>
-              <div className="overflow-x-auto">
+              <MobileRecordCards
+                items={currentData}
+                onSelect={handleMasjidClick}
+                title={(item) => item.mosqueName || 'Unknown Mosque'}
+                id={(item, i) => item.trackingId || item._id?.slice(-8) || `#${String(i + 1).padStart(3, '0')}`}
+                meta={(item) => item.district && item.area ? `${item.district}, ${item.area}` : 'Not specified'}
+                status={(item) => (
+                    <span className={getStatusDisplay(item.status).className}>
+                      {getStatusDisplay(item.status).text}
+                    </span>
+                  )}
+                empty="No welfare fund applications found"
+              />
+
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   <thead style={{ backgroundColor: '#6db14e' }}>
                     <tr>
