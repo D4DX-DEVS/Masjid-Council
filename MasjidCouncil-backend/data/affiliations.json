@@ -1,0 +1,869 @@
+[
+  {
+    "affiliationNumber": "MAF1758696285090354",
+    "name": "test",
+    "mosqueType": "മഹല്ലി പള്ളി",
+    "mahallaType": "പൂർണ മഹല്ല്",
+    "establishedYear": 2021,
+    "address": [
+      {
+        "address": "dscdscssvsv",
+        "district": "sdvsdvsv",
+        "pincode": 23213,
+        "phone": 5566778899,
+        "email": "n@gmail.com",
+        "website": "https://fonts.google.com/selection/embed"
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "sdcdscs",
+        "district": "sdvsdvfsv"
+      }
+    ],
+    "facilities": [
+      "മദ്രസ",
+      "സകാത്ത് സെല്‍"
+    ],
+    "hasCemetery": false,
+    "mosqueCapacity": "232",
+    "mosqueArea": "123",
+    "fridayMaleAttendance": "2",
+    "fridayFemaleAttendance": "2",
+    "finance": [
+      {
+        "assets": "sdcscsdcsc",
+        "incomeSource": "svsdvsvs",
+        "monthlyExpense": "1231"
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": true,
+        "recordsKept": [
+          "അസറ്റ് രജിസ്റ്റർ",
+          "വിവാഹ മോചന രജിസ്റ്റര്‍"
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "123",
+        "lastYearExpense": "123"
+      }
+    ],
+    "commmunityServices": [
+      "പലിശരഹിത നിധി",
+      "ബ്ലഡ് ബാങ്ക്"
+    ],
+    "otherCommunityServices": [
+      "wfddscfsdc"
+    ],
+    "committees": [
+      {
+        "committeeType": "അസോസിയേഷൻ",
+        "president": [
+          {
+            "name": "sdsd",
+            "phone": "5566778899",
+            "email": "https://fonts.google.com/selection/embed"
+          }
+        ],
+        "secretary": [
+          {
+            "name": "sdvsv",
+            "phone": "5566778899",
+            "email": "https://fonts.google.com/selection/embed"
+          }
+        ],
+        "workers": [
+          {
+            "age": "22",
+            "salary": "2323",
+            "qualification": "dfdfdf",
+            "remarks": "dscsd",
+            "working": "dcsdvcsv",
+            "otherStateWorkers": true,
+            "LegalOtherStateWorkers": true
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T06:44:45.090Z",
+    "updatedAt": "2025-09-24T06:44:45.090Z"
+  },
+  {
+    "affiliationNumber": "MAF1758696610966917",
+    "name": "test",
+    "mosqueType": "",
+    "mahallaType": "പൂർണ മഹല്ല്",
+    "establishedYear": 3434,
+    "address": [
+      {
+        "address": "new test kdcsdvdv(H)kvndv",
+        "district": "sdfdsfsf",
+        "pincode": 3424,
+        "phone": 91,
+        "email": "n@gmail.com",
+        "website": "https://fonts.google.com/selection/embed"
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "sdcdsc",
+        "district": "dcdsvsdv"
+      }
+    ],
+    "facilities": [
+      "ഡിജിറ്റൽ ലൈബ്രറി",
+      "വനിതാ വേദി"
+    ],
+    "hasCemetery": true,
+    "mosqueCapacity": "212",
+    "mosqueArea": "12",
+    "fridayMaleAttendance": "12",
+    "fridayFemaleAttendance": "12",
+    "finance": [
+      {
+        "assets": "dscsdcss",
+        "incomeSource": "dvsdvsvsv",
+        "monthlyExpense": "21"
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": true,
+        "recordsKept": [
+          "വിവാഹ മോചന രജിസ്റ്റര്‍",
+          "ഖബര്‍ രജിസ്റ്റ്റ്‍"
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "23123",
+        "lastYearExpense": "123103"
+      }
+    ],
+    "commmunityServices": [
+      "പലിശരഹിത നിധി",
+      "ബ്ലഡ് ബാങ്ക്",
+      "മെഡിക്കൽ ഹെൽപ്",
+      "കരിയർ ഹെൽപ് സെൻ്റർ"
+    ],
+    "otherCommunityServices": [
+      "asdscsdc"
+    ],
+    "committees": [
+      {
+        "committeeType": "അസോസിയേഷൻ",
+        "president": [
+          {
+            "name": "aasf",
+            "phone": "1122334455",
+            "email": "v@gmail.com"
+          }
+        ],
+        "secretary": [
+          {
+            "name": "sdfsf",
+            "phone": "1122334455",
+            "email": "v@gmail.com"
+          }
+        ],
+        "workers": [
+          {
+            "age": "21",
+            "salary": "12",
+            "qualification": "ddcd",
+            "remarks": "dvcv",
+            "working": "vdvdvdv",
+            "otherStateWorkers": true,
+            "LegalOtherStateWorkers": true
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T06:50:10.966Z",
+    "updatedAt": "2025-09-24T06:50:10.966Z"
+  },
+  {
+    "affiliationNumber": "MAF1758705931530650",
+    "name": "",
+    "mosqueType": "",
+    "mahallaType": "",
+    "establishedYear": 2025,
+    "address": [
+      {
+        "address": "",
+        "district": "",
+        "pincode": 0,
+        "phone": 0,
+        "email": "",
+        "website": ""
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "",
+        "district": ""
+      }
+    ],
+    "facilities": [],
+    "hasCemetery": false,
+    "mosqueCapacity": "",
+    "mosqueArea": "",
+    "fridayMaleAttendance": "0",
+    "fridayFemaleAttendance": "0",
+    "finance": [
+      {
+        "assets": "",
+        "incomeSource": "",
+        "monthlyExpense": ""
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": false,
+        "recordsKept": []
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "0",
+        "lastYearExpense": "0"
+      }
+    ],
+    "commmunityServices": [],
+    "otherCommunityServices": [],
+    "committees": [
+      {
+        "committeeType": "",
+        "president": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "secretary": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "workers": [
+          {
+            "age": "",
+            "salary": "",
+            "qualification": "",
+            "remarks": "",
+            "working": "",
+            "otherStateWorkers": false,
+            "LegalOtherStateWorkers": false
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:25:31.530Z",
+    "updatedAt": "2025-09-24T09:25:31.530Z"
+  },
+  {
+    "affiliationNumber": "MAF1758705934857624",
+    "name": "",
+    "mosqueType": "",
+    "mahallaType": "",
+    "establishedYear": 2025,
+    "address": [
+      {
+        "address": "",
+        "district": "",
+        "pincode": 0,
+        "phone": 0,
+        "email": "",
+        "website": ""
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "",
+        "district": ""
+      }
+    ],
+    "facilities": [],
+    "hasCemetery": false,
+    "mosqueCapacity": "",
+    "mosqueArea": "",
+    "fridayMaleAttendance": "0",
+    "fridayFemaleAttendance": "0",
+    "finance": [
+      {
+        "assets": "",
+        "incomeSource": "",
+        "monthlyExpense": ""
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": false,
+        "recordsKept": []
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "0",
+        "lastYearExpense": "0"
+      }
+    ],
+    "commmunityServices": [],
+    "otherCommunityServices": [],
+    "committees": [
+      {
+        "committeeType": "",
+        "president": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "secretary": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "workers": [
+          {
+            "age": "",
+            "salary": "",
+            "qualification": "",
+            "remarks": "",
+            "working": "",
+            "otherStateWorkers": false,
+            "LegalOtherStateWorkers": false
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:25:34.858Z",
+    "updatedAt": "2025-09-24T09:25:34.858Z"
+  },
+  {
+    "affiliationNumber": "MAF1758705939214577",
+    "name": "",
+    "mosqueType": "",
+    "mahallaType": "",
+    "establishedYear": 2025,
+    "address": [
+      {
+        "address": "",
+        "district": "",
+        "pincode": 0,
+        "phone": 0,
+        "email": "",
+        "website": ""
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "",
+        "district": ""
+      }
+    ],
+    "facilities": [],
+    "hasCemetery": false,
+    "mosqueCapacity": "",
+    "mosqueArea": "",
+    "fridayMaleAttendance": "0",
+    "fridayFemaleAttendance": "0",
+    "finance": [
+      {
+        "assets": "",
+        "incomeSource": "",
+        "monthlyExpense": ""
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": false,
+        "recordsKept": []
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "0",
+        "lastYearExpense": "0"
+      }
+    ],
+    "commmunityServices": [],
+    "otherCommunityServices": [],
+    "committees": [
+      {
+        "committeeType": "",
+        "president": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "secretary": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "workers": [
+          {
+            "age": "",
+            "salary": "",
+            "qualification": "",
+            "remarks": "",
+            "working": "",
+            "otherStateWorkers": false,
+            "LegalOtherStateWorkers": false
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:25:39.215Z",
+    "updatedAt": "2025-09-24T09:25:39.215Z"
+  },
+  {
+    "affiliationNumber": "MAF1758706033176230",
+    "name": "masjid",
+    "mosqueType": "ജുമുഅത്ത് പള്ളി",
+    "mahallaType": "പൂർണ മഹല്ല്",
+    "establishedYear": 2111,
+    "address": [
+      {
+        "address": "wefdsfsf",
+        "district": "sdfsf",
+        "pincode": 12312,
+        "phone": 1122334455,
+        "email": "d@gmail.com",
+        "website": ""
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "adad",
+        "district": "fsefs"
+      }
+    ],
+    "facilities": [
+      "മദ്രസ",
+      "ഡിജിറ്റൽ ലൈബ്രറി"
+    ],
+    "hasCemetery": true,
+    "mosqueCapacity": "39",
+    "mosqueArea": "132",
+    "fridayMaleAttendance": "213",
+    "fridayFemaleAttendance": "12",
+    "finance": [
+      {
+        "assets": "wefffsdf",
+        "incomeSource": "dfdsfdf",
+        "monthlyExpense": "123"
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": true,
+        "recordsKept": [
+          "അസറ്റ് രജിസ്റ്റർ",
+          "ഖബര്‍ രജിസ്റ്റ്റ്‍",
+          "വിവാഹ മോചന രജിസ്റ്റര്‍"
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "12312",
+        "lastYearExpense": "313"
+      }
+    ],
+    "commmunityServices": [
+      "പലിശരഹിത നിധി",
+      "മെഡിക്കൽ ഹെൽപ്"
+    ],
+    "otherCommunityServices": [
+      "fgdg"
+    ],
+    "committees": [
+      {
+        "committeeType": "അസോസിയേഷൻ",
+        "president": [
+          {
+            "name": "dfgd",
+            "phone": "8527834253",
+            "email": "d@gmail.com"
+          }
+        ],
+        "secretary": [
+          {
+            "name": "dgd",
+            "phone": "8527834253",
+            "email": "d@gmail.com"
+          }
+        ],
+        "workers": [
+          {
+            "age": "21",
+            "salary": "121",
+            "qualification": "sdc",
+            "remarks": "csdcs",
+            "working": "sfsf",
+            "otherStateWorkers": true,
+            "LegalOtherStateWorkers": true
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:27:13.176Z",
+    "updatedAt": "2025-09-24T09:27:13.176Z"
+  },
+  {
+    "affiliationNumber": "MAF1758706140403565",
+    "name": "",
+    "mosqueType": "",
+    "mahallaType": "",
+    "establishedYear": 2025,
+    "address": [
+      {
+        "address": "",
+        "district": "",
+        "pincode": 0,
+        "phone": 0,
+        "email": "",
+        "website": ""
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "",
+        "district": ""
+      }
+    ],
+    "facilities": [],
+    "hasCemetery": false,
+    "mosqueCapacity": "",
+    "mosqueArea": "",
+    "fridayMaleAttendance": "0",
+    "fridayFemaleAttendance": "0",
+    "finance": [
+      {
+        "assets": "",
+        "incomeSource": "",
+        "monthlyExpense": ""
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": false,
+        "recordsKept": []
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "0",
+        "lastYearExpense": "0"
+      }
+    ],
+    "commmunityServices": [],
+    "otherCommunityServices": [],
+    "committees": [
+      {
+        "committeeType": "",
+        "president": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "secretary": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "workers": [
+          {
+            "age": "",
+            "salary": "",
+            "qualification": "",
+            "remarks": "",
+            "working": "",
+            "otherStateWorkers": false,
+            "LegalOtherStateWorkers": false
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:29:00.404Z",
+    "updatedAt": "2025-09-24T09:29:00.404Z"
+  },
+  {
+    "affiliationNumber": "MAF1758706142598360",
+    "name": "",
+    "mosqueType": "",
+    "mahallaType": "",
+    "establishedYear": 2025,
+    "address": [
+      {
+        "address": "",
+        "district": "",
+        "pincode": 0,
+        "phone": 0,
+        "email": "",
+        "website": ""
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "",
+        "district": ""
+      }
+    ],
+    "facilities": [],
+    "hasCemetery": false,
+    "mosqueCapacity": "",
+    "mosqueArea": "",
+    "fridayMaleAttendance": "0",
+    "fridayFemaleAttendance": "0",
+    "finance": [
+      {
+        "assets": "",
+        "incomeSource": "",
+        "monthlyExpense": ""
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": false,
+        "recordsKept": []
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "0",
+        "lastYearExpense": "0"
+      }
+    ],
+    "commmunityServices": [],
+    "otherCommunityServices": [],
+    "committees": [
+      {
+        "committeeType": "",
+        "president": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "secretary": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "workers": [
+          {
+            "age": "",
+            "salary": "",
+            "qualification": "",
+            "remarks": "",
+            "working": "",
+            "otherStateWorkers": false,
+            "LegalOtherStateWorkers": false
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:29:02.599Z",
+    "updatedAt": "2025-09-24T09:29:02.599Z"
+  },
+  {
+    "affiliationNumber": "MAF1758706173559523",
+    "name": "",
+    "mosqueType": "",
+    "mahallaType": "",
+    "establishedYear": 2025,
+    "address": [
+      {
+        "address": "",
+        "district": "",
+        "pincode": 0,
+        "phone": 0,
+        "email": "",
+        "website": ""
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "",
+        "district": ""
+      }
+    ],
+    "facilities": [],
+    "hasCemetery": false,
+    "mosqueCapacity": "",
+    "mosqueArea": "",
+    "fridayMaleAttendance": "0",
+    "fridayFemaleAttendance": "0",
+    "finance": [
+      {
+        "assets": "",
+        "incomeSource": "",
+        "monthlyExpense": ""
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": false,
+        "recordsKept": []
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "0",
+        "lastYearExpense": "0"
+      }
+    ],
+    "commmunityServices": [],
+    "otherCommunityServices": [],
+    "committees": [
+      {
+        "committeeType": "",
+        "president": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "secretary": [
+          {
+            "name": "",
+            "phone": "",
+            "email": ""
+          }
+        ],
+        "workers": [
+          {
+            "age": "",
+            "salary": "",
+            "qualification": "",
+            "remarks": "",
+            "working": "",
+            "otherStateWorkers": false,
+            "LegalOtherStateWorkers": false
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:29:33.559Z",
+    "updatedAt": "2025-09-24T09:29:33.559Z"
+  },
+  {
+    "affiliationNumber": "MAF1758706455019512",
+    "name": "newww palliiii",
+    "mosqueType": "ജുമുഅത്ത് പള്ളി",
+    "mahallaType": "ഭാഗിക മഹല്ല്",
+    "establishedYear": 2122,
+    "address": [
+      {
+        "address": "vfvfvfdvvdvd",
+        "district": "ddfgfgdf",
+        "pincode": 32323,
+        "phone": 8527834255,
+        "email": "d@gmail.com",
+        "website": "http://localhost:5174/affiliation"
+      }
+    ],
+    "jamathArea": [
+      {
+        "area": "dsdvs",
+        "district": "svdsvvdv"
+      }
+    ],
+    "facilities": [
+      "മദ്രസ",
+      "ഡിജിറ്റൽ ലൈബ്രറി"
+    ],
+    "hasCemetery": true,
+    "mosqueCapacity": "123123",
+    "mosqueArea": "131231",
+    "fridayMaleAttendance": "123",
+    "fridayFemaleAttendance": "123",
+    "finance": [
+      {
+        "assets": "svsvfd",
+        "incomeSource": "dbfgfbfgb",
+        "monthlyExpense": "232"
+      }
+    ],
+    "audit": [
+      {
+        "hasAudit": true,
+        "recordsKept": [
+          "ഇൻവാഡ്/ ഔട്ട്‍വാഡ് ഫയൽ"
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "lastYearIncome": "242",
+        "lastYearExpense": "24234"
+      }
+    ],
+    "commmunityServices": [
+      "ബ്ലഡ് ബാങ്ക്",
+      "കൗൺസ‌ലിംഗ്",
+      "തൊഴിൽ പരിശീലനങ്ങൾ"
+    ],
+    "otherCommunityServices": [
+      "b  vb "
+    ],
+    "committees": [
+      {
+        "committeeType": "കമ്മറ്റി",
+        "president": [
+          {
+            "name": "fggf",
+            "phone": "8527834254",
+            "email": "f@gmail.com"
+          }
+        ],
+        "secretary": [
+          {
+            "name": "ghfh",
+            "phone": "8527834254",
+            "email": "f@gmail.com"
+          }
+        ],
+        "workers": [
+          {
+            "age": "22",
+            "salary": "21212",
+            "qualification": "dcsc",
+            "remarks": "sdfsdf",
+            "working": "sfsf",
+            "otherStateWorkers": true,
+            "LegalOtherStateWorkers": true
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-09-24T09:34:15.020Z",
+    "updatedAt": "2025-09-24T09:34:15.020Z"
+  }
+]
