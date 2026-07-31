@@ -109,6 +109,10 @@ const mosqueFundSchema = new mongoose.Schema({
     enum: ["pending", "approved", "rejected", "under_review"],
     default: "pending",
   },
+  rejectionReason: {
+    type: String,
+    default: null,
+  },
 
   // Timestamps
   createdAt: {

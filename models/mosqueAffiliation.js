@@ -191,8 +191,17 @@ const mosqueAffiliationSchema = new mongoose.Schema({
     }],
 });
 
-// Add timestamps
+// Add status + timestamps
 mosqueAffiliationSchema.add({
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    rejectionReason: {
+        type: String,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

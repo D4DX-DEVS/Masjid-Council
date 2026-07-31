@@ -8,6 +8,7 @@ const multer = require("multer");
 const mosqueAffiliationRoutes = require("./routes/mosqueAffiliationRoutes");
 const welfarefundRoutes = require("./routes/welfarefundRoutes");
 const mosqueFundRoutes = require("./routes/mosqueFundRoutes");
+const khateebRegistrationRoutes = require("./routes/khateebRegistrationRoutes");
 const superAdminRoutes = require("./routes/superAdminRoutes");
 // const adminRoutes = require("./routes/adminRoutes");
 
@@ -69,6 +70,7 @@ connectDB();
 app.use("/api/mosqueAffiliation", mosqueAffiliationRoutes);
 app.use("/api/welfarefund", welfarefundRoutes);
 app.use("/api/mosqueFund", mosqueFundRoutes);
+app.use("/api/khateebRegistration", khateebRegistrationRoutes);
 app.use("/api/superadmin", superAdminRoutes);
 // app.use("/api/admin", adminRoutes);
 

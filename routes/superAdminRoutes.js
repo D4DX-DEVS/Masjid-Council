@@ -2,6 +2,9 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Admin = require('../models/admin');
+const mosqueFund = require('../models/mosqueFund');
+const welfarefund = require('../models/welfarefund');
+const mosqueAffiliation = require('../models/mosqueAffiliation');
 const { authenticateSuperAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -201,6 +204,74 @@ router.delete('/admin/:id', authenticateSuperAdmin, async (req, res) => {
 
     } catch (error) {
         console.error('Delete admin error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+});
+
+
+// Change application status (Protected Route)
+// ponytail: one handler for all three forms, they only differ by model
+const STATUS_MODELS = {
+    'mosque-fund': mosqueFund,
+    'welfare-fund': welfarefund,
+    'affiliation': mosqueAffiliation
+};
+const ALLOWED_STATUSES = ['pending', 'approved', 'rejected'];
+
+router.put('/:form/:id/status', authenticateSuperAdmin, async (req, res) => {
+    try {
+        const Model = STATUS_MODELS[req.params.form];
+        if (!Model) {
+            return res.status(404).json({
+                success: false,
+                message: `Unknown form type '${req.params.form}'`
+            });
+        }
+
+        const { status, rejectionReason } = req.body;
+
+        if (!ALLOWED_STATUSES.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: `status must be one of: ${ALLOWED_STATUSES.join(', ')}`
+            });
+        }
+
+        if (status === 'rejected' && !(rejectionReason || '').trim()) {
+            return res.status(400).json({
+                success: false,
+                message: 'rejectionReason is required when rejecting'
+            });
+        }
+
+        const updated = await Model.findByIdAndUpdate(
+            req.params.id,
+            {
+                status,
+                rejectionReason: status === 'rejected' ? rejectionReason.trim() : null,
+                updatedAt: Date.now()
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: 'Application not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Status changed to ${status}`,
+            data: updated
+        });
+
+    } catch (error) {
+        console.error('Status change error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'

@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
 const mosqueAffiliation = require("../models/mosqueAffiliation");
 const externalApiService = require("../services/externalApiService");
-const fs = require('fs').promises;
-const path = require('path');
 
 // CREATE - Add a new mosque affiliation
 router.post("/create", async (req, res) => {
@@ -84,47 +81,14 @@ router.post("/create", async (req, res) => {
 
     console.log("Mapped data:", mappedData);
 
-    // Try MongoDB first, fallback to file storage
-    try {
-      if (mongoose.connection.readyState === 1) {
-        const newMosqueAffiliation = new mosqueAffiliation(mappedData);
-        const savedMosqueAffiliation = await newMosqueAffiliation.save();
-        console.log("Saved to MongoDB successfully:", savedMosqueAffiliation);
-        
-        return res.status(201).json({
-          success: true,
-          message: "Mosque affiliation created successfully with affiliation number: " + savedMosqueAffiliation.affiliationNumber,
-          data: savedMosqueAffiliation,
-        });
-      } else {
-        throw new Error("MongoDB not connected");
-      }
-    } catch (dbError) {
-      console.log("MongoDB failed, using file storage:", dbError.message);
-      
-      // Fallback to file storage
-      const filePath = path.join(__dirname, '../data/affiliations.json');
-      let affiliations = [];
-      
-      try {
-        const fileData = await fs.readFile(filePath, 'utf8');
-        affiliations = JSON.parse(fileData);
-      } catch (fileError) {
-        console.log("Creating new affiliations file");
-        affiliations = [];
-      }
-      
-      affiliations.push(mappedData);
-      await fs.writeFile(filePath, JSON.stringify(affiliations, null, 2));
-      
-      console.log("Saved to file successfully");
-      
-      return res.status(201).json({
-        success: true,
-        message: "Mosque affiliation created successfully with affiliation number: " + mappedData.affiliationNumber,
-        data: mappedData,
-      });
-    }
+    const newMosqueAffiliation = new mosqueAffiliation(mappedData);
+    const savedMosqueAffiliation = await newMosqueAffiliation.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Mosque affiliation created successfully with affiliation number: " + savedMosqueAffiliation.affiliationNumber,
+      data: savedMosqueAffiliation,
+    });
   } catch (error) {
     console.error("Error creating mosque affiliation:", error);
     res.status(400).json({
