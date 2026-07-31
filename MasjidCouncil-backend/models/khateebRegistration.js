@@ -32,6 +32,18 @@ const khateebRegistrationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  khutbaRegular: {
+    type: String,
+    enum: ["regular", "occasional"],
+    required: true,
+  },
+
+  // Movement affiliation
+  movementRelation: {
+    type: String,
+    enum: ["rukn", "karkun", "active_associate", "none"],
+    required: true,
+  },
 
   // Participation
   attending: {

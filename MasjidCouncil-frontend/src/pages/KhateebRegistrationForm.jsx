@@ -19,6 +19,8 @@ const EMPTY_FORM = {
   mahallu: '',
   area: '',
   district: '',
+  khutbaRegular: '',
+  movementRelation: '',
   attending: '',
   notAttendingReason: '',
   feePaid: ''
@@ -57,7 +59,7 @@ const KhateebRegistrationForm = () => {
   const validateAllFields = () => {
     const errors = {};
 
-    ['fullName', 'phone', 'masjidName', 'mahallu', 'district', 'attending', 'feePaid'].forEach((field) => {
+    ['fullName', 'phone', 'masjidName', 'mahallu', 'district', 'khutbaRegular', 'movementRelation', 'attending', 'feePaid'].forEach((field) => {
       if (!formData[field] || !formData[field].trim()) errors[field] = true;
     });
 
@@ -111,6 +113,28 @@ const KhateebRegistrationForm = () => {
     `w-full p-2.5 sm:p-3 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500 ${
       validationErrors[field] ? 'border-red-500' : 'border-gray-300'
     }`;
+
+  // ponytail: plain render fn, not a nested component — avoids remount-on-render
+  const renderRadios = (name, options) =>
+    options.map((option) => (
+      <label
+        key={option.value}
+        className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${
+          formData[name] === option.value ? 'border-green-500 bg-green-50' :
+          validationErrors[name] ? 'border-red-500' : 'border-gray-300'
+        }`}
+      >
+        <input
+          type="radio"
+          name={name}
+          value={option.value}
+          checked={formData[name] === option.value}
+          onChange={handleInputChange}
+          className="w-5 h-5 accent-green-600"
+        />
+        <span className="text-sm sm:text-base text-gray-800">{option.label}</span>
+      </label>
+    ));
 
   const alertModal = showAlert && (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -289,6 +313,30 @@ const KhateebRegistrationForm = () => {
                 ))}
               </select>
             </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                ഖുത്ബ സ്ഥിരമായി നിർവഹിക്കുന്നുണ്ടോ? <span className="text-red-500">*</span>
+              </label>
+              <div className="space-y-3">
+                {renderRadios('khutbaRegular', [
+                  { value: 'regular', label: 'ഉണ്ട്' },
+                  { value: 'occasional', label: 'ഇടക്കിടെ നിർവഹിക്കുന്നു' }
+                ])}
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                പ്രസ്ഥാന ബന്ധം <span className="text-red-500">*</span>
+              </label>
+              <div className="space-y-3">
+                {renderRadios('movementRelation', [
+                  { value: 'rukn', label: 'റുക്ൻ' },
+                  { value: 'karkun', label: 'കാർകുൻ' },
+                  { value: 'active_associate', label: 'ആക്ടീവ് അസോസിയേറ്റ്' },
+                  { value: 'none', label: 'ബന്ധമില്ല' }
+                ])}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -298,25 +346,10 @@ const KhateebRegistrationForm = () => {
             3. സംഗമത്തിലെ പങ്കാളിത്തം (Participation Confirmation) <span className="text-red-500">*</span>
           </h2>
           <div className="space-y-3">
-            {[{ value: 'yes', label: 'അതെ, പങ്കെടുക്കും' }, { value: 'no', label: 'ഇല്ല' }].map((option) => (
-              <label
-                key={option.value}
-                className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${
-                  formData.attending === option.value ? 'border-green-500 bg-green-50' :
-                  validationErrors.attending ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="attending"
-                  value={option.value}
-                  checked={formData.attending === option.value}
-                  onChange={handleInputChange}
-                  className="w-5 h-5 accent-green-600"
-                />
-                <span className="text-sm sm:text-base text-gray-800">{option.label}</span>
-              </label>
-            ))}
+            {renderRadios('attending', [
+              { value: 'yes', label: 'അതെ, പങ്കെടുക്കും' },
+              { value: 'no', label: 'ഇല്ല' }
+            ])}
           </div>
           {formData.attending === 'no' && (
             <div className="mt-4">
@@ -341,25 +374,10 @@ const KhateebRegistrationForm = () => {
           </h2>
           <p className="text-sm text-gray-600 mb-3">രജിസ്ട്രേഷൻ ഫീസ് (₹250) <span className="text-red-500">*</span></p>
           <div className="space-y-3">
-            {[{ value: 'yes', label: 'അടച്ചു' }, { value: 'no', label: 'ഇല്ല' }].map((option) => (
-              <label
-                key={option.value}
-                className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${
-                  formData.feePaid === option.value ? 'border-green-500 bg-green-50' :
-                  validationErrors.feePaid ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="feePaid"
-                  value={option.value}
-                  checked={formData.feePaid === option.value}
-                  onChange={handleInputChange}
-                  className="w-5 h-5 accent-green-600"
-                />
-                <span className="text-sm sm:text-base text-gray-800">{option.label}</span>
-              </label>
-            ))}
+            {renderRadios('feePaid', [
+              { value: 'yes', label: 'അടച്ചു' },
+              { value: 'no', label: 'ഇല്ല' }
+            ])}
           </div>
         </div>
 
