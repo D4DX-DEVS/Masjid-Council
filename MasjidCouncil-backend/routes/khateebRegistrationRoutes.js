@@ -14,7 +14,7 @@ router.get("/test", (req, res) => {
 // CREATE - Add a new khateeb registration
 router.post("/create", async (req, res) => {
     try {
-        const requiredFields = ["fullName", "phone", "masjidName", "mahallu", "district", "attending", "feePaid"];
+        const requiredFields = ["fullName", "phone", "masjidName", "mahallu", "district", "khutbaRegular", "movementRelation", "attending", "feePaid"];
         const missing = requiredFields.filter((field) => !req.body[field]);
         if (missing.length > 0) {
             return res.status(400).json({
@@ -31,6 +31,8 @@ router.post("/create", async (req, res) => {
             mahallu: req.body.mahallu,
             area: req.body.area || "",
             district: req.body.district,
+            khutbaRegular: req.body.khutbaRegular,
+            movementRelation: req.body.movementRelation,
             attending: req.body.attending,
             notAttendingReason: req.body.attending === "no" ? (req.body.notAttendingReason || "") : "",
             feePaid: req.body.feePaid,

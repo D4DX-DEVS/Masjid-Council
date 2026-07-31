@@ -11,6 +11,14 @@ const STATUS_STYLES = {
   rejected: { text: 'Rejected', class: 'bg-red-100 text-red-800' }
 };
 
+const KHUTBA_LABELS = { regular: 'ഉണ്ട്', occasional: 'ഇടക്കിടെ നിർവഹിക്കുന്നു' };
+const MOVEMENT_LABELS = {
+  rukn: 'റുക്ൻ',
+  karkun: 'കാർകുൻ',
+  active_associate: 'ആക്ടീവ് അസോസിയേറ്റ്',
+  none: 'ബന്ധമില്ല'
+};
+
 const Field = ({ label, value }) => (
   <div>
     <label className="text-sm font-medium text-gray-500">{label}</label>
@@ -175,6 +183,8 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
               <Field label="സ്ഥലം / മഹല്ല്" value={data.mahallu} />
               <Field label="ഏരിയ" value={data.area} />
               <Field label="ജില്ല" value={data.district} />
+              <Field label="ഖുത്ബ സ്ഥിരമായി നിർവഹിക്കുന്നുണ്ടോ?" value={KHUTBA_LABELS[data.khutbaRegular]} />
+              <Field label="പ്രസ്ഥാന ബന്ധം" value={MOVEMENT_LABELS[data.movementRelation]} />
             </div>
           </div>
 

@@ -1,0 +1,11 @@
+{
+  "name": "masjid-council",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix MasjidCouncil-backend install && npm --prefix MasjidCouncil-frontend install",
+    "dev:api": "npm --prefix MasjidCouncil-backend start",
+    "dev:web": "npm --prefix MasjidCouncil-frontend run dev",
+    "build:web": "npm --prefix MasjidCouncil-frontend run build",
+    "lint:web": "npm --prefix MasjidCouncil-frontend run lint"
+  }
+}

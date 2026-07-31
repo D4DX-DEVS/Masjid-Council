@@ -1,0 +1,20 @@
+[build]
+  base = "MasjidCouncil-frontend"
+  command = "npm run build"
+  publish = "dist"
+  # monorepo: skip deploy when only backend changed ("." = base dir)
+  ignore = "git diff --quiet HEAD^ HEAD -- ."
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Opt out of Google's FLoC tracking
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Permissions-Policy = "interest-cohort=()"
