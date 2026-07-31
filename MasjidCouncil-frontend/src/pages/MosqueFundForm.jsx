@@ -787,21 +787,21 @@ const MosqueFundForm = () => {
           </div>
           
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള അപേക്ഷ</h1>
-            <p className="text-lg text-gray-700" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് കൗൺസിൽ കേരള</p>
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള അപേക്ഷ</h1>
+            <p className="text-sm sm:text-lg text-gray-700" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് കൗൺസിൽ കേരള</p>
           </div>
         </div>
 
         {/* Info Card */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-          <h2 className="text-xl font-semibold text-blue-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-lg sm:text-xl font-semibold text-blue-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
             നിർദേശങ്ങൾ വായിക്കുക
           </h2>
         </div>
 
         {/* Guidelines */}
         <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <ul className="list-disc space-y-2 text-gray-800 text-sm ml-6" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <ul className="list-disc space-y-2 text-gray-800 text-xs sm:text-sm ml-4 sm:ml-6" style={{ fontFamily: "Anek Malayalam Variable" }}>
             <li>MCK യിൽ അഫിലിയേറ്റ് ചെയ്‌ത മസ്‌ജിദുകൾക്ക് വേണ്ടിയുള്ള സംവിധാനമാണിത്. അഫിലിയേറ്റ് ചെയ്യാത്ത പള്ളികളുടെ അപേക്ഷ പരിഗണിക്കുകയില്ല.</li>
             <li>എല്ലാ മാസവും ആദ്യത്തെ വെള്ളിയാഴ്‌ച ജുമുഅക്ക് ശേഷം മസ്‌ജിദ് ഫണ്ട് സമാഹരിക്കുകയും കേന്ദ്രത്തിലടക്കുകയും ചെയ്യുന്ന പള്ളികൾക്കാണ് സഹായത്തിന് അർഹതയുള്ളത്.</li>
             <li>പള്ളികളുമായി ബന്ധപ്പെട്ട അറ്റകുറ്റപ്പണികൾക്ക് വേണ്ടിയാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്. പുതിയ പള്ളി നിർമ്മാണത്തിനോ പള്ളിയുമായി ചേർന്ന് നിൽകുന്ന മറ്റു സംവിധാനങ്ങൾക്കോ (മദ്രസ, ലൈബ്രറി) സഹായം ലഭ്യമല്ല.</li>
@@ -818,18 +818,18 @@ const MosqueFundForm = () => {
           <strong style={{ fontFamily: "Anek Malayalam Variable" }}>NB:</strong> അപേക്ഷയോടൊപ്പമുള്ള മാർഗനിർദ്ദേശങ്ങളിൽ സൂചിപ്പിച്ച രേഖകൾ അപേക്ഷയോടൊപ്പം സമർപ്പിക്കേണ്ടതാണ്.
         </div>
 
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-4">
           <button 
             style={{ fontFamily: "Anek Malayalam Variable" }}
             onClick={() => navigate('/')}
-            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2.5 px-4 sm:py-3 sm:px-6 rounded-lg transition-colors"
           >
             ← ഹോമിലേക്ക് മടങ്ങുക
           </button>
           <button 
             style={{ fontFamily: "Anek Malayalam Variable" }}
             onClick={() => setShowForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 sm:py-3 sm:px-6 rounded-lg transition-colors"
           >
             നിർദേശങ്ങൾ വായിച്ചു, അപേക്ഷ പൂരിപ്പിക്കുക
           </button>
@@ -858,7 +858,7 @@ const MosqueFundForm = () => {
             </div>
             
           <div>
-              <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: "Anek Malayalam Variable" }}>
               മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള അപേക്ഷ
             </h1>
               <p className="text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് കൗൺസിൽ കേരള</p>
@@ -869,11 +869,11 @@ const MosqueFundForm = () => {
 
       <div className="space-y-8">
         {/* Mosque Details Section */}
-        <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
+        <div className="border rounded-lg p-4 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 എം സി കെ അഫിലിയേഷൻ നമ്പർ <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -895,7 +895,7 @@ const MosqueFundForm = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 മസ്ജിദിന്റെ പേര് <span className="text-red-500">*</span>
                 {autoFilledFields.mosqueName && (
                   <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
@@ -918,7 +918,7 @@ const MosqueFundForm = () => {
           </div>
           
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               വിലാസം <span className="text-red-500">*</span>
               {autoFilledFields.address && (
                 <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
@@ -940,7 +940,7 @@ const MosqueFundForm = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               മാനേജിംഗ് കമ്മിറ്റി/ട്രസ്‌റ്റ്
               </label>
               <input
@@ -948,11 +948,11 @@ const MosqueFundForm = () => {
                 name="managementType"
                 value={formData.managementType}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               പ്രസിഡൻ്റ്/ ചെയർമാൻ
               </label>
               <input
@@ -960,11 +960,11 @@ const MosqueFundForm = () => {
                 name="presidentSecretary"
                 value={formData.presidentSecretary}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഫോൺ <span className="text-red-500">*</span>
               </label>
               <input
@@ -979,7 +979,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ജില്ല <span className="text-red-500">*</span>
                 {autoFilledFields.district && (
                   <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
@@ -1006,7 +1006,7 @@ const MosqueFundForm = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഏരിയ
                 {autoFilledFields.area && (
                   <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
@@ -1033,14 +1033,14 @@ const MosqueFundForm = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               ജമാഅത്തെ ഇസ്‌ലാമി പ്രാദേശിക ഘടകം
               </label>
               <select
                 name="jamathIslami"
                 value={formData.jamathIslami}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={loadingDropdowns || !formData.area}
                 style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
               >
@@ -1058,11 +1058,11 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Help Status Section */}
-        <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>മുമ്പ് സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
+        <div className="border rounded-lg p-4 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>മുമ്പ് സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               മസ്‌ജിദ് കൗൺസിൽ കേരളക്ക് മാസാന്ത ഫണ്ട് ശേഖരണം നടക്കാറുണ്ടോ <span className="text-red-500">*</span>
               </label>
               <select
@@ -1081,7 +1081,7 @@ const MosqueFundForm = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               മസ്‌ജിദ് കൗൺസിലിൽ നിന്ന് മുമ്പ് സഹായം ലഭ്യമായിട്ടുണ്ടോ <span className="text-red-500">*</span>
               </label>
               <select
@@ -1103,11 +1103,11 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Current Help Section */}
-        <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>നലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
+        <div className="border rounded-lg p-4 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>നലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               ഇപ്പോൾ സഹായം ആവശ്യമായ ഇനം <span className="text-red-500">*</span>
               </label>
               <input
@@ -1123,7 +1123,7 @@ const MosqueFundForm = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ആവശ്യത്തിന്റെ വിശദവിവരം <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -1140,7 +1140,7 @@ const MosqueFundForm = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                   പ്രതീക്ഷിക്കുന്ന ചെലവ് (രൂപ) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -1156,7 +1156,7 @@ const MosqueFundForm = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 സ്വന്തമായി ശേഖരിക്കാവുന്ന തുക (രൂപ)
                 </label>
                 <input
@@ -1165,7 +1165,7 @@ const MosqueFundForm = () => {
                   name="ownContribution"
                   value={formData.ownContribution}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -1173,11 +1173,11 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Welfare Fund Details */}
-        <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>കോൺടാക്റ്റ് വിവരങ്ങൾ</h2>
+        <div className="border rounded-lg p-4 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>കോൺടാക്റ്റ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 മസ്ജിദ് പ്രസിഡന്റ്/സെക്രട്ടറി <span className="text-red-500">*</span>
               </label>
               <input
@@ -1193,7 +1193,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഫോൺ <span className="text-red-500">*</span>
               </label>
               <input
@@ -1209,7 +1209,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 വാട്സാപ്പ് നമ്പർ <span className="text-red-500">*</span>
               </label>
               <input
@@ -1228,12 +1228,12 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Required Documents */}
-        <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>ആവശ്യമായ ഡോക്യുമെന്റുകൾ</h2>
+        <div className="border rounded-lg p-4 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>ആവശ്യമായ ഡോക്യുമെന്റുകൾ</h2>
           <div className="space-y-6">
             {/* Bank Passbook Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ബാങ്ക് പാസ് ബുക്കിന്റെ കോപ്പി (PDF, JPEG, PNG, GIF, WEBP)
               </label>
               {!uploadedFiles.bankPassbook ? (
@@ -1294,7 +1294,7 @@ const MosqueFundForm = () => {
 
             {/* Full Estimate Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 പ്ലാൻ, എസ്റ്റിമേറ്റ് ഫയൽ (PDF, JPEG, PNG, GIF, WEBP)
               </label>
               {!uploadedFiles.fullEstimate ? (
@@ -1356,8 +1356,8 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Declarations */}
-        <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>പ്രഖ്യാപനങ്ങൾ</h2>
+        <div className="border rounded-lg p-4 sm:p-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>പ്രഖ്യാപനങ്ങൾ</h2>
           <div className="space-y-4">
             <label className="flex items-start space-x-3">
               <input

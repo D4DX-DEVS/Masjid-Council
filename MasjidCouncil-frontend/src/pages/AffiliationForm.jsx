@@ -946,7 +946,7 @@ const AffiliationForm = () => {
             
             <div>
               <h1
-                className="text-2xl font-bold text-gray-900"
+                className="text-lg sm:text-2xl font-bold text-gray-900"
                 style={{ fontFamily: "Anek Malayalam Variable" }}
               >
                 മസ്ജിദ് അഫിലിയേഷനുള്ള അപേക്ഷ
@@ -1044,7 +1044,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("localityAddress", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option
                     value=""
@@ -1085,7 +1085,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("yearStarted", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1113,7 +1113,7 @@ const AffiliationForm = () => {
                     handleInputChange("completeAddress", e.target.value)
                   }
                   rows="4"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1229,7 +1229,7 @@ const AffiliationForm = () => {
                     onChange={(e) =>
                       handleInputChange("website", e.target.value)
                     }
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -1263,7 +1263,7 @@ const AffiliationForm = () => {
                     filterAreasByDistrict(selectedDistrict);
                   }}
                   disabled={loadingDistricts}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                 >
                   <option value="">
                     {loadingDistricts ? "ലോഡിംഗ്..." : "ജില്ല തിരഞ്ഞെടുക്കുക"}
@@ -1286,7 +1286,7 @@ const AffiliationForm = () => {
                   value={formData.area}
                   onChange={(e) => handleInputChange("area", e.target.value)}
                   disabled={loadingAreas || !formData.jamaatDistrict}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                 >
                   <option value="">
                     {!formData.jamaatDistrict 
@@ -1406,7 +1406,7 @@ const AffiliationForm = () => {
                       handleInputChange("cemeteryDescription", e.target.value)
                     }
                     placeholder="വിനൂർദ്ദനം"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               )}
@@ -1436,7 +1436,7 @@ const AffiliationForm = () => {
                     handleInputChange("specialtyDescription", e.target.value)
                   }
                   rows="3"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1453,7 +1453,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("category", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1481,7 +1481,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("menCount", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1497,7 +1497,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("womenCount", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1525,7 +1525,7 @@ const AffiliationForm = () => {
                     handleInputChange("financialAssets", e.target.value)
                   }
                   rows="4"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1541,7 +1541,7 @@ const AffiliationForm = () => {
                     handleInputChange("incomeSource", e.target.value)
                   }
                   rows="4"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1557,7 +1557,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("monthlyExpenses", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1667,7 +1667,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("totalIncome", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1683,7 +1683,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("totalExpense", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1727,7 +1727,7 @@ const AffiliationForm = () => {
                     handleInputChange("otherServices", e.target.value)
                   }
                   rows="3"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1754,7 +1754,7 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("committeeType", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option
                     value=""

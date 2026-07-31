@@ -133,9 +133,9 @@ const SearchFilterControls = ({
   }, [filterFieldLabels]);
 
   return (
-    <div className="flex items-center gap-4 h-12">
+    <div className="flex flex-wrap items-start justify-end gap-3 sm:gap-4 w-full sm:w-auto sm:h-12">
       {/* Search Button that Expands */}
-      <div className="flex items-center h-10">
+      <div className={`flex items-start sm:items-center sm:h-10 ${showSearch ? 'w-full sm:w-auto' : ''}`}>
         {!showSearch ? (
           <button
             onClick={toggleSearch}
@@ -145,15 +145,15 @@ const SearchFilterControls = ({
             Search
           </button>
         ) : (
-          <div className="flex items-center gap-2 animate-in slide-in-from-right-4 duration-500">
-            <div className="relative">
+          <div className="flex items-center gap-2 w-full animate-in slide-in-from-right-4 duration-500">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder={getSearchPlaceholder()}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white shadow-lg transition-all duration-500 w-80 h-10"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white shadow-lg transition-all duration-500 w-full sm:w-80 h-10"
                 autoFocus
               />
             </div>
@@ -168,7 +168,7 @@ const SearchFilterControls = ({
       </div>
 
       {/* Filter Button that Expands */}
-      <div className="flex items-center h-10">
+      <div className={`flex items-start sm:items-center sm:h-10 ${showFilter ? 'w-full sm:w-auto' : ''}`}>
         {!showFilter ? (
           <button
             onClick={toggleFilter}
@@ -178,14 +178,14 @@ const SearchFilterControls = ({
             Filter
           </button>
         ) : (
-          <div className="flex items-center gap-2 animate-in slide-in-from-right-4 duration-500">
-            <div className="flex gap-3 bg-white p-3 rounded-lg shadow-lg border border-gray-300 items-center">
+          <div className="flex items-start gap-2 w-full animate-in slide-in-from-right-4 duration-500">
+            <div className="grid grid-cols-2 sm:flex sm:flex-row flex-1 min-w-0 gap-2 sm:gap-3 bg-white p-3 rounded-lg shadow-lg border border-gray-300 sm:items-center">
               {filterFields.map(field => (
                 <select
                   key={field}
                   value={tempFilters[field] || 'all'}
                   onChange={(e) => handleFilterChange(field, e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 min-w-[150px]"
+                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 sm:min-w-[150px]"
                 >
                   <option value="all">
                     All {getFilterLabel(field)}
@@ -199,16 +199,16 @@ const SearchFilterControls = ({
               ))}
               
               {/* Apply and Reset Buttons */}
-              <div className="flex gap-2 ml-2 border-l border-gray-300 pl-3">
+              <div className="col-span-2 flex gap-2 sm:ml-2 pt-2 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-300 sm:pl-3">
                 <button
                   onClick={applyFilters}
-                  className="px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors h-9 font-medium"
+                  className="flex-1 sm:flex-none px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors h-9 font-medium"
                 >
                   Apply
                 </button>
                 <button
                   onClick={resetFilters}
-                  className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors h-9 font-medium"
+                  className="flex-1 sm:flex-none px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors h-9 font-medium"
                 >
                   Reset
                 </button>

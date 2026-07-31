@@ -22,6 +22,9 @@ import SuperAdminMosqueFundList from './pages/SuperAdminMosqueFundList';
 import SuperAdminAffiliationDetails from './pages/SuperAdminAffiliationDetails';
 import SuperAdminMedicalAidDetails from './pages/SuperAdminMedicalAidDetails';
 import SuperAdminMosqueFundDetails from './pages/SuperAdminMosqueFundDetails';
+import KhateebRegistrationForm from './pages/KhateebRegistrationForm';
+import KhateebRegistrationList from './pages/KhateebRegistrationList';
+import KhateebRegistrationDetails from './pages/KhateebRegistrationDetails';
 
 
 // Helper component to wrap Routes and conditional navbar
@@ -35,7 +38,9 @@ const Layout = () => {
     '/medical-list',
     '/medical-list-admin',
     '/mosque-list',
-    '/mosque-list-admin'
+    '/mosque-list-admin',
+    '/khateeb-list-admin',
+    '/khateeb-details-admin'
   ];
 
   const superAdminRoutes = [
@@ -45,13 +50,16 @@ const Layout = () => {
     '/superadmin-mosque-fund-list',
     '/superadmin-affiliation-details',
     '/superadmin-medical-details',
-    '/superadmin-mosque-fund-details'
+    '/superadmin-mosque-fund-details',
+    '/superadmin-khateeb-list',
+    '/superadmin-khateeb-details'
   ];
 
   const formRoutes = [
     '/affiliation',
     '/medical-aid',
-    '/mosque-fund'
+    '/mosque-fund',
+    '/khateeb-registration'
   ];
 
   const isAdminRoute = adminRoutes.includes(location.pathname);
@@ -85,6 +93,11 @@ const Layout = () => {
         <Route path="/superadmin-affiliation-details" element={<SuperAdminAffiliationDetails />} />
         <Route path="/superadmin-medical-details" element={<SuperAdminMedicalAidDetails />} />
         <Route path="/superadmin-mosque-fund-details" element={<SuperAdminMosqueFundDetails />} />
+        <Route path="/khateeb-registration" element={<KhateebRegistrationForm />} />
+        <Route path="/khateeb-list-admin" element={<KhateebRegistrationList role="admin" />} />
+        <Route path="/khateeb-details-admin" element={<KhateebRegistrationDetails role="admin" />} />
+        <Route path="/superadmin-khateeb-list" element={<KhateebRegistrationList role="superadmin" />} />
+        <Route path="/superadmin-khateeb-details" element={<KhateebRegistrationDetails role="superadmin" />} />
       </Routes>
     </>
   );

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, Menu, X, LogOut, Home, FileText, Heart, Building2, User, AlertCircle } from "lucide-react";
-import logo from '../assets/logo.png';
+import { TrendingUp, FileText, Heart, Building2, User, AlertCircle, CalendarDays } from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
+import { StatCardsSkeleton, SkeletonBar } from "../components/Skeleton";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -10,14 +11,13 @@ const AdminHome = () => {
   const [stats, setStats] = useState({
     affiliation: { total: 0, pending: 0, approved: 0, rejected: 0 },
     medical: { total: 0, pending: 0, approved: 0, rejected: 0 },
-    mosque: { total: 0, pending: 0, approved: 0, rejected: 0 }
+    mosque: { total: 0, pending: 0, approved: 0, rejected: 0 },
+    khateeb: { total: 0, pending: 0, approved: 0, rejected: 0 }
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [adminInfo, setAdminInfo] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     fetchStatistics();
@@ -46,7 +46,10 @@ const AdminHome = () => {
       
       const mosqueResponse = await fetch(`${API_BASE_URL}/api/mosqueFund/all`);
       const mosqueData = await mosqueResponse.json();
-      
+
+      const khateebResponse = await fetch(`${API_BASE_URL}/api/khateebRegistration/all`);
+      const khateebData = await khateebResponse.json();
+
       setStats({
         affiliation: {
           total: affiliationData.data?.length || 0,
@@ -65,6 +68,12 @@ const AdminHome = () => {
           pending: mosqueData.data?.filter(item => item.status === 'pending').length || 0,
           approved: mosqueData.data?.filter(item => item.status === 'approved').length || 0,
           rejected: mosqueData.data?.filter(item => item.status === 'rejected').length || 0
+        },
+        khateeb: {
+          total: khateebData.data?.length || 0,
+          pending: khateebData.data?.filter(item => item.status === 'pending').length || 0,
+          approved: khateebData.data?.filter(item => item.status === 'approved').length || 0,
+          rejected: khateebData.data?.filter(item => item.status === 'rejected').length || 0
         }
       });
     } catch (error) {
@@ -86,10 +95,14 @@ const AdminHome = () => {
       const mosqueResponse = await fetch(`${API_BASE_URL}/api/mosqueFund/all`);
       const mosqueData = await mosqueResponse.json();
 
+      const khateebResponse = await fetch(`${API_BASE_URL}/api/khateebRegistration/all`);
+      const khateebData = await khateebResponse.json();
+
       const allSubmissions = [
         ...(affiliationData.data || []).map(item => ({ ...item, type: 'affiliation' })),
         ...(medicalData.data || []).map(item => ({ ...item, type: 'medical' })),
-        ...(mosqueData.data || []).map(item => ({ ...item, type: 'mosque' }))
+        ...(mosqueData.data || []).map(item => ({ ...item, type: 'mosque' })),
+        ...(khateebData.data || []).map(item => ({ ...item, type: 'khateeb' }))
       ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
       setRecentSubmissions(allSubmissions);
@@ -99,17 +112,13 @@ const AdminHome = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    navigate('/admin-login');
-  };
 
   const getTypeDisplay = (type) => {
     const types = {
       affiliation: { text: 'Affiliation', color: 'bg-blue-100 text-blue-800', icon: FileText },
       medical: { text: 'Welfare Fund', color: 'bg-green-100 text-green-800', icon: Heart },
-      mosque: { text: 'Masjid Fund', color: 'bg-purple-100 text-purple-800', icon: Building2 }
+      mosque: { text: 'Masjid Fund', color: 'bg-purple-100 text-purple-800', icon: Building2 },
+      khateeb: { text: "Mirqath '26", color: 'bg-amber-100 text-amber-800', icon: CalendarDays }
     };
     return types[type] || types.affiliation;
   };
@@ -123,12 +132,19 @@ const AdminHome = () => {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
+  // Keep the shell (and the mobile footer menu) mounted while data loads
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6db14e] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <div className="flex-1 min-w-0">
+          <div className="p-4 sm:p-8 pb-24 md:pb-8">
+            <StatCardsSkeleton />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SkeletonBar className="h-48 w-full rounded-xl" />
+              <SkeletonBar className="h-48 w-full rounded-xl" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -136,104 +152,11 @@ const AdminHome = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-xl transition-all duration-300 fixed h-full z-50 flex flex-col`}>
-        {/* Logo and Toggle */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <div className="flex items-center space-x-3">
-                <img src={logo} alt="MCK Logo" className="h-10 w-auto" />
-                <span className="font-bold text-gray-900 text-sm">MCK Admin</span>
-              </div>
-            )}
-            {!sidebarOpen && (
-              <img src={logo} alt="MCK Logo" className="h-10 w-auto mx-auto" />
-            )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${!sidebarOpen ? 'mx-auto mt-2' : ''}`}
-            >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <button
-            onClick={() => navigate('/admin-home')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg bg-green-50 text-[#6db14e] font-medium w-full"
-          >
-            <Home className="w-5 h-5" />
-            {sidebarOpen && <span>Dashboard</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/affiliation-list-admin')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors w-full"
-          >
-            <FileText className="w-5 h-5" />
-            {sidebarOpen && <span>Affiliation</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/medical-list-admin')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors w-full"
-          >
-            <Heart className="w-5 h-5" />
-            {sidebarOpen && <span>Welfare Fund</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/mosque-list-admin')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors w-full"
-          >
-            <Building2 className="w-5 h-5" />
-            {sidebarOpen && <span>Masjid Fund</span>}
-          </button>
-        </nav>
-
-        {/* User Info - Above Logout */}
-        {adminInfo && (
-          <div className="p-4 border-t border-gray-200">
-            {sidebarOpen ? (
-              <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{adminInfo.username}</p>
-                    <p className="text-xs text-gray-600 truncate">{adminInfo.district}</p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="mb-3 flex justify-center">
-                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Logout Button */}
-        <div className="p-4 border-t border-gray-200">
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            {sidebarOpen && <span>Logout</span>}
-          </button>
-        </div>
-      </div>
+      <AdminSidebar />
 
       {/* Main Content - No Header */}
-      <div className={`flex-1 ${sidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
-        <div className="p-8">
+      <div className="flex-1 min-w-0">
+        <div className="p-4 sm:p-8 pb-24 md:pb-8">
           {/* Alerts */}
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
@@ -243,26 +166,26 @@ const AdminHome = () => {
           )}
 
           {/* Statistics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <button
               onClick={() => navigate('/affiliation-list-admin')}
-              className="text-left rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
             >
-              <div className="flex items-center justify-between mb-2">
-                <FileText className="w-8 h-8 text-[#6db14e]" />
-                <span className="text-3xl font-bold text-[#6db14e]">{stats.affiliation.total}</span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
+                <FileText className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-[#6db14e]" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Masjid Affiliation</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-[#6db14e]">{stats.affiliation.total}</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-xl mb-3">Masjid Affiliation</h3>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Pending:</span>
                   <span className="font-semibold text-yellow-600">{stats.affiliation.pending}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Approved:</span>
                   <span className="font-semibold text-green-600">{stats.affiliation.approved}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Rejected:</span>
                   <span className="font-semibold text-red-600">{stats.affiliation.rejected}</span>
                 </div>
@@ -271,23 +194,23 @@ const AdminHome = () => {
 
             <button
               onClick={() => navigate('/medical-list-admin')}
-              className="text-left rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
             >
-              <div className="flex items-center justify-between mb-2">
-                <Heart className="w-8 h-8 text-blue-600" />
-                <span className="text-3xl font-bold text-blue-600">{stats.medical.total}</span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
+                <Heart className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-blue-600" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Welfare Fund</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-blue-600">{stats.medical.total}</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-xl mb-3">Welfare Fund</h3>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Pending:</span>
                   <span className="font-semibold text-yellow-600">{stats.medical.pending}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Approved:</span>
                   <span className="font-semibold text-green-600">{stats.medical.approved}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Rejected:</span>
                   <span className="font-semibold text-red-600">{stats.medical.rejected}</span>
                 </div>
@@ -296,25 +219,50 @@ const AdminHome = () => {
 
             <button
               onClick={() => navigate('/mosque-list-admin')}
-              className="text-left rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
             >
-              <div className="flex items-center justify-between mb-2">
-                <Building2 className="w-8 h-8 text-purple-600" />
-                <span className="text-3xl font-bold text-purple-600">{stats.mosque.total}</span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
+                <Building2 className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-purple-600" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Masjid Fund</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-purple-600">{stats.mosque.total}</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-xl mb-3">Masjid Fund</h3>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Pending:</span>
                   <span className="font-semibold text-yellow-600">{stats.mosque.pending}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Approved:</span>
                   <span className="font-semibold text-green-600">{stats.mosque.approved}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Rejected:</span>
                   <span className="font-semibold text-red-600">{stats.mosque.rejected}</span>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => navigate('/khateeb-list-admin')}
+              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+            >
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
+                <CalendarDays className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-amber-600" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Mirqath '26</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-amber-600">{stats.khateeb.total}</span>
+              </div>
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+                <div className="flex justify-between gap-1">
+                  <span className="text-gray-500">Pending:</span>
+                  <span className="font-semibold text-yellow-600">{stats.khateeb.pending}</span>
+                </div>
+                <div className="flex justify-between gap-1">
+                  <span className="text-gray-500">Approved:</span>
+                  <span className="font-semibold text-green-600">{stats.khateeb.approved}</span>
+                </div>
+                <div className="flex justify-between gap-1">
+                  <span className="text-gray-500">Rejected:</span>
+                  <span className="font-semibold text-red-600">{stats.khateeb.rejected}</span>
                 </div>
               </div>
             </button>
@@ -370,7 +318,7 @@ const AdminHome = () => {
                         </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-gray-900 truncate">
-                            {submission.name || submission.mosqueName || 'Unknown'}
+                            {submission.name || submission.mosqueName || submission.fullName || 'Unknown'}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
                               <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(submission.status)}`}>
@@ -399,36 +347,6 @@ const AdminHome = () => {
         </div>
       </div>
 
-      {/* Logout Confirmation Modal */}
-      {showLogoutModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
-              <LogOut className="w-6 h-6 text-red-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to logout?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

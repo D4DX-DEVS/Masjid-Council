@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Menu, X, LogOut, Home, FileText, Heart, Building2, User } from 'lucide-react';
+import { Plus, Menu, X, LogOut, Home, FileText, Heart, Building2, User, CalendarDays } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 const SuperAdminSidebar = ({ onAddAdmin }) => {
@@ -27,10 +27,19 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
     return location.pathname === path;
   };
 
+  // Same destinations as the desktop sidebar, short labels for the mobile footer bar
+  const navItems = [
+    { to: '/superadmin-dashboard', icon: Home, label: 'Home' },
+    { to: '/superadmin-affiliation-list', icon: FileText, label: 'Affiliation' },
+    { to: '/superadmin-medical-list', icon: Heart, label: 'Welfare' },
+    { to: '/superadmin-mosque-fund-list', icon: Building2, label: 'Fund' },
+    { to: '/superadmin-khateeb-list', icon: CalendarDays, label: 'Mirqath' },
+  ];
+
   return (
     <>
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-xl transition-all duration-300 fixed h-full z-50 flex flex-col`}>
+      {/* Sidebar (desktop) */}
+      <div className={`hidden md:flex ${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-xl transition-all duration-300 fixed h-full z-50 flex-col`}>
         {/* Logo and Toggle */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -100,6 +109,18 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
           >
             <Building2 className="w-5 h-5" />
             {sidebarOpen && <span>Masjid Fund</span>}
+          </button>
+
+          <button
+            onClick={() => navigate('/superadmin-khateeb-list')}
+            className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors w-full ${
+              isActive('/superadmin-khateeb-list')
+                ? 'bg-green-50 text-green-700 font-medium'
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
+            <CalendarDays className="w-5 h-5" />
+            {sidebarOpen && <span>Mirqath '26</span>}
           </button>
 
           {onAddAdmin && (
@@ -179,8 +200,34 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
         </div>
       )}
 
-      {/* Spacer to push content */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'}`}></div>
+      {/* Spacer to push content (desktop only) */}
+      <div className={`hidden md:block ${sidebarOpen ? 'w-64' : 'w-20'}`}></div>
+
+      {/* Footer menu (mobile) */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.06)] flex">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.to}
+              onClick={() => navigate(item.to)}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] ${
+                isActive(item.to) ? 'text-green-700 font-semibold' : 'text-gray-500'
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="truncate max-w-full px-0.5">{item.label}</span>
+            </button>
+          );
+        })}
+        <button
+          onClick={handleLogout}
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] text-red-600"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+      </nav>
     </>
   );
 };
