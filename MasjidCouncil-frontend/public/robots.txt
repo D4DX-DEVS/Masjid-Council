@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Disallow: /admin-login
+Disallow: /superadmin-login
+Disallow: /admin-home
+Disallow: /superadmin-dashboard
+Disallow: /affiliation-list
+Disallow: /affiliation-list-admin
+Disallow: /medical-list
+Disallow: /medical-list-admin
+Disallow: /mosque-list
+Disallow: /mosque-list-admin
+Disallow: /superadmin-affiliation-list
+Disallow: /superadmin-medical-list
+Disallow: /superadmin-mosque-fund-list
+Disallow: /superadmin-affiliation-details
+Disallow: /superadmin-medical-details
+Disallow: /superadmin-mosque-fund-details
+Disallow: /khateeb-list-admin
+Disallow: /khateeb-details-admin
+Disallow: /superadmin-khateeb-list
+Disallow: /superadmin-khateeb-details
+
+Sitemap: https://masjidcouncilkerala.org/sitemap.xml

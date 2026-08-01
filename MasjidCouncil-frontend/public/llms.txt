@@ -1,0 +1,12 @@
+# Masjid Council Kerala
+
+> Official platform of Masjid Council Kerala for mosque affiliation, medical aid applications, mosque fund support and khateeb registration across Kerala, India.
+
+## Services
+- [Mosque Affiliation](https://masjidcouncilkerala.org/affiliation): Apply to affiliate a mosque with the council.
+- [Medical Aid](https://masjidcouncilkerala.org/medical-aid): Apply for medical financial assistance.
+- [Mosque Fund](https://masjidcouncilkerala.org/mosque-fund): Apply for mosque construction/maintenance fund support.
+- [Khateeb Registration](https://masjidcouncilkerala.org/khateeb-registration): Register as a khateeb.
+
+## About
+- [About the council](https://masjidcouncilkerala.org/about)
