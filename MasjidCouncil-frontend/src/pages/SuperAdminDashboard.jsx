@@ -590,12 +590,12 @@ const SuperAdminDashboard = () => {
 
           {/* KPI cards — compact row */}
           {statsLoading && <StatCardsSkeleton />}
-          <div className={`grid grid-cols-2 xl:grid-cols-12 gap-3 sm:gap-6 mb-8 ${statsLoading ? 'hidden' : ''}`}>
+          <div className={`grid grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-6 mb-8 ${statsLoading ? 'hidden' : ''}`}>
             {kpiCards.map(({ key, title, icon: Icon, color, bg, to }) => (
               <button
                 key={key}
                 onClick={() => navigate(to)}
-                className="group xl:col-span-3 text-left bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-5 relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                className="group lg:col-span-3 text-left bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-5 relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                 style={cardShadow}
               >
                 <span className="absolute inset-x-0 top-0 h-1" style={{ background: color }} />
@@ -627,9 +627,9 @@ const SuperAdminDashboard = () => {
           </div>
 
           {/* Analytics — primary focus, asymmetric 8/4 */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
             {/* Trend */}
-            <div className="xl:col-span-8 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8" style={cardShadow}>
+            <div className="lg:col-span-8 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8" style={cardShadow}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-[#111827] flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-[#2E7D4F]" />
@@ -643,7 +643,7 @@ const SuperAdminDashboard = () => {
             </div>
 
             {/* Donut */}
-            <div className="xl:col-span-4 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 flex flex-col" style={cardShadow}>
+            <div className="lg:col-span-4 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 flex flex-col" style={cardShadow}>
               <h2 className="text-xl font-semibold text-[#111827] mb-4">Status Distribution</h2>
               <div className="flex items-center gap-6 flex-1">
                 <DonutChart approved={agg.approved} pending={agg.pending} rejected={agg.rejected} />
@@ -668,9 +668,9 @@ const SuperAdminDashboard = () => {
           </div>
 
           {/* Recent row — asymmetric 7/5 */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
             {/* Recent Submissions */}
-            <div className="xl:col-span-7 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
+            <div className="lg:col-span-7 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
               <h2 className="text-xl font-semibold text-[#111827] mb-4">Recent Submissions</h2>
               {recentSubmissions.length > 0 ? (
                 <div className="divide-y divide-gray-100">
@@ -704,7 +704,7 @@ const SuperAdminDashboard = () => {
             </div>
 
             {/* Recent Admins */}
-            <div className="xl:col-span-5 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
+            <div className="lg:col-span-5 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
               <h2 className="text-xl font-semibold text-[#111827] mb-4">Recently Added Admins</h2>
               {recentAdmins.length > 0 ? (
                 <div className="divide-y divide-gray-100">
@@ -768,8 +768,8 @@ const SuperAdminDashboard = () => {
               </button>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
+            {/* Table — desktop/tablet */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="min-w-full">
                 <thead className="sticky top-0 bg-[#F7F9FB]">
                   <tr>
@@ -810,6 +810,37 @@ const SuperAdminDashboard = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Cards — mobile, no horizontal scroll */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {pagedAdmins.map((admin) => (
+                <div key={admin._id} className="px-4 py-3 flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-[#111827] truncate">{admin.username}</p>
+                    <p className="text-xs text-[#6B7280] truncate">{admin.phoneNumber}</p>
+                    <p className="text-xs text-[#6B7280] truncate">
+                      {admin.district}{admin.area ? ` · ${admin.area}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    <button
+                      onClick={() => handleEdit(admin)}
+                      aria-label={`Edit ${admin.username}`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#1F6B3A] bg-[#EAF6EF] hover:bg-green-100 transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(admin._id)}
+                      aria-label={`Delete ${admin.username}`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {filteredAdmins.length === 0 ? (
