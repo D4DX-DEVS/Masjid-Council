@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, Plus, Trash2, X } from "lucide-react";
+import SelectField from '../components/SelectField';
 import logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 
@@ -925,17 +926,17 @@ const AffiliationForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg">
+    <div className="mc-form min-h-screen bg-gradient-to-b from-slate-50 to-white p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl ring-1 ring-gray-100 overflow-hidden">
         {/* Header */}
-        <div className="bg-white border-b p-6 relative">
+        <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-lg border-b border-gray-100 p-5 sm:p-6 relative">
           {/* Cross button */}
           <button
             onClick={showCancelConfirmation}
-            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-200"
             title="ഫോം ഉപേക്ഷിക്കുക"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-4 pr-12">
@@ -947,7 +948,7 @@ const AffiliationForm = () => {
             <div>
               <h1
                 className="text-lg sm:text-2xl font-bold text-gray-900"
-                style={{ fontFamily: "Anek Malayalam Variable" }}
+                style={{ fontFamily: "Noto Sans Malayalam" }}
               >
                 മസ്ജിദ് അഫിലിയേഷനുള്ള അപേക്ഷ
               </h1>
@@ -961,7 +962,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+              style={{ fontFamily: "Noto Sans Malayalam" }}
             >
               അടിസ്ഥാന വിവരങ്ങൾ
             </h2>
@@ -991,7 +992,7 @@ const AffiliationForm = () => {
                 >
                   2. പള്ളിയുടെ സ്വഭാവം <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SelectField
                   value={formData.mosqueAddress}
                   onChange={(e) =>
                     handleInputChange("mosqueAddress", e.target.value)
@@ -1030,7 +1031,7 @@ const AffiliationForm = () => {
                   >
                     ട‌ൗൺ പള്ളി
                   </option>
-                </select>
+                </SelectField>
               </div>
               <div>
                 <label
@@ -1039,7 +1040,7 @@ const AffiliationForm = () => {
                 >
                   3. മഹല്ലിന്‍റെ സ്വഭാവം <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SelectField
                   value={formData.localityAddress}
                   onChange={(e) =>
                     handleInputChange("localityAddress", e.target.value)
@@ -1070,7 +1071,7 @@ const AffiliationForm = () => {
                   >
                     സംയുക്തമഹല്ല്
                   </option>
-                </select>
+                </SelectField>
               </div>
               <div>
                 <label
@@ -1124,7 +1125,7 @@ const AffiliationForm = () => {
                   >
                     ജില്ല <span className="text-red-500">*</span>
                   </label>
-                  <select
+                  <SelectField
                     value={formData.district}
                     onChange={(e) =>
                       handleInputChange("district", e.target.value)
@@ -1142,7 +1143,7 @@ const AffiliationForm = () => {
                         {district.title || district.name || district.districtName}
                       </option>
                     ))}
-                  </select>
+                  </SelectField>
                   {apiError && (
                     <p className="text-sm text-orange-600 mt-1">
                       ⚠️ {apiError} - Using fallback data
@@ -1252,7 +1253,7 @@ const AffiliationForm = () => {
                 >
                   ജില്ല <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SelectField
                   value={formData.jamaatDistrict}
                   onChange={(e) => {
                     const selectedDistrict = e.target.value;
@@ -1273,7 +1274,7 @@ const AffiliationForm = () => {
                {district.title || district.name || district.districtName}
              </option>
            ))}
-                </select>
+                </SelectField>
               </div>
               <div>
                 <label
@@ -1282,7 +1283,7 @@ const AffiliationForm = () => {
                 >
                   ഏരിയ <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SelectField
                   value={formData.area}
                   onChange={(e) => handleInputChange("area", e.target.value)}
                   disabled={loadingAreas || !formData.jamaatDistrict}
@@ -1303,7 +1304,7 @@ const AffiliationForm = () => {
                {area.title || area.name || area.areaName}
              </option>
            ))}
-                </select>
+                </SelectField>
                 {/* {!formData.jamaatDistrict && (
                   <p className="text-sm text-gray-500 mt-1">
                     ആദ്യം ജില്ല തിരഞ്ഞെടുക്കുക
@@ -1749,7 +1750,7 @@ const AffiliationForm = () => {
                 >
                   31. മാനേജിംഗ് കമ്മിറ്റിയുടെ പേര് <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SelectField
                   value={formData.committeeType}
                   onChange={(e) =>
                     handleInputChange("committeeType", e.target.value)
@@ -1786,7 +1787,7 @@ const AffiliationForm = () => {
                   >
                     മുതവല്ലി
                   </option>
-                </select>
+                </SelectField>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

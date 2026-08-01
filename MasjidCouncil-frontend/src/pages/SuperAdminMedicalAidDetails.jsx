@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { ProfileMenu } from '../components/PageHeader';
+import { invalidate } from '../lib/apiCache';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
-import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import StatusChangeModal from '../components/StatusChangeModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -103,6 +105,7 @@ const SuperAdminMedicalAidDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert(`Medical aid status changed to ${newStatus} successfully!`, 'success');
         setShowStatusChangeModal(false);
         // Update the local state
@@ -153,6 +156,7 @@ const SuperAdminMedicalAidDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert('Medical aid application approved successfully!', 'success');
         setShowConfirmModal(false);
         // Update the local state
@@ -204,6 +208,7 @@ const SuperAdminMedicalAidDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert('Medical aid application rejected successfully!', 'success');
         setShowRejectModal(false);
         setRejectionReason('');
@@ -237,7 +242,7 @@ const SuperAdminMedicalAidDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
             Error: {error}
           </h2>
           <button 
@@ -255,7 +260,7 @@ const SuperAdminMedicalAidDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
             ഡാറ്റ ലഭ്യമല്ല
           </h2>
           <button 
@@ -303,12 +308,12 @@ const SuperAdminMedicalAidDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Anek Malayalam Variable" }}>
-      <SuperAdminNavbar />
-      <div className="p-4">
+    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: "Noto Sans Malayalam" }}>
+      <SuperAdminSidebar />
+      <div className="flex-1 min-w-0 p-4 pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+          <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-3 sm:p-4 rounded-t-lg">
             <div className="flex items-center gap-3">
               <button 
                 onClick={handleBack}
@@ -317,32 +322,33 @@ const SuperAdminMedicalAidDetails = () => {
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
-                <p className="text-green-100 text-sm">Medical Aid Application Details</p>
+                <h1 className="text-base sm:text-xl font-bold leading-snug">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
+                <p className="text-green-100 text-xs sm:text-sm">Medical Aid Application Details</p>
                 <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
               </div>
+              <div className="ml-auto flex-shrink-0"><ProfileMenu role="superadmin" /></div>
             </div>
           </div>
 
         <div className="space-y-6">
           {/* Application Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Application Summary</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Application Summary</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Application ID</label>
+                <label className="text-xs font-medium text-gray-500">Application ID</label>
                 <p className="text-lg font-bold text-blue-600">{displayData.applicationId || displayData._id?.slice(-8) || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Submission Date</label>
-                <p className="text-lg font-medium text-gray-900">{displayData.submissionDate || (displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString() : 'N/A')}</p>
+                <label className="text-xs font-medium text-gray-500">Submission Date</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{displayData.submissionDate || (displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString() : 'N/A')}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Status</label>
+                <label className="text-xs font-medium text-gray-500">Status</label>
                 <div className="mt-1">{getStatusBadge(displayData.status || 'pending')}</div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Requested Amount</label>
+                <label className="text-xs font-medium text-gray-500">Requested Amount</label>
                 <p className="text-lg font-bold text-red-600">₹{displayData.requestedAmount || displayData.expectedExpense || '0'}</p>
               </div>
             </div>
@@ -350,88 +356,88 @@ const SuperAdminMedicalAidDetails = () => {
 
           {/* Mosque Information */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mosque Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Mosque Information</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">Mosque Name</label>
-                <p className="text-lg font-medium text-gray-900">{displayData.mosqueName || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">Mosque Name</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{displayData.mosqueName || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">MCK Affiliation Number</label>
-                <p className="text-lg font-medium text-gray-900">{displayData.mckAffiliation || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">MCK Affiliation Number</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{displayData.mckAffiliation || 'N/A'}</p>
               </div>
             </div>
             <div className="mt-4">
-              <label className="text-sm font-medium text-gray-500">Address</label>
+              <label className="text-xs font-medium text-gray-500">Address</label>
               <p className="text-gray-900 whitespace-pre-wrap">{displayData.address || 'N/A'}</p>
             </div>
           </div>
 
           {/* Management Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Management Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Management Details</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">Committee President</label>
-                <p className="text-gray-900">{displayData.committeePerson || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">Committee President</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.committeePerson || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Management Type</label>
-                <p className="text-gray-900">{displayData.managementType || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">Management Type</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.managementType || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Phone</label>
-                <p className="text-gray-900">{displayData.phone || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">Phone</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.phone || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">WhatsApp</label>
-                <p className="text-gray-900">{displayData.whatsapp || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">WhatsApp</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.whatsapp || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">President Phone</label>
-                <p className="text-gray-900">{displayData.presidentPhone || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">President Phone</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.presidentPhone || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">President/Chairman</label>
-                <p className="text-gray-900">{displayData.presidentChairman || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">President/Chairman</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.presidentChairman || 'N/A'}</p>
               </div>
             </div>
           </div>
 
           {/* Jamaat Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Jamaat Islami Details</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Jamaat Islami Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Jamaat Unit</label>
-                <p className="text-gray-900">{displayData.jammatDetails || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">Jamaat Unit</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.jammatDetails || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Area</label>
-                <p className="text-gray-900">{displayData.area || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">Area</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.area || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">District</label>
-                <p className="text-gray-900">{displayData.district || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">District</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.district || 'N/A'}</p>
               </div>
             </div>
           </div>
 
           {/* Applicant Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Applicant Details</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Applicant Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Application For</label>
-                  <p className="text-lg font-medium text-gray-900">{displayData.applicantDetails || 'N/A'}</p>
+                  <label className="text-xs font-medium text-gray-500">Application For</label>
+                  <p className="text-sm font-medium text-gray-900 break-words">{displayData.applicantDetails || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Position</label>
-                  <p className="text-gray-900">{displayData.chairmanDesignation || 'N/A'}</p>
+                  <label className="text-xs font-medium text-gray-500">Position</label>
+                  <p className="text-sm text-gray-900 break-words">{displayData.chairmanDesignation || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Salary</label>
+                  <label className="text-xs font-medium text-gray-500">Salary</label>
                   <p className="text-lg font-medium text-green-600">₹{displayData.salary || '0'}</p>
                 </div>
               </div>
@@ -440,23 +446,23 @@ const SuperAdminMedicalAidDetails = () => {
 
           {/* Help Request Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Help Request Details</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Help Request Details</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Purpose of Help</label>
+                <label className="text-xs font-medium text-gray-500">Purpose of Help</label>
                 <p className="text-lg font-medium text-blue-600">{displayData.helpPurpose || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Detailed Description</label>
+                <label className="text-xs font-medium text-gray-500">Detailed Description</label>
                 <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{displayData.needDescription || 'N/A'}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
                 <div className="bg-red-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-500">Expected Expense</label>
+                  <label className="text-xs font-medium text-gray-500">Expected Expense</label>
                   <p className="text-xl font-bold text-red-600">₹{displayData.expectedExpense || '0'}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-500">Own Contribution</label>
+                  <label className="text-xs font-medium text-gray-500">Own Contribution</label>
                   <p className="text-xl font-bold text-green-600">₹{displayData.ownContribution || '0'}</p>
                 </div>
               </div>
@@ -465,16 +471,16 @@ const SuperAdminMedicalAidDetails = () => {
 
           {/* Previous Help */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Previous Help</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Previous Help</h2>
             <div>
-              <label className="text-sm font-medium text-gray-500">Previous Help from MCK</label>
-              <p className="text-lg font-medium text-gray-900">{displayData.previousHelp || 'N/A'}</p>
+              <label className="text-xs font-medium text-gray-500">Previous Help from MCK</label>
+              <p className="text-sm font-medium text-gray-900 break-words">{displayData.previousHelp || 'N/A'}</p>
             </div>
           </div>
 
           {/* Mosque Officials */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mosque Officials</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Mosque Officials</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h3 className="font-medium mb-3 text-blue-800">President / Secretary</h3>
@@ -495,7 +501,7 @@ const SuperAdminMedicalAidDetails = () => {
 
           {/* Required Documents Checklist */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Required Documents</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Required Documents</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -503,7 +509,7 @@ const SuperAdminMedicalAidDetails = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">Employee Aadhaar Copy</span>
+                <span className="text-sm text-gray-900 break-words">Employee Aadhaar Copy</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -511,7 +517,7 @@ const SuperAdminMedicalAidDetails = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">Mosque Bank Passbook Copy</span>
+                <span className="text-sm text-gray-900 break-words">Mosque Bank Passbook Copy</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -519,7 +525,7 @@ const SuperAdminMedicalAidDetails = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">House Repair Estimate</span>
+                <span className="text-sm text-gray-900 break-words">House Repair Estimate</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -527,14 +533,14 @@ const SuperAdminMedicalAidDetails = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">House Photos</span>
+                <span className="text-sm text-gray-900 break-words">House Photos</span>
               </div>
             </div>
           </div>
 
           {/* Super Admin Actions */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Super Admin Actions</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Super Admin Actions</h2>
             
             {/* Show buttons only if status is pending */}
             {formData.status === 'pending' ? (

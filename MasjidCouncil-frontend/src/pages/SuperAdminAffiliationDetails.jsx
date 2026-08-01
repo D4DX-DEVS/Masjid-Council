@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { ProfileMenu } from '../components/PageHeader';
+import { invalidate } from '../lib/apiCache';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
-import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import StatusChangeModal from '../components/StatusChangeModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -103,6 +105,7 @@ const SuperAdminAffiliationDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert(`Affiliation status changed to ${newStatus} successfully!`, 'success');
         setShowStatusChangeModal(false);
         // Update the local state
@@ -153,6 +156,7 @@ const SuperAdminAffiliationDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert('Affiliation application approved successfully!', 'success');
         setShowConfirmModal(false);
         // Update the local state
@@ -204,6 +208,7 @@ const SuperAdminAffiliationDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert('Affiliation application rejected successfully!', 'success');
         setShowRejectModal(false);
         setRejectionReason('');
@@ -237,7 +242,7 @@ const SuperAdminAffiliationDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
             Error: {error}
           </h2>
           <button 
@@ -255,7 +260,7 @@ const SuperAdminAffiliationDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
             ഡാറ്റ ലഭ്യമല്ല
           </h2>
           <button
@@ -270,12 +275,12 @@ const SuperAdminAffiliationDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Anek Malayalam Variable" }}>
-      <SuperAdminNavbar />
-      <div className="p-4">
+    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: "Noto Sans Malayalam" }}>
+      <SuperAdminSidebar />
+      <div className="flex-1 min-w-0 p-4 pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-3 sm:p-4 rounded-t-lg">
           <div className="flex items-center gap-3">
               <button 
                 onClick={handleBack}
@@ -284,30 +289,31 @@ const SuperAdminAffiliationDetails = () => {
               <ArrowLeft className="w-5 h-5" />
               </button>
                 <div>
-              <h1 className="text-xl font-bold">മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ</h1>
-              <p className="text-green-100 text-sm">Mosque Affiliation Application Details</p>
+              <h1 className="text-base sm:text-xl font-bold leading-snug">മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ</h1>
+              <p className="text-green-100 text-xs sm:text-sm">Mosque Affiliation Application Details</p>
               <p className="text-green-200 text-xs">Affiliation Number: {affiliation.affiliationNumber}</p>
             </div>
+              <div className="ml-auto flex-shrink-0"><ProfileMenu role="superadmin" /></div>
           </div>
         </div>
 
-        <div className="p-8 space-y-8 mt-4">
+        <div className="p-4 space-y-3 mt-2">
           {/* Application Summary */}
           <section className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">അഫിലിയേഷൻ നമ്പർ</label>
+                <label className="text-xs font-medium text-gray-500">അഫിലിയേഷൻ നമ്പർ</label>
                 <p className="text-lg font-bold text-blue-600">{affiliation.affiliationNumber || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">സമർപ്പിച്ച തീയതി</label>
-                <p className="text-lg font-medium text-gray-900">
+                <label className="text-xs font-medium text-gray-500">സമർപ്പിച്ച തീയതി</label>
+                <p className="text-sm font-medium text-gray-900 break-words">
                   {affiliation.createdAt ? new Date(affiliation.createdAt).toLocaleDateString('ml-IN') : 'N/A'}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">അപേക്ഷയുടെ നിലവിലെ അവസ്ഥ</label>
+                <label className="text-xs font-medium text-gray-500">അപേക്ഷയുടെ നിലവിലെ അവസ്ഥ</label>
                 <div className="mt-1">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                     affiliation.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -321,65 +327,65 @@ const SuperAdminAffiliationDetails = () => {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പള്ളിയുടെ പേര്</label>
+                <label className="text-xs font-medium text-gray-500">പള്ളിയുടെ പേര്</label>
                 <p className="text-lg font-bold text-blue-600">{affiliation.name || 'N/A'}</p>
               </div>
             </div>
           </section>
 
           {/* Basic Information */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അടിസ്ഥാന വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അടിസ്ഥാന വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">പള്ളിയുടെ പേര്</label>
-                <p className="text-lg font-medium text-gray-900">{affiliation.name || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">പള്ളിയുടെ പേര്</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{affiliation.name || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പള്ളിയുടെ സ്വഭാവം</label>
-                <p className="text-lg font-medium text-gray-900">{affiliation.mosqueType || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">പള്ളിയുടെ സ്വഭാവം</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{affiliation.mosqueType || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">മഹല്ലിന്‍റെ സ്വഭാവം</label>
-                <p className="text-lg font-medium text-gray-900">{affiliation.mahallaType || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">മഹല്ലിന്‍റെ സ്വഭാവം</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{affiliation.mahallaType || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പ്രവർത്തനമാരംഭിച്ച വർഷം</label>
-                <p className="text-lg font-medium text-gray-900">{affiliation.establishedYear || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">പ്രവർത്തനമാരംഭിച്ച വർഷം</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{affiliation.establishedYear || 'വിവരം ഇല്ല'}</p>
               </div>
             </div>
           </section>
 
           {/* Address Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">വിലാസ വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">വിലാസ വിവരങ്ങൾ</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">പൂർണ വിലാസം</label>
+                <label className="text-xs font-medium text-gray-500">പൂർണ വിലാസം</label>
                 <p className="text-gray-900 whitespace-pre-wrap">{affiliation.address?.[0]?.address || 'വിവരം ഇല്ല'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ജില്ല</label>
-                  <p className="text-gray-900">{affiliation.address?.[0]?.district || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">ജില്ല</label>
+                  <p className="text-sm text-gray-900 break-words">{affiliation.address?.[0]?.district || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">പിൻകോഡ്</label>
-                  <p className="text-gray-900">{affiliation.address?.[0]?.pincode || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">പിൻകോഡ്</label>
+                  <p className="text-sm text-gray-900 break-words">{affiliation.address?.[0]?.pincode || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ഫോൺ</label>
-                  <p className="text-gray-900">{affiliation.address?.[0]?.phone || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">ഫോൺ</label>
+                  <p className="text-sm text-gray-900 break-words">{affiliation.address?.[0]?.phone || 'വിവരം ഇല്ല'}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ഇ മെയിൽ</label>
-                  <p className="text-gray-900">{affiliation.address?.[0]?.email || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">ഇ മെയിൽ</label>
+                  <p className="text-sm text-gray-900 break-words">{affiliation.address?.[0]?.email || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">വെബ്സൈറ്റ്</label>
-                  <p className="text-gray-900">{affiliation.address?.[0]?.website || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">വെബ്സൈറ്റ്</label>
+                  <p className="text-sm text-gray-900 break-words">{affiliation.address?.[0]?.website || 'വിവരം ഇല്ല'}</p>
                 </div>
               </div>
             </div>
@@ -387,28 +393,28 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Jamaat-e-Islami Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Jamaat-e-Islami Unit</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Jamaat-e-Islami Unit</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">Area</label>
-                <p className="text-gray-900">{affiliation.jamathArea?.[0]?.area || 'Not provided'}</p>
+                <label className="text-xs font-medium text-gray-500">Area</label>
+                <p className="text-sm text-gray-900 break-words">{affiliation.jamathArea?.[0]?.area || 'Not provided'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">District</label>
-                <p className="text-gray-900">{affiliation.jamathArea?.[0]?.district || 'Not provided'}</p>
+                <label className="text-xs font-medium text-gray-500">District</label>
+                <p className="text-sm text-gray-900 break-words">{affiliation.jamathArea?.[0]?.district || 'Not provided'}</p>
               </div>
             </div>
           </div>
 
           {/* Mosque Facilities */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mosque Facilities</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Mosque Facilities</h2>
             {affiliation.facilities && affiliation.facilities.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {affiliation.facilities.map((facility, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    <span className="text-gray-900">{facility}</span>
+                    <span className="text-sm text-gray-900 break-words">{facility}</span>
                   </div>
                 ))}
               </div>
@@ -419,74 +425,74 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Cemetery Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Cemetery Details</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Cemetery Details</h2>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">Has Cemetery?</label>
-                <p className="text-gray-900">{affiliation.hasCemetery ? 'Yes' : 'No'}</p>
+                <label className="text-xs font-medium text-gray-500">Has Cemetery?</label>
+                <p className="text-sm text-gray-900 break-words">{affiliation.hasCemetery ? 'Yes' : 'No'}</p>
               </div>
             </div>
           </div>
 
           {/* Mosque Capacity */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mosque Capacity</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Mosque Capacity</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">Prayer Capacity (People)</label>
-                <p className="text-gray-900">{affiliation.mosqueCapacity || 'Not provided'}</p>
+                <label className="text-xs font-medium text-gray-500">Prayer Capacity (People)</label>
+                <p className="text-sm text-gray-900 break-words">{affiliation.mosqueCapacity || 'Not provided'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Area</label>
-                <p className="text-gray-900">{affiliation.mosqueArea || 'Not provided'}</p>
+                <label className="text-xs font-medium text-gray-500">Area</label>
+                <p className="text-sm text-gray-900 break-words">{affiliation.mosqueArea || 'Not provided'}</p>
               </div>
             </div>
           </div>
 
           {/* Juma Participants */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Friday Participants</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Friday Participants</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">Male Participants</label>
-                <p className="text-lg font-medium text-gray-900">{affiliation.fridayMaleAttendance || '0'}</p>
+                <label className="text-xs font-medium text-gray-500">Male Participants</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{affiliation.fridayMaleAttendance || '0'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Female Participants</label>
-                <p className="text-lg font-medium text-gray-900">{affiliation.fridayFemaleAttendance || '0'}</p>
+                <label className="text-xs font-medium text-gray-500">Female Participants</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{affiliation.fridayFemaleAttendance || '0'}</p>
               </div>
             </div>
           </div>
 
           {/* Financial Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Financial Details</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Financial Details</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Assets (Fixed & Movable)</label>
+                <label className="text-xs font-medium text-gray-500">Assets (Fixed & Movable)</label>
                 <p className="text-gray-900 whitespace-pre-wrap">{affiliation.finance?.[0]?.assets || 'Not provided'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Income Sources</label>
+                <label className="text-xs font-medium text-gray-500">Income Sources</label>
                 <p className="text-gray-900 whitespace-pre-wrap">{affiliation.finance?.[0]?.incomeSource || 'Not provided'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Monthly Expense (₹)</label>
-                <p className="text-lg font-medium text-gray-900">₹{affiliation.finance?.[0]?.monthlyExpense || '0'}</p>
+                <label className="text-xs font-medium text-gray-500">Monthly Expense (₹)</label>
+                <p className="text-sm font-medium text-gray-900 break-words">₹{affiliation.finance?.[0]?.monthlyExpense || '0'}</p>
               </div>
             </div>
           </div>
 
           {/* Official Records */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Official Records</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Official Records</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Audit Conducted?</label>
-                <p className="text-gray-900">{affiliation.audit?.[0]?.hasAudit ? 'Yes' : 'No'}</p>
+                <label className="text-xs font-medium text-gray-500">Audit Conducted?</label>
+                <p className="text-sm text-gray-900 break-words">{affiliation.audit?.[0]?.hasAudit ? 'Yes' : 'No'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Records Maintained</label>
+                <label className="text-xs font-medium text-gray-500">Records Maintained</label>
                 {affiliation.audit?.[0]?.recordsKept && affiliation.audit[0].recordsKept.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
                     {affiliation.audit[0].recordsKept.map((record, index) => (
@@ -505,14 +511,14 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Last Year Accounts */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Last Year Accounts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Last Year Accounts</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">Income (₹)</label>
+                <label className="text-xs font-medium text-gray-500">Income (₹)</label>
                 <p className="text-lg font-medium text-green-600">₹{affiliation.accounts?.[0]?.lastYearIncome || '0'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Expense (₹)</label>
+                <label className="text-xs font-medium text-gray-500">Expense (₹)</label>
                 <p className="text-lg font-medium text-red-600">₹{affiliation.accounts?.[0]?.lastYearExpense || '0'}</p>
               </div>
             </div>
@@ -520,14 +526,14 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Community Services */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Community Services</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Community Services</h2>
             <div className="space-y-4">
               {affiliation.commmunityServices && affiliation.commmunityServices.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   {affiliation.commmunityServices.map((service, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      <span className="text-gray-900">{service}</span>
+                      <span className="text-sm text-gray-900 break-words">{service}</span>
                     </div>
                   ))}
                 </div>
@@ -536,7 +542,7 @@ const SuperAdminAffiliationDetails = () => {
               )}
               {affiliation.otherCommunityServices && affiliation.otherCommunityServices.length > 0 && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Others</label>
+                  <label className="text-xs font-medium text-gray-500">Others</label>
                   <p className="text-gray-900 whitespace-pre-wrap">{affiliation.otherCommunityServices.join('\n')}</p>
                 </div>
               )}
@@ -545,11 +551,11 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Managing Committee */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Managing Committee</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Managing Committee</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Committee Name</label>
-                <p className="text-gray-900">{affiliation.committees?.[0]?.committeeType || 'Not provided'}</p>
+                <label className="text-xs font-medium text-gray-500">Committee Name</label>
+                <p className="text-sm text-gray-900 break-words">{affiliation.committees?.[0]?.committeeType || 'Not provided'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-4 bg-blue-50 rounded-lg">
@@ -574,7 +580,7 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Staff Details */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Staff Details</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Staff Details</h2>
             {affiliation.committees?.[0]?.workers && affiliation.committees[0].workers.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full border border-gray-200 rounded-lg">
@@ -669,7 +675,7 @@ const SuperAdminAffiliationDetails = () => {
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">Confirm Approval</h3>
+                <h3 className="text-sm font-medium text-gray-900 break-words">Confirm Approval</h3>
               </div>
             </div>
             <div className="mb-6">
@@ -713,7 +719,7 @@ const SuperAdminAffiliationDetails = () => {
                 <XCircle className="h-8 w-8 text-red-600" />
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">Confirm Rejection</h3>
+                <h3 className="text-sm font-medium text-gray-900 break-words">Confirm Rejection</h3>
               </div>
             </div>
             <div className="mb-4">
@@ -775,7 +781,7 @@ const SuperAdminAffiliationDetails = () => {
                 {alertType === 'warning' && <AlertCircle className="h-8 w-8 text-yellow-600" />}
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-sm font-medium text-gray-900 break-words">
                   {alertType === 'success' && 'Success'}
                   {alertType === 'error' && 'Error'}
                   {alertType === 'warning' && 'Warning'}

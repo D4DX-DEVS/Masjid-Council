@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Shield, Eye, EyeOff, User, Lock, LoaderCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import loginSuper from '../assets/LoginSuper.jpg';
@@ -70,87 +70,123 @@ const SuperAdminLogin = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 relative pt-20 bg-[#adc5cc] bg-no-repeat bg-[position:left_top] bg-cover md:bg-fixed md:bg-[length:40%]"
-      style={{
-        backgroundImage: `url(${loginSuper})`,
-      }}
-    >
-      {/* Overlay to reduce image opacity */}
-      <div className="absolute inset-0 bg-white/70"></div>
-      
+    <div className="min-h-screen relative flex overflow-hidden">
+      {/* Desktop: image gets its own half, matching the photo's portrait aspect */}
+      <div
+        className="hidden lg:block w-1/2 bg-cover bg-center"
+        style={{ backgroundImage: `url(${loginSuper})` }}
+      />
 
+      {/* Form side */}
+      <div className="relative w-full lg:w-1/2 flex items-center justify-center px-4 pb-4 pt-20 sm:px-6 sm:pb-6 sm:pt-6 lg:p-10">
+        {/* Mobile: full-bleed image behind the card */}
+        <div
+          className="absolute inset-0 lg:hidden bg-cover bg-center"
+          style={{ backgroundImage: `url(${loginSuper})` }}
+        />
+        <div className="absolute inset-0 lg:hidden bg-gradient-to-b from-white/60 to-white/70" />
+        {/* Desktop: soft panel behind the card */}
+        <div className="hidden lg:block absolute inset-0 bg-gradient-to-br from-emerald-50/70 via-white to-slate-50" />
 
-      {/* Main Content */}
-      <div className="max-w-md w-full relative z-20 mx-auto md:ml-180 md:-mt-24">
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Professional Header Section */}
-          <div className="flex items-center justify-center md:justify-start mb-6 sm:mb-10 md:-ml-20">
-            <img 
-              src={logo} 
-              alt="Masjid Council Kerala" 
-              className="h-14 sm:h-20 w-auto mr-4 sm:mr-8"
-            />
-            <h1 className="text-xl sm:text-3xl font-black text-gray-900" style={{ fontFamily: 'Cinzel, serif' }}>Super Admin Login</h1>
-          </div>
-          <div>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full md:w-80 border-2 border-[#80a6b0] rounded-full px-5 sm:px-6 py-2.5 sm:py-3 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
-              placeholder="Enter username"
-              required
-            />
-          </div>
-
-          <div>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full md:w-80 border-2 border-[#80a6b0] rounded-full px-5 sm:px-6 py-2.5 sm:py-3 pr-14 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
-                placeholder="Enter password"
-                required
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-5 md:pr-36 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
-                )}
-              </button>
+      {/* Card */}
+      <div className="relative z-20 w-full max-w-md">
+        <div className="rounded-3xl bg-white/75 backdrop-blur-2xl ring-1 ring-white/70 shadow-2xl p-6 sm:p-8">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <img src={logo} alt="Masjid Council Kerala" className="h-12 sm:h-14 w-auto shrink-0" />
+            <div>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 bg-emerald-50 ring-1 ring-emerald-100 rounded-full px-2 py-0.5 mb-1">
+                <Shield className="h-3 w-3" />
+                Restricted
+              </span>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Super Admin Login</h1>
+              <div className="w-12 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full mt-2" />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full md:w-64 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 md:ml-10"
+          {error && (
+            <div className="bg-red-50 ring-1 ring-red-200 text-red-700 px-4 py-3 rounded-xl mb-5 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-200 bg-white/80 pl-10 pr-3 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all"
+                  placeholder="Enter username"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-200 bg-white/80 pl-10 pr-11 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all"
+                  placeholder="Enter password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-60 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/20 transition-all hover:shadow-xl active:scale-[0.99] flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                'Login'
+              )}
+            </button>
+          </form>
+
+          {/* Arabic ayah */}
+          <p
+            className="mt-6 pt-5 border-t border-gray-200/70 text-center text-lg sm:text-xl text-gray-600"
+            dir="rtl"
+            style={{ fontFamily: 'Amiri, serif' }}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            وَأَنَّ ٱلْمَسَٰجِدَ لِلَّهِ فَلَا تَدْعُواْ مَعَ ٱللَّهِ أَحَدًا
+          </p>
+
+          {/* Back to Admin Login */}
+          <button
+            type="button"
+            onClick={() => navigate('/admin-login')}
+            className="mt-5 w-full inline-flex items-center justify-center gap-1.5 text-sm text-gray-500 hover:text-emerald-700 transition-colors group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+            Back to Admin Login
           </button>
-        </form>
-      </div>
-      
-      {/* Arabic text at bottom */}
-      <div className="hidden md:block absolute bottom-6 right-74 text-right mb-12">
-        <p className="text-3xl text-gray-700 font-medium" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>
-          وَأَنَّ ٱلْمَسَٰجِدَ لِلَّهِ فَلَا تَدْعُواْ مَعَ ٱللَّهِ أَحَدًا
-        </p>
+        </div>
+        </div>
       </div>
     </div>
   );

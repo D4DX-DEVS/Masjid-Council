@@ -181,7 +181,7 @@ const MedicalAidDataList = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
             Error: {error}
           </h2>
           <button 
@@ -199,7 +199,7 @@ const MedicalAidDataList = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
             ഡാറ്റ ലഭ്യമല്ല
           </h2>
           <button 
@@ -214,10 +214,10 @@ const MedicalAidDataList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+    <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-3 sm:p-4 rounded-t-lg">
           <div className="flex items-center gap-3">
             <button 
               onClick={handleBack}
@@ -226,30 +226,30 @@ const MedicalAidDataList = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
-              <p className="text-green-100 text-sm">Medical Aid Application Details</p>
+              <h1 className="text-base sm:text-xl font-bold leading-snug">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
+              <p className="text-green-100 text-xs sm:text-sm">Medical Aid Application Details</p>
               <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
             </div>
           </div>
         </div>
 
-        <div className="p-8 space-y-8 mt-4">
+        <div className="p-4 space-y-3 mt-2">
           {/* Application Summary */}
           <section className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">അപേക്ഷാ നമ്പർ</label>
+                <label className="text-xs font-medium text-gray-500">അപേക്ഷാ നമ്പർ</label>
                 <p className="text-lg font-bold text-blue-600">{formData._id?.slice(-8) || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">സമർപ്പിച്ച തീയതി</label>
-                <p className="text-lg font-medium text-gray-900">
+                <label className="text-xs font-medium text-gray-500">സമർപ്പിച്ച തീയതി</label>
+                <p className="text-sm font-medium text-gray-900 break-words">
                   {formData.createdAt ? new Date(formData.createdAt).toLocaleDateString('ml-IN') : 'N/A'}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">അപേക്ഷയുടെ നിലവിലെ അവസ്ഥ</label>
+                <label className="text-xs font-medium text-gray-500">അപേക്ഷയുടെ നിലവിലെ അവസ്ഥ</label>
                 <div className="mt-1">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                     formData.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -263,84 +263,84 @@ const MedicalAidDataList = () => {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ആവശ്യപ്പെടുന്ന തുക</label>
+                <label className="text-xs font-medium text-gray-500">ആവശ്യപ്പെടുന്ന തുക</label>
                 <p className="text-lg font-bold text-red-600">₹{formData.expectedExpense || '0'}</p>
               </div>
             </div>
           </section>
 
           {/* Mosque Information */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മസ്ജിദ് വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">മസ്ജിദ് വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">മസ്ജിദിന്റെ പേര്</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mosqueName || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">മസ്ജിദിന്റെ പേര്</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.mosqueName || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">MCK അഫിലിയേഷൻ നമ്പർ</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mckAffiliation || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">MCK അഫിലിയേഷൻ നമ്പർ</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.mckAffiliation || 'വിവരം ഇല്ല'}</p>
               </div>
             </div>
             <div className="mt-4">
-              <label className="text-sm font-medium text-gray-600">വിലാസം</label>
+              <label className="text-xs font-medium text-gray-500">വിലാസം</label>
               <p className="text-gray-900 whitespace-pre-wrap">{formData.address || 'വിവരം ഇല്ല'}</p>
             </div>
           </section>
 
           {/* Management Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മാനേജ്മെന്റ് വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">മാനേജ്മെന്റ് വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">പരിപാലന കമ്മിറ്റി പ്രസിഡന്റ്</label>
-                <p className="text-gray-900">{formData.committeePerson || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">പരിപാലന കമ്മിറ്റി പ്രസിഡന്റ്</label>
+                <p className="text-sm text-gray-900 break-words">{formData.committeePerson || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">മാനേജ്മെന്റ് തരം</label>
-                <p className="text-gray-900">{formData.managementType || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">മാനേജ്മെന്റ് തരം</label>
+                <p className="text-sm text-gray-900 break-words">{formData.managementType || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ഫോൺ</label>
-                <p className="text-gray-900">{formData.phone || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">ഫോൺ</label>
+                <p className="text-sm text-gray-900 break-words">{formData.phone || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">വാട്സ്ആപ്പ്</label>
-                <p className="text-gray-900">{formData.whatsapp || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">വാട്സ്ആപ്പ്</label>
+                <p className="text-sm text-gray-900 break-words">{formData.whatsapp || 'വിവരം ഇല്ല'}</p>
               </div>
             </div>
           </section>
 
           {/* Jamaat Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ജമാഅത്തെ ഇസ്‌ലാമി വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ജമാഅത്തെ ഇസ്‌ലാമി വിവരങ്ങൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">ഏരിയ</label>
-                <p className="text-gray-900">{formData.area || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">ഏരിയ</label>
+                <p className="text-sm text-gray-900 break-words">{formData.area || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ജില്ല</label>
-                <p className="text-gray-900">{formData.district || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">ജില്ല</label>
+                <p className="text-sm text-gray-900 break-words">{formData.district || 'വിവരം ഇല്ല'}</p>
               </div>
             </div>
           </section>
 
           {/* Applicant Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അപേക്ഷ വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അപേക്ഷ വിവരങ്ങൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">അപേക്ഷ സമർപ്പിക്കുന്നത് ആർക്കാണ് വേണ്ടി</label>
-                  <p className="text-lg font-medium text-gray-900">{formData.applicantDetails || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">അപേക്ഷ സമർപ്പിക്കുന്നത് ആർക്കാണ് വേണ്ടി</label>
+                  <p className="text-sm font-medium text-gray-900 break-words">{formData.applicantDetails || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ജോലി ചെയ്യുന്ന തസ്‌തിക</label>
-                  <p className="text-gray-900">{formData.chairmanDesignation || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">ജോലി ചെയ്യുന്ന തസ്‌തിക</label>
+                  <p className="text-sm text-gray-900 break-words">{formData.chairmanDesignation || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">വേതനം</label>
+                  <label className="text-xs font-medium text-gray-500">വേതനം</label>
                   <p className="text-lg font-medium text-green-600">₹{formData.salary || '0'}</p>
                 </div>
               </div>
@@ -348,28 +348,28 @@ const MedicalAidDataList = () => {
           </section>
 
           {/* Help Request Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">സഹായാഭ്യർത്ഥന വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">സഹായാഭ്യർത്ഥന വിവരങ്ങൾ</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">സഹായത്തിന്റെ ഉദ്ദേശ്യം</label>
+                <label className="text-xs font-medium text-gray-500">സഹായത്തിന്റെ ഉദ്ദേശ്യം</label>
                 <p className="text-lg font-medium text-blue-600">{formData.helpPurpose || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ആവശ്യത്തിന്റെ വിശദവിവരം</label>
+                <label className="text-xs font-medium text-gray-500">ആവശ്യത്തിന്റെ വിശദവിവരം</label>
                 <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{formData.needDescription || 'വിവരം ഇല്ല'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-red-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-600">പ്രതീക്ഷിക്കുന്ന ചെലവ്</label>
+                  <label className="text-xs font-medium text-gray-500">പ്രതീക്ഷിക്കുന്ന ചെലവ്</label>
                   <p className="text-xl font-bold text-red-600">₹{formData.expectedExpense || '0'}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-600">സ്വന്തം സംഭാവന</label>
+                  <label className="text-xs font-medium text-gray-500">സ്വന്തം സംഭാവന</label>
                   <p className="text-xl font-bold text-green-600">₹{formData.ownContribution || '0'}</p>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-600">ആവശ്യപ്പെടുന്ന തുക</label>
+                  <label className="text-xs font-medium text-gray-500">ആവശ്യപ്പെടുന്ന തുക</label>
                   <p className="text-xl font-bold text-blue-600">₹{(parseInt(formData.expectedExpense || 0) - parseInt(formData.ownContribution || 0)).toLocaleString()}</p>
                 </div>
               </div>
@@ -377,17 +377,17 @@ const MedicalAidDataList = () => {
           </section>
 
           {/* Previous Help */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മുമ്പത്തെ സഹായം</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">മുമ്പത്തെ സഹായം</h2>
             <div>
-              <label className="text-sm font-medium text-gray-600">MCK യിൽ നിന്ന് മുമ്പ് സഹായം ലഭിച്ചിട്ടുണ്ടോ?</label>
-              <p className="text-lg font-medium text-gray-900">{formData.previousHelp || 'വിവരം ഇല്ല'}</p>
+              <label className="text-xs font-medium text-gray-500">MCK യിൽ നിന്ന് മുമ്പ് സഹായം ലഭിച്ചിട്ടുണ്ടോ?</label>
+              <p className="text-sm font-medium text-gray-900 break-words">{formData.previousHelp || 'വിവരം ഇല്ല'}</p>
             </div>
           </section>
 
           {/* Mosque Officials */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മസ്‌ജിദ് ഉദ്യോഗസ്ഥ വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">മസ്‌ജിദ് ഉദ്യോഗസ്ഥ വിവരങ്ങൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h3 className="font-medium mb-3 text-blue-800">പ്രസിഡന്‍റ് / സെക്രട്ടറി</h3>
@@ -407,8 +407,8 @@ const MedicalAidDataList = () => {
           </section>
 
           {/* Required Documents Checklist */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ആവശ്യമായ രേഖകൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ആവശ്യമായ രേഖകൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -416,7 +416,7 @@ const MedicalAidDataList = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">ജീവനക്കാരന്റെ ആധാർ കോപ്പി</span>
+                <span className="text-sm text-gray-900 break-words">ജീവനക്കാരന്റെ ആധാർ കോപ്പി</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -424,7 +424,7 @@ const MedicalAidDataList = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">മസ്ജിദ് ബാങ്ക് പാസ് ബുക്ക് കോപ്പി</span>
+                <span className="text-sm text-gray-900 break-words">മസ്ജിദ് ബാങ്ക് പാസ് ബുക്ക് കോപ്പി</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -432,7 +432,7 @@ const MedicalAidDataList = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">വീട് റിപ്പയർ എസ്റ്റിമേറ്റ്</span>
+                <span className="text-sm text-gray-900 break-words">വീട് റിപ്പയർ എസ്റ്റിമേറ്റ്</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -440,7 +440,7 @@ const MedicalAidDataList = () => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">വീടിന്റെ ഫോട്ടോകൾ</span>
+                <span className="text-sm text-gray-900 break-words">വീടിന്റെ ഫോട്ടോകൾ</span>
               </div>
             </div>
           </section>
@@ -496,7 +496,7 @@ const MedicalAidDataList = () => {
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">Confirm Approval</h3>
+                <h3 className="text-sm font-medium text-gray-900 break-words">Confirm Approval</h3>
               </div>
             </div>
             <div className="mb-6">
@@ -540,7 +540,7 @@ const MedicalAidDataList = () => {
                 <XCircle className="h-8 w-8 text-red-600" />
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">Confirm Rejection</h3>
+                <h3 className="text-sm font-medium text-gray-900 break-words">Confirm Rejection</h3>
               </div>
             </div>
             <div className="mb-4">
@@ -602,7 +602,7 @@ const MedicalAidDataList = () => {
                 {alertType === 'warning' && <AlertCircle className="h-8 w-8 text-yellow-600" />}
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-sm font-medium text-gray-900 break-words">
                   {alertType === 'success' && 'Success'}
                   {alertType === 'error' && 'Error'}
                   {alertType === 'warning' && 'Warning'}

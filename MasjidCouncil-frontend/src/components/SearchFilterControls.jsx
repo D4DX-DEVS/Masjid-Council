@@ -1,225 +1,157 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Search, Filter, X } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import SelectField from "./SelectField";
 
-const SearchFilterControls = ({ 
-  data, 
-  onFilteredDataChange, 
-  searchFields = ['mosqueName'], 
+const getNestedValue = (obj, path) => path.split('.').reduce((current, key) => current?.[key], obj);
+
+const ALL = '__all';
+
+// Search box is always visible; filters live in a popover with an active-count badge.
+// Filters apply as you pick them — no Apply button to forget to press.
+const SearchFilterControls = ({
+  data,
+  onFilteredDataChange,
+  searchFields = ['mosqueName'],
   filterFields = ['status', 'district'],
   uniqueFieldValues = {},
-  filterFieldLabels = {} // New prop for custom labels
+  filterFieldLabels = {}
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
+  const [filters, setFilters] = useState({});
   const [showFilter, setShowFilter] = useState(false);
-  
-  // Temporary filters (user's selection before applying)
-  const [tempFilters, setTempFilters] = useState({});
-  
-  // Applied filters (actually used for filtering)
-  const [appliedFilters, setAppliedFilters] = useState({});
-  
-  // Track if filters have been initialized
-  const [isInitialized, setIsInitialized] = useState(false);
-  
-  // Use ref to store the callback to avoid dependency issues
-  const onFilteredDataChangeRef = useRef(onFilteredDataChange);
-  
-  // Update ref when callback changes
+  const panelRef = useRef(null);
+
+  const onChangeRef = useRef(onFilteredDataChange);
   useEffect(() => {
-    onFilteredDataChangeRef.current = onFilteredDataChange;
+    onChangeRef.current = onFilteredDataChange;
   }, [onFilteredDataChange]);
 
-  // Initialize filters based on filterFields - only once
   useEffect(() => {
-    if (!isInitialized) {
-      const initialFilters = {};
-      filterFields.forEach(field => {
-        initialFilters[field] = 'all';
-      });
-      setTempFilters(initialFilters);
-      setAppliedFilters(initialFilters);
-      setIsInitialized(true);
-    }
-  }, [filterFields, isInitialized]);
+    if (!showFilter) return;
+    const onDown = (e) => {
+      // Radix renders the select listbox in a portal, outside panelRef — don't treat it as "outside"
+      if (e.target.closest?.('[data-radix-popper-content-wrapper]')) return;
+      if (panelRef.current && !panelRef.current.contains(e.target)) setShowFilter(false);
+    };
+    const onKey = (e) => e.key === 'Escape' && setShowFilter(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [showFilter]);
 
-  const getNestedValue = useCallback((obj, path) => {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
-  }, []);
-
-  // Memoize the filtered data computation
   const filteredData = useMemo(() => {
     let filtered = data || [];
 
-    // Search functionality
-    if (searchTerm && searchFields.length > 0) {
-      filtered = filtered.filter(item =>
-        searchFields.some(field => {
-          const fieldValue = getNestedValue(item, field);
-          return fieldValue?.toLowerCase().includes(searchTerm.toLowerCase());
-        })
+    if (searchTerm) {
+      const needle = searchTerm.toLowerCase();
+      filtered = filtered.filter((item) =>
+        searchFields.some((field) => getNestedValue(item, field)?.toLowerCase().includes(needle))
       );
     }
 
-    // Filter functionality - using appliedFilters
-    filterFields.forEach(field => {
-      if (appliedFilters[field] && appliedFilters[field] !== 'all') {
-        filtered = filtered.filter(item => {
-          const fieldValue = getNestedValue(item, field);
-          return fieldValue === appliedFilters[field];
-        });
-      }
-    });
+    for (const field of filterFields) {
+      const value = filters[field];
+      if (value) filtered = filtered.filter((item) => getNestedValue(item, field) === value);
+    }
 
     return filtered;
-  }, [data, searchTerm, appliedFilters, searchFields, filterFields, getNestedValue]);
+  }, [data, searchTerm, filters, searchFields, filterFields]);
 
-  // Send filtered data to parent whenever it changes
   useEffect(() => {
-    if (isInitialized && onFilteredDataChangeRef.current) {
-      onFilteredDataChangeRef.current(filteredData);
-    }
-  }, [filteredData, isInitialized]);
+    onChangeRef.current?.(filteredData);
+  }, [filteredData]);
 
-  const toggleSearch = useCallback(() => {
-    setShowSearch(prev => !prev);
-    setShowFilter(false);
-  }, []);
+  const getUniqueValues = useCallback(
+    (field) =>
+      uniqueFieldValues[field] ||
+      [...new Set(data?.map((item) => getNestedValue(item, field)).filter(Boolean))],
+    [uniqueFieldValues, data]
+  );
 
-  const toggleFilter = useCallback(() => {
-    setShowFilter(prev => !prev);
-    setShowSearch(false);
-  }, []);
+  const getLabel = (field) =>
+    filterFieldLabels[field] || field.charAt(0).toUpperCase() + field.slice(1);
 
-  const handleFilterChange = useCallback((field, value) => {
-    setTempFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  }, []);
-
-  const applyFilters = useCallback(() => {
-    setAppliedFilters({ ...tempFilters });
-  }, [tempFilters]);
-
-  const resetFilters = useCallback(() => {
-    const initialFilters = {};
-    filterFields.forEach(field => {
-      initialFilters[field] = 'all';
-    });
-    setTempFilters(initialFilters);
-    setAppliedFilters(initialFilters);
-  }, [filterFields]);
-
-  const getUniqueValues = useCallback((field) => {
-    if (uniqueFieldValues[field]) {
-      return uniqueFieldValues[field];
-    }
-    return [...new Set(data?.map(item => getNestedValue(item, field)).filter(Boolean))];
-  }, [uniqueFieldValues, data, getNestedValue]);
-
-  const getSearchPlaceholder = useCallback(() => {
-    if (searchFields.includes('mosqueName')) return 'Search by mosque name...';
-    if (searchFields.includes('name')) return 'Search by name...';
-    return 'Search...';
-  }, [searchFields]);
-
-  const getFilterLabel = useCallback((field) => {
-    if (filterFieldLabels[field]) {
-      return filterFieldLabels[field];
-    }
-    // Default label formatting
-    return field.charAt(0).toUpperCase() + field.slice(1);
-  }, [filterFieldLabels]);
+  const activeCount = filterFields.filter((f) => filters[f]).length;
 
   return (
-    <div className="flex flex-wrap items-start justify-end gap-3 sm:gap-4 w-full sm:w-auto sm:h-12">
-      {/* Search Button that Expands */}
-      <div className={`flex items-start sm:items-center sm:h-10 ${showSearch ? 'w-full sm:w-auto' : ''}`}>
-        {!showSearch ? (
-          <button
-            onClick={toggleSearch}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-500 h-10"
-          >
-            <Search className="w-4 h-4" />
-            Search
-          </button>
-        ) : (
-          <div className="flex items-center gap-2 w-full animate-in slide-in-from-right-4 duration-500">
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder={getSearchPlaceholder()}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white shadow-lg transition-all duration-500 w-full sm:w-80 h-10"
-                autoFocus
-              />
-            </div>
-            <button
-              onClick={() => setShowSearch(false)}
-              className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+    <div className="flex items-center gap-2 w-full sm:w-auto">
+      <div className="relative flex-1 sm:flex-none sm:w-72">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search..."
+          className="w-full h-10 pl-9 pr-3 text-sm bg-white border border-gray-300 rounded-lg placeholder:text-gray-400 focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-600/15"
+        />
       </div>
 
-      {/* Filter Button that Expands */}
-      <div className={`flex items-start sm:items-center sm:h-10 ${showFilter ? 'w-full sm:w-auto' : ''}`}>
-        {!showFilter ? (
-          <button
-            onClick={toggleFilter}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-500 h-10"
-          >
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
-        ) : (
-          <div className="flex items-start gap-2 w-full animate-in slide-in-from-right-4 duration-500">
-            <div className="grid grid-cols-2 sm:flex sm:flex-row flex-1 min-w-0 gap-2 sm:gap-3 bg-white p-3 rounded-lg shadow-lg border border-gray-300 sm:items-center">
-              {filterFields.map(field => (
-                <select
-                  key={field}
-                  value={tempFilters[field] || 'all'}
-                  onChange={(e) => handleFilterChange(field, e.target.value)}
-                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 sm:min-w-[150px]"
-                >
-                  <option value="all">
-                    All {getFilterLabel(field)}
-                  </option>
-                  {getUniqueValues(field).map(value => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              ))}
-              
-              {/* Apply and Reset Buttons */}
-              <div className="col-span-2 flex gap-2 sm:ml-2 pt-2 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-300 sm:pl-3">
-                <button
-                  onClick={applyFilters}
-                  className="flex-1 sm:flex-none px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors h-9 font-medium"
-                >
-                  Apply
-                </button>
-                <button
-                  onClick={resetFilters}
-                  className="flex-1 sm:flex-none px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors h-9 font-medium"
-                >
-                  Reset
-                </button>
-              </div>
+      <div className="relative flex-shrink-0" ref={panelRef}>
+        <button
+          onClick={() => setShowFilter((v) => !v)}
+          aria-expanded={showFilter}
+          className="flex items-center gap-2 h-10 px-3 text-sm font-medium bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          <span className="hidden sm:inline">Filter</span>
+          {activeCount > 0 && (
+            <span className="min-w-5 h-5 px-1.5 rounded-full bg-[#6db14e] text-white text-[11px] font-semibold flex items-center justify-center">
+              {activeCount}
+            </span>
+          )}
+        </button>
+
+        {showFilter && (
+          <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
+              <p className="text-sm font-semibold text-gray-900">Filters</p>
+              <button
+                onClick={() => setShowFilter(false)}
+                aria-label="Close filters"
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={() => setShowFilter(false)}
-              className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+
+            <div className="p-4 space-y-3">
+              {filterFields.map((field) => (
+                <label key={field} className="block">
+                  <span className="block text-xs font-medium text-gray-500 mb-1">{getLabel(field)}</span>
+                  <SelectField
+                    name={field}
+                    value={filters[field] || ALL}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        [field]: e.target.value === ALL ? undefined : e.target.value
+                      }))
+                    }
+                  >
+                    {/* Sentinel, not an empty value — Radix treats "" as the placeholder */}
+                    <option value={ALL}>All</option>
+                    {getUniqueValues(field).map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </SelectField>
+                </label>
+              ))}
+            </div>
+
+            <div className="px-4 py-3 border-t border-gray-100">
+              <button
+                onClick={() => setFilters({})}
+                disabled={activeCount === 0}
+                className="w-full h-9 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              >
+                Clear all
+              </button>
+            </div>
           </div>
         )}
       </div>

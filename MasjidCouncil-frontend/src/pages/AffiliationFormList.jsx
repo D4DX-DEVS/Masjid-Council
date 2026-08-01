@@ -182,7 +182,7 @@ const AffiliationFormList = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
             Error: {error}
           </h2>
           <button 
@@ -200,7 +200,7 @@ const AffiliationFormList = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
             ഡാറ്റ ലഭ്യമല്ല
           </h2>
           <button 
@@ -215,10 +215,10 @@ const AffiliationFormList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+    <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-3 sm:p-4 rounded-t-lg">
           <div className="flex items-center gap-3">
             <button 
               onClick={handleBack}
@@ -227,8 +227,8 @@ const AffiliationFormList = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-xl font-bold">മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ</h1>
-              <p className="text-green-100 text-sm">Mosque Affiliation Application Details</p>
+              <h1 className="text-base sm:text-xl font-bold leading-snug">മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ</h1>
+              <p className="text-green-100 text-xs sm:text-sm">Mosque Affiliation Application Details</p>
               <p className="text-green-200 text-xs">
                 {formData.status === 'approved' 
                   ? `Affiliation Number: ${formData.affiliationNumber}` 
@@ -239,89 +239,89 @@ const AffiliationFormList = () => {
           </div>
         </div>
 
-        <div className="p-8 space-y-8 mt-4">
+        <div className="p-4 space-y-3 mt-2">
           {/* Basic Information */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അടിസ്ഥാന വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അടിസ്ഥാന വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">പള്ളിയുടെ പേര്</label>
-                <p className="text-lg font-medium text-gray-900">{formData.name || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">പള്ളിയുടെ പേര്</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.name || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പള്ളിയുടെ സ്വഭാവം</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mosqueType || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">പള്ളിയുടെ സ്വഭാവം</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.mosqueType || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">മഹല്ലിന്‍റെ സ്വഭാവം</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mahallaType || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">മഹല്ലിന്‍റെ സ്വഭാവം</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.mahallaType || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പ്രവർത്തനമാരംഭിച്ച വർഷം</label>
-                <p className="text-lg font-medium text-gray-900">{formData.establishedYear || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">പ്രവർത്തനമാരംഭിച്ച വർഷം</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.establishedYear || 'വിവരം ഇല്ല'}</p>
               </div>
             </div>
           </section>
 
           {/* Address Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">വിലാസ വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">വിലാസ വിവരങ്ങൾ</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">പൂർണ വിലാസം</label>
+                <label className="text-xs font-medium text-gray-500">പൂർണ വിലാസം</label>
                 <p className="text-gray-900 whitespace-pre-wrap">{formData.address?.[0]?.address || 'വിവരം ഇല്ല'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ജില്ല</label>
-                  <p className="text-gray-900">{formData.address?.[0]?.district || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">ജില്ല</label>
+                  <p className="text-sm text-gray-900 break-words">{formData.address?.[0]?.district || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">പിൻകോഡ്</label>
-                  <p className="text-gray-900">{formData.address?.[0]?.pincode || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">പിൻകോഡ്</label>
+                  <p className="text-sm text-gray-900 break-words">{formData.address?.[0]?.pincode || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ഫോൺ</label>
-                  <p className="text-gray-900">{formData.address?.[0]?.phone || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">ഫോൺ</label>
+                  <p className="text-sm text-gray-900 break-words">{formData.address?.[0]?.phone || 'വിവരം ഇല്ല'}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ഇ മെയിൽ</label>
-                  <p className="text-gray-900">{formData.address?.[0]?.email || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">ഇ മെയിൽ</label>
+                  <p className="text-sm text-gray-900 break-words">{formData.address?.[0]?.email || 'വിവരം ഇല്ല'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">വെബ്സൈറ്റ്</label>
-                  <p className="text-gray-900">{formData.address?.[0]?.website || 'വിവരം ഇല്ല'}</p>
+                  <label className="text-xs font-medium text-gray-500">വെബ്സൈറ്റ്</label>
+                  <p className="text-sm text-gray-900 break-words">{formData.address?.[0]?.website || 'വിവരം ഇല്ല'}</p>
                 </div>
               </div>
             </div>
           </section>
 
           {/* Jamaat-e-Islami Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ജമാഅത്തെ ഇസ്‌ലാമി ഘടകം</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ജമാഅത്തെ ഇസ്‌ലാമി ഘടകം</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">ഏരിയ</label>
-                <p className="text-gray-900">{formData.jamathArea?.[0]?.area || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">ഏരിയ</label>
+                <p className="text-sm text-gray-900 break-words">{formData.jamathArea?.[0]?.area || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ജില്ല</label>
-                <p className="text-gray-900">{formData.jamathArea?.[0]?.district || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">ജില്ല</label>
+                <p className="text-sm text-gray-900 break-words">{formData.jamathArea?.[0]?.district || 'വിവരം ഇല്ല'}</p>
               </div>
             </div>
           </section>
 
           {/* Mosque Facilities */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">പള്ളിയോടനുബന്ധിച്ച ഇതര സംവിധാനങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">പള്ളിയോടനുബന്ധിച്ച ഇതര സംവിധാനങ്ങൾ</h2>
             {formData.facilities && formData.facilities.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {formData.facilities.map((facility, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-900">{facility}</span>
+                    <span className="text-sm text-gray-900 break-words">{facility}</span>
                   </div>
                 ))}
               </div>
@@ -331,75 +331,75 @@ const AffiliationFormList = () => {
           </section>
 
           {/* Cemetery Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ഖബറിസ്ഥാൻ വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ഖബറിസ്ഥാൻ വിവരങ്ങൾ</h2>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">ഖബറിസ്ഥാൻ ഉണ്ടോ?</label>
-                <p className="text-gray-900">{formData.hasCemetery ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">ഖബറിസ്ഥാൻ ഉണ്ടോ?</label>
+                <p className="text-sm text-gray-900 break-words">{formData.hasCemetery ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
                 </div>
             </div>
           </section>
 
           {/* Mosque Specialty */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">പള്ളിയുടെ ശേഷി</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">പള്ളിയുടെ ശേഷി</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">നമസ്‌കാര ശേഷി (പേർ)</label>
-                <p className="text-gray-900">{formData.mosqueCapacity || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">നമസ്‌കാര ശേഷി (പേർ)</label>
+                <p className="text-sm text-gray-900 break-words">{formData.mosqueCapacity || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">വിസ്തീര്‍ണം</label>
-                <p className="text-gray-900">{formData.mosqueArea || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">വിസ്തീര്‍ണം</label>
+                <p className="text-sm text-gray-900 break-words">{formData.mosqueArea || 'വിവരം ഇല്ല'}</p>
               </div>
             </div>
           </section>
 
           {/* Juma Participants */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ജുമുഅ പങ്കാളികൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ജുമുഅ പങ്കാളികൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">പുരുഷന്മാർ</label>
-                <p className="text-lg font-medium text-gray-900">{formData.fridayMaleAttendance || '0'}</p>
+                <label className="text-xs font-medium text-gray-500">പുരുഷന്മാർ</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.fridayMaleAttendance || '0'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">സ്ത്രീകൾ</label>
-                <p className="text-lg font-medium text-gray-900">{formData.fridayFemaleAttendance || '0'}</p>
+                <label className="text-xs font-medium text-gray-500">സ്ത്രീകൾ</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{formData.fridayFemaleAttendance || '0'}</p>
               </div>
             </div>
           </section>
 
           {/* Financial Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">സാമ്പത്തിക വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">സാമ്പത്തിക വിവരങ്ങൾ</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">സ്ഥാവര-ജംഗമ സ്വത്തുക്കൾ</label>
+                <label className="text-xs font-medium text-gray-500">സ്ഥാവര-ജംഗമ സ്വത്തുക്കൾ</label>
                 <p className="text-gray-900 whitespace-pre-wrap">{formData.finance?.[0]?.assets || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">വരുമാന മാർഗ്ഗങ്ങൾ</label>
+                <label className="text-xs font-medium text-gray-500">വരുമാന മാർഗ്ഗങ്ങൾ</label>
                 <p className="text-gray-900 whitespace-pre-wrap">{formData.finance?.[0]?.incomeSource || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പ്രതിമാസ ചെലവ് (രൂപ)</label>
-                <p className="text-lg font-medium text-gray-900">₹{formData.finance?.[0]?.monthlyExpense || '0'}</p>
+                <label className="text-xs font-medium text-gray-500">പ്രതിമാസ ചെലവ് (രൂപ)</label>
+                <p className="text-sm font-medium text-gray-900 break-words">₹{formData.finance?.[0]?.monthlyExpense || '0'}</p>
               </div>
             </div>
           </section>
 
           {/* Official Records */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ഓഡിറ്റും രേഖകളും</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ഓഡിറ്റും രേഖകളും</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">ഓഡിറ്റ് ചെയ്യാറുണ്ടോ?</label>
-                <p className="text-gray-900">{formData.audit?.[0]?.hasAudit ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">ഓഡിറ്റ് ചെയ്യാറുണ്ടോ?</label>
+                <p className="text-sm text-gray-900 break-words">{formData.audit?.[0]?.hasAudit ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">സൂക്ഷിക്കുന്ന രേഖകൾ</label>
+                <label className="text-xs font-medium text-gray-500">സൂക്ഷിക്കുന്ന രേഖകൾ</label>
                 {formData.audit?.[0]?.recordsKept && formData.audit[0].recordsKept.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
                     {formData.audit[0].recordsKept.map((record, index) => (
@@ -417,21 +417,21 @@ const AffiliationFormList = () => {
           </section>
 
           {/* Last Year Accounts */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">കഴിഞ്ഞ വർഷത്തെ കണക്ക്</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">കഴിഞ്ഞ വർഷത്തെ കണക്ക്</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">വരവ് (രൂപ)</label>
+                <label className="text-xs font-medium text-gray-500">വരവ് (രൂപ)</label>
                 <p className="text-lg font-medium text-green-600">₹{formData.accounts?.[0]?.lastYearIncome || '0'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ചെലവ് (രൂപ)</label>
+                <label className="text-xs font-medium text-gray-500">ചെലവ് (രൂപ)</label>
                 <p className="text-lg font-medium text-red-600">₹{formData.accounts?.[0]?.lastYearExpense || '0'}</p>
               </div>
             </div>
             {formData.accounts?.[0]?.lastYearIncome && formData.accounts?.[0]?.lastYearExpense && (
               <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                <label className="text-sm font-medium text-gray-600">ബാലൻസ്</label>
+                <label className="text-xs font-medium text-gray-500">ബാലൻസ്</label>
                 <p className={`text-lg font-medium ${(parseInt(formData.accounts[0].lastYearIncome) - parseInt(formData.accounts[0].lastYearExpense)) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   ₹{(parseInt(formData.accounts[0].lastYearIncome) - parseInt(formData.accounts[0].lastYearExpense)).toLocaleString()}
                 </p>
@@ -440,15 +440,15 @@ const AffiliationFormList = () => {
           </section>
 
           {/* Community Services */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മഹല്ലിന്‍റെ / പള്ളിയുടെ മേൽനോട്ടത്തിൽ നടക്കുന്ന ജനസേവന സംരംഭങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">മഹല്ലിന്‍റെ / പള്ളിയുടെ മേൽനോട്ടത്തിൽ നടക്കുന്ന ജനസേവന സംരംഭങ്ങൾ</h2>
             <div className="space-y-4">
               {formData.commmunityServices && formData.commmunityServices.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   {formData.commmunityServices.map((service, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-900">{service}</span>
+                      <span className="text-sm text-gray-900 break-words">{service}</span>
                     </div>
                   ))}
                 </div>
@@ -457,7 +457,7 @@ const AffiliationFormList = () => {
               )}
               {formData.otherCommunityServices && formData.otherCommunityServices.length > 0 && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">മറ്റുള്ളവ</label>
+                  <label className="text-xs font-medium text-gray-500">മറ്റുള്ളവ</label>
                   <p className="text-gray-900 whitespace-pre-wrap">{formData.otherCommunityServices.join('\n')}</p>
                 </div>
               )}
@@ -465,12 +465,12 @@ const AffiliationFormList = () => {
           </section>
 
           {/* Managing Committee */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മാനേജിംഗ് കമ്മിറ്റി</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">മാനേജിംഗ് കമ്മിറ്റി</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">കമ്മിറ്റിയുടെ പേര്</label>
-                <p className="text-gray-900">{formData.committees?.[0]?.committeeType || 'വിവരം ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">കമ്മിറ്റിയുടെ പേര്</label>
+                <p className="text-sm text-gray-900 break-words">{formData.committees?.[0]?.committeeType || 'വിവരം ഇല്ല'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-4 bg-blue-50 rounded-lg">
@@ -494,8 +494,8 @@ const AffiliationFormList = () => {
           </section>
 
           {/* Staff Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ജീവനക്കാരുടെ വിവരങ്ങൾ</h2>
+          <section className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ജീവനക്കാരുടെ വിവരങ്ങൾ</h2>
             {formData.committees?.[0]?.workers && formData.committees[0].workers.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full border border-gray-300 rounded-lg">
@@ -525,14 +525,14 @@ const AffiliationFormList = () => {
               <p className="text-gray-500">ജീവനക്കാരുടെ വിവരങ്ങൾ ചേർത്തിട്ടില്ല</p>
             )}
             
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">അന്യ സംസ്ഥാന ജീവനക്കാർ ഉണ്ടോ?</label>
-                <p className="text-gray-900">{formData.committees?.[0]?.workers?.[0]?.otherStateWorkers ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">അന്യ സംസ്ഥാന ജീവനക്കാർ ഉണ്ടോ?</label>
+                <p className="text-sm text-gray-900 break-words">{formData.committees?.[0]?.workers?.[0]?.otherStateWorkers ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">അന്യ സംസ്ഥാന ജീവനക്കാരെ നിയമിക്കുമ്പോൾ ആവശ്യമായ നടപടിക്രമങ്ങൾ പാലിക്കാറുണ്ടോ/രേഖകൾ സൂക്ഷിക്കാറുണ്ടോ?</label>
-                <p className="text-gray-900">{formData.committees?.[0]?.workers?.[0]?.LegalOtherStateWorkers ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
+                <label className="text-xs font-medium text-gray-500">അന്യ സംസ്ഥാന ജീവനക്കാരെ നിയമിക്കുമ്പോൾ ആവശ്യമായ നടപടിക്രമങ്ങൾ പാലിക്കാറുണ്ടോ/രേഖകൾ സൂക്ഷിക്കാറുണ്ടോ?</label>
+                <p className="text-sm text-gray-900 break-words">{formData.committees?.[0]?.workers?.[0]?.LegalOtherStateWorkers ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
               </div>
             </div>
           </section>
@@ -588,7 +588,7 @@ const AffiliationFormList = () => {
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">Confirm Approval</h3>
+                <h3 className="text-sm font-medium text-gray-900 break-words">Confirm Approval</h3>
               </div>
             </div>
             <div className="mb-6">
@@ -632,7 +632,7 @@ const AffiliationFormList = () => {
                 <XCircle className="h-8 w-8 text-red-600" />
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">Confirm Rejection</h3>
+                <h3 className="text-sm font-medium text-gray-900 break-words">Confirm Rejection</h3>
               </div>
             </div>
             <div className="mb-4">
@@ -694,7 +694,7 @@ const AffiliationFormList = () => {
                 {alertType === 'warning' && <AlertCircle className="h-8 w-8 text-yellow-600" />}
               </div>
               <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-sm font-medium text-gray-900 break-words">
                   {alertType === 'success' && 'Success'}
                   {alertType === 'error' && 'Error'}
                   {alertType === 'warning' && 'Warning'}

@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { ProfileMenu } from '../components/PageHeader';
+import { invalidate } from '../lib/apiCache';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import { SkeletonBar, DetailSkeleton } from '../components/Skeleton';
+import AdminSidebar from '../components/AdminSidebar';
+import SuperAdminSidebar from '../components/SuperAdminSidebar';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -21,8 +25,8 @@ const MOVEMENT_LABELS = {
 
 const Field = ({ label, value }) => (
   <div>
-    <label className="text-sm font-medium text-gray-500">{label}</label>
-    <p className="text-base text-gray-900 break-words">{value || 'N/A'}</p>
+    <label className="text-xs font-medium text-gray-500">{label}</label>
+    <p className="text-sm text-gray-900 break-words">{value || 'N/A'}</p>
   </div>
 );
 
@@ -39,6 +43,7 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
   const [message, setMessage] = useState('');
 
   const canDecide = role === 'superadmin';
+  const Sidebar = canDecide ? SuperAdminSidebar : AdminSidebar;
 
   useEffect(() => {
     const id = location.state?.registration?._id;
@@ -85,6 +90,7 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
 
       const result = await response.json();
       if (result.success) {
+        invalidate(); // list caches now hold a stale status
         setData(result.data);
         setMessage(`Registration ${status} successfully!`);
       } else {
@@ -102,11 +108,14 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-          <SkeletonBar className="h-24 w-full rounded-none" />
-          <div className="p-4 sm:p-6">
-            <DetailSkeleton />
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="flex-1 min-w-0 p-4 sm:p-6 pb-24 md:pb-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+            <SkeletonBar className="h-24 w-full rounded-none" />
+            <div className="p-4 sm:p-6">
+              <DetailSkeleton />
+            </div>
           </div>
         </div>
       </div>
@@ -115,12 +124,15 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4">{error || 'ഡാറ്റ ലഭ്യമല്ല'}</h2>
-          <button onClick={() => navigate(-1)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-            Go Back
-          </button>
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="flex-1 min-w-0 flex items-center justify-center p-4 pb-24 md:pb-8">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-red-600 mb-4">{error || 'ഡാറ്റ ലഭ്യമല്ല'}</h2>
+            <button onClick={() => navigate(-1)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -129,10 +141,12 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
   const statusConfig = STATUS_STYLES[data.status] || { text: 'Unknown', class: 'bg-gray-100 text-gray-800' };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6" style={{ fontFamily: 'Anek Malayalam Variable' }}>
+    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: 'Noto Sans Malayalam' }}>
+      <Sidebar />
+      <div className="flex-1 min-w-0 p-4 sm:p-6 pb-24 md:pb-8">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4">
+        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-3 sm:p-4">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="p-2 hover:bg-green-700 rounded-full transition-colors">
               <ArrowLeft className="w-5 h-5" />
@@ -142,6 +156,7 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
               <p className="text-green-100 text-xs sm:text-sm">മസ്ജിദ് കൗൺസിൽ കേരള</p>
               <p className="text-green-200 text-xs">രജിസ്ട്രേഷൻ ഐഡി: {data._id?.slice(-8) || 'N/A'}</p>
             </div>
+              <div className="ml-auto flex-shrink-0"><ProfileMenu role={role} /></div>
           </div>
         </div>
 
@@ -151,12 +166,12 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
           )}
 
           {/* Summary */}
-          <div className="border border-gray-200 rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">രജിസ്ട്രേഷൻ സംഗ്രഹം</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">രജിസ്ട്രേഷൻ സംഗ്രഹം</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
               <Field label="സമർപ്പണ തീയതി" value={data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB') : 'N/A'} />
               <div>
-                <label className="text-sm font-medium text-gray-500">സ്റ്റാറ്റസ്</label>
+                <label className="text-xs font-medium text-gray-500">സ്റ്റാറ്റസ്</label>
                 <div className="mt-1">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.class}`}>{statusConfig.text}</span>
                 </div>
@@ -166,9 +181,9 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
           </div>
 
           {/* Personal */}
-          <div className="border border-gray-200 rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">1. വ്യക്തിഗത വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">1. വ്യക്തിഗത വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <Field label="ഖത്തീബിന്റെ പേര്" value={data.fullName} />
               <Field label="ഫോൺ / വാട്ട്സ്ആപ്പ്" value={data.phone} />
               <Field label="ഇമെയിൽ" value={data.email} />
@@ -176,9 +191,9 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
           </div>
 
           {/* Masjid */}
-          <div className="border border-gray-200 rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">2. മഹല്ല് / മസ്ജിദ് വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">2. മഹല്ല് / മസ്ജിദ് വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <Field label="മസ്ജിദിന്റെ പേര്" value={data.masjidName} />
               <Field label="സ്ഥലം / മഹല്ല്" value={data.mahallu} />
               <Field label="ഏരിയ" value={data.area} />
@@ -189,9 +204,9 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
           </div>
 
           {/* Participation */}
-          <div className="border border-gray-200 rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">3. സംഗമത്തിലെ പങ്കാളിത്തം</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">3. സംഗമത്തിലെ പങ്കാളിത്തം</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <Field label="പങ്കെടുക്കുന്നു" value={data.attending === 'yes' ? 'അതെ, പങ്കെടുക്കും' : 'ഇല്ല'} />
               {data.attending === 'no' && <Field label="കാരണം" value={data.notAttendingReason} />}
             </div>
@@ -224,6 +239,7 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Reject modal */}

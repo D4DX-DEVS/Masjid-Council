@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { ProfileMenu } from '../components/PageHeader';
+import { invalidate } from '../lib/apiCache';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
-import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import StatusChangeModal from '../components/StatusChangeModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -103,6 +105,7 @@ const SuperAdminMosqueFundDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert(`Mosque fund status changed to ${newStatus} successfully!`, 'success');
         setShowStatusChangeModal(false);
         // Update the local state
@@ -153,6 +156,7 @@ const SuperAdminMosqueFundDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert('Mosque fund application approved successfully!', 'success');
         setShowConfirmModal(false);
         // Update the local state
@@ -204,6 +208,7 @@ const SuperAdminMosqueFundDetails = () => {
       const data = await response.json();
       
       if (data.success) {
+        invalidate(); // list caches now hold a stale status
         showAlert('Mosque fund application rejected successfully!', 'success');
         setShowRejectModal(false);
         setRejectionReason('');
@@ -237,7 +242,7 @@ const SuperAdminMosqueFundDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
             Error: {error}
           </h2>
           <button 
@@ -255,7 +260,7 @@ const SuperAdminMosqueFundDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
             ഡാറ്റ ലഭ്യമല്ല
           </h2>
           <button 
@@ -339,12 +344,12 @@ const SuperAdminMosqueFundDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Anek Malayalam Variable" }}>
-      <SuperAdminNavbar />
-      <div className="p-4">
+    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: "Noto Sans Malayalam" }}>
+      <SuperAdminSidebar />
+      <div className="flex-1 min-w-0 p-4 pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-3 sm:p-4 rounded-t-lg">
           <div className="flex items-center gap-3">
               <button 
               onClick={handleBack}
@@ -353,32 +358,33 @@ const SuperAdminMosqueFundDetails = () => {
               <ArrowLeft className="w-5 h-5" />
               </button>
                 <div>
-              <h1 className="text-xl font-bold">മസ്ജിദ് ഫണ്ട് സഹായ അപേക്ഷ</h1>
-                <p className="text-green-100 text-sm">മസ്ജിദ് ഫണ്ട് അപേക്ഷ വിവരങ്ങൾ</p>
+              <h1 className="text-base sm:text-xl font-bold leading-snug">മസ്ജിദ് ഫണ്ട് സഹായ അപേക്ഷ</h1>
+                <p className="text-green-100 text-xs sm:text-sm">മസ്ജിദ് ഫണ്ട് അപേക്ഷ വിവരങ്ങൾ</p>
                 <p className="text-green-200 text-xs">അപേക്ഷ ഐഡി: {formData._id?.slice(-8) || 'N/A'}</p>
             </div>
+              <div className="ml-auto flex-shrink-0"><ProfileMenu role="superadmin" /></div>
           </div>
         </div>
 
         <div className="space-y-6">
           {/* Application Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">അപേക്ഷ സംഗ്രഹം</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">അപേക്ഷ സംഗ്രഹം</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">അപേക്ഷ ഐഡി</label>
+                <label className="text-xs font-medium text-gray-500">അപേക്ഷ ഐഡി</label>
                 <p className="text-lg font-bold text-purple-600">{displayData.applicationId || displayData._id?.slice(-8) || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">സമർപ്പണ തീയതി</label>
-                <p className="text-lg font-medium text-gray-900">{displayData.submissionDate || (displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString() : 'N/A')}</p>
+                <label className="text-xs font-medium text-gray-500">സമർപ്പണ തീയതി</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{displayData.submissionDate || (displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString() : 'N/A')}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">പ്രവേശനം</label>
+                <label className="text-xs font-medium text-gray-500">പ്രവേശനം</label>
                 <div className="mt-1">{getStatusBadge(displayData.status || 'pending')}</div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">അഭ്യർത്ഥിച്ച തുക</label>
+                <label className="text-xs font-medium text-gray-500">അഭ്യർത്ഥിച്ച തുക</label>
                 <p className="text-lg font-bold text-red-600">₹{displayData.expectedExpense || '0'}</p>
               </div>
             </div>
@@ -386,97 +392,97 @@ const SuperAdminMosqueFundDetails = () => {
 
           {/* Mosque Basic Information */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">മസ്ജിദ് വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">മസ്ജിദ് വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">മസ്ജിദിന്റെ പേര്</label>
-                <p className="text-lg font-medium text-gray-900">{displayData.mosqueName || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">മസ്ജിദിന്റെ പേര്</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{displayData.mosqueName || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">എംസികെ അഫിലിയേഷൻ നമ്പർ</label>
-                <p className="text-lg font-medium text-gray-900">{displayData.mckAffiliation || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">എംസികെ അഫിലിയേഷൻ നമ്പർ</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{displayData.mckAffiliation || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">മാനേജിംഗ് കമ്മിറ്റി/ട്രസ്‌റ്റ്</label>
-                <p className="text-gray-900">{displayData.managementType || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">മാനേജിംഗ് കമ്മിറ്റി/ട്രസ്‌റ്റ്</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.managementType || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">പ്രസിഡന്റ്/ചെയർമാൻ</label>
-                <p className="text-gray-900">{displayData.presidentSecretary || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">പ്രസിഡന്റ്/ചെയർമാൻ</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.presidentSecretary || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">ഫോൺ</label>
-                <p className="text-gray-900">{displayData.phone || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">ഫോൺ</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.phone || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">ജമാത്ത് ഇസ്ലാമി പ്രാദേശിക ഘടകം</label>
-                <p className="text-gray-900">{displayData.jamathIslami || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">ജമാത്ത് ഇസ്ലാമി പ്രാദേശിക ഘടകം</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.jamathIslami || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">ഏരിയ</label>
-                <p className="text-gray-900">{displayData.area || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">ഏരിയ</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.area || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">ജില്ല</label>
-                <p className="text-gray-900">{displayData.district || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">ജില്ല</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.district || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">മസ്ജിദ് പ്രസിഡന്റ്/സെക്രട്ടറി</label>
-                <p className="text-gray-900">{displayData.mosqueOfficialName || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">മസ്ജിദ് പ്രസിഡന്റ്/സെക്രട്ടറി</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.mosqueOfficialName || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">ഫോൺ</label>
-                <p className="text-gray-900">{displayData.mosqueOfficialPhone || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">ഫോൺ</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.mosqueOfficialPhone || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">വാട്സാപ്പ് നമ്പർ</label>
-                <p className="text-gray-900">{displayData.whatsappNumber || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">വാട്സാപ്പ് നമ്പർ</label>
+                <p className="text-sm text-gray-900 break-words">{displayData.whatsappNumber || 'N/A'}</p>
               </div>
             </div>
             <div className="mt-4">
-              <label className="text-sm font-medium text-gray-500">വിലാസം</label>
+              <label className="text-xs font-medium text-gray-500">വിലാസം</label>
               <p className="text-gray-900 whitespace-pre-wrap">{displayData.address || 'N/A'}</p>
             </div>
           </div>
 
           {/* Fund Collection History */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">മുൻ സഹായ വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">മുൻ സഹായ വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">മാസിക ഫണ്ട് ശേഖരണം</label>
+                <label className="text-xs font-medium text-gray-500">മാസിക ഫണ്ട് ശേഖരണം</label>
                 <p className="text-lg font-medium text-green-600">{displayData.mckFundService || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">മുൻ സഹായം ലഭിച്ചത്</label>
-                <p className="text-lg font-medium text-gray-900">{displayData.previousHelp || 'N/A'}</p>
+                <label className="text-xs font-medium text-gray-500">മുൻ സഹായം ലഭിച്ചത്</label>
+                <p className="text-sm font-medium text-gray-900 break-words">{displayData.previousHelp || 'N/A'}</p>
               </div>
             </div>
           </div>
 
           {/* Current Help Request */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">നിലവിലെ സഹായ അഭ്യർത്ഥന</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">നിലവിലെ സഹായ അഭ്യർത്ഥന</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">സഹായം ആവശ്യമുള്ളത്</label>
+                <label className="text-xs font-medium text-gray-500">സഹായം ആവശ്യമുള്ളത്</label>
                 <p className="text-lg font-medium text-purple-600">{displayData.helpPurpose || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">വിശദ വിവരണം</label>
+                <label className="text-xs font-medium text-gray-500">വിശദ വിവരണം</label>
                 <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{displayData.needDescription || 'N/A'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-red-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-500">പ്രതീക്ഷിക്കുന്ന ചെലവ്</label>
+                  <label className="text-xs font-medium text-gray-500">പ്രതീക്ഷിക്കുന്ന ചെലവ്</label>
                   <p className="text-xl font-bold text-red-600">₹{displayData.expectedExpense || '0'}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-500">സ്വന്തം സംഭാവന</label>
+                  <label className="text-xs font-medium text-gray-500">സ്വന്തം സംഭാവന</label>
                   <p className="text-xl font-bold text-green-600">₹{displayData.ownContribution || '0'}</p>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-500">ആവശ്യപ്പെടുന്ന തുക</label>
+                  <label className="text-xs font-medium text-gray-500">ആവശ്യപ്പെടുന്ന തുക</label>
                   <p className="text-xl font-bold text-blue-600">₹{(parseInt(displayData.expectedExpense || 0) - parseInt(displayData.ownContribution || 0)).toLocaleString()}</p>
                 </div>
               </div>
@@ -485,7 +491,7 @@ const SuperAdminMosqueFundDetails = () => {
 
           {/* Required Documents */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">ആവശ്യമായ രേഖകൾ</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">ആവശ്യമായ രേഖകൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Bank Passbook Card */}
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
@@ -599,7 +605,7 @@ const SuperAdminMosqueFundDetails = () => {
 
           {/* Super Admin Actions */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">അപേക്ഷ പ്രവേശനം</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">അപേക്ഷ പ്രവേശനം</h2>
             
             {/* Show buttons only if status is pending */}
             {displayData.status === 'pending' ? (

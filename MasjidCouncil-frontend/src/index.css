@@ -1,1 +1,174 @@
 @import "tailwindcss";
+
+/* Malayalam glyphs fall back here on any element without an explicit font. */
+body {
+  font-family: Poppins, "Noto Sans Malayalam", system-ui, sans-serif;
+}
+
+/* ponytail: the application forms repeat the same input utility string ~200 times
+   across 4 files. Styling them once here beats editing every occurrence. Scoped to
+   .mc-form so admin tables and the rest of the app are untouched. */
+.mc-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.mc-form select,
+.mc-form textarea {
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  background-color: #fff;
+  padding: 0.7rem 0.9rem;
+  color: #111827;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.mc-form input:not(:disabled):hover,
+.mc-form select:not(:disabled):hover,
+.mc-form textarea:not(:disabled):hover {
+  border-color: #d1d5db;
+}
+
+.mc-form input:focus,
+.mc-form select:focus,
+.mc-form textarea:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgb(22 163 74 / 0.15);
+}
+
+.mc-form input:disabled,
+.mc-form select:disabled,
+.mc-form textarea:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+}
+
+.mc-form input[type="checkbox"],
+.mc-form input[type="radio"] {
+  accent-color: #16a34a;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.mc-form input[type="file"] {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.mc-form input[type="file"]::file-selector-button {
+  margin-right: 0.75rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background-color: #f0fdf4;
+  color: #15803d;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mc-form input[type="file"]::file-selector-button:hover {
+  background-color: #dcfce7;
+}
+
+/* Mobile: the forms are long, so tighten type and spacing to cut scrolling.
+   Same single place as the rest of the form styling. */
+@media (max-width: 640px) {
+  .mc-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .mc-form select,
+  .mc-form textarea,
+  .mc-form [role="combobox"] {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8125rem;
+    border-radius: 0.6rem;
+  }
+
+  .mc-form label,
+  .mc-form [role="combobox"] {
+    font-size: 0.8125rem;
+  }
+
+  .mc-form label {
+    margin-bottom: 0.25rem;
+  }
+
+  .mc-form h1 {
+    font-size: 1.05rem;
+    line-height: 1.3;
+  }
+
+  .mc-form section > h2 {
+    font-size: 1rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .mc-form textarea {
+    min-height: 4.5rem;
+  }
+
+  /* Intro copy and instruction lists carry desktop sizes too. */
+  .mc-form p,
+  .mc-form li {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .mc-form h3 {
+    font-size: 0.9rem;
+  }
+
+  /* Sections and the page shell carry generous desktop padding - halve it. */
+  .mc-form section {
+    margin-bottom: 0.5rem;
+  }
+
+  .mc-form table {
+    font-size: 0.75rem;
+  }
+
+  .mc-form input[type="checkbox"],
+  .mc-form input[type="radio"] {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+}
+
+/* The 12 confirmation/result dialogs across the 4 forms share this shape,
+   so soften them here rather than editing each one. */
+.mc-form div[class*="fixed"][class*="inset-0"] > div {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.35);
+  animation: mc-modal-in 0.18s ease-out;
+}
+
+.mc-form div[class*="fixed"][class*="inset-0"] button {
+  border-radius: 0.7rem;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+@keyframes mc-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Section headings get a green accent rule instead of plain bold text. */
+.mc-form section > h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.mc-form section > h2::before {
+  content: "";
+  width: 0.25rem;
+  height: 1.15em;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, #22c55e, #16a34a);
+  flex-shrink: 0;
+}
