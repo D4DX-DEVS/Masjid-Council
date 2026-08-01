@@ -4,6 +4,9 @@ import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
 import { ListSkeleton } from "../components/Skeleton";
 import MobileRecordCards from "../components/MobileRecordCards";
+import PageHeader from "../components/PageHeader";
+import Pagination from "../components/Pagination";
+import { cachedJson, peekJson } from "../lib/apiCache";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,7 +14,7 @@ const SuperAdminAffiliationList = () => {
   const navigate = useNavigate();
   const [affiliations, setAffiliations] = useState([]);
   const [filteredAffiliations, setFilteredAffiliations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => peekJson(`${API_BASE_URL}/api/mosqueAffiliation/all`) === undefined);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -28,13 +31,7 @@ const SuperAdminAffiliationList = () => {
 
   const fetchAffiliations = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/all`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
+      const data = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
       if (data.success) {
         setAffiliations(data.data || []);
       } else {
@@ -122,23 +119,21 @@ const SuperAdminAffiliationList = () => {
   );
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredAffiliations.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredAffiliations.slice(startIndex, endIndex);
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <SuperAdminSidebar />
       
       <div className="flex-1 min-w-0">
-        <div className="p-4 sm:p-8 pb-24 md:pb-8">
-          {/* Search and Filter Controls */}
-          <div className="flex justify-end mb-6">
+        <PageHeader
+          role="superadmin"
+          title="Affiliation"
+          subtitle="Mosque affiliation applications"
+          count={loading ? null : filteredAffiliations.length}
+          actions={
             <SearchFilterControls
               data={affiliations}
               onFilteredDataChange={handleFilteredDataChange}
@@ -147,7 +142,10 @@ const SuperAdminAffiliationList = () => {
               uniqueFieldValues={uniqueFieldValues}
               filterFieldLabels={filterFieldLabels}
             />
-          </div>
+          }
+        />
+
+        <div className="p-4 sm:p-8 pb-24 md:pb-8">
 
         {/* Main Content Card */}
         <div className="bg-white shadow-xl rounded-2xl overflow-hidden border-0">
@@ -182,14 +180,14 @@ const SuperAdminAffiliationList = () => {
               />
 
               <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
-                  <thead style={{ backgroundColor: '#6db14e' }}>
+                <table className="w-full min-w-[760px]">
+                  <thead className="bg-[#F7F9FB] border-b border-gray-100">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Application ID</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Mosque Name</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Location</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Status</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-white uppercase tracking-wider">Action</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Application ID</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Mosque Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Location</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Status</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -254,45 +252,12 @@ const SuperAdminAffiliationList = () => {
                 </table>
               </div>
               
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-700">
-                      Showing {startIndex + 1} to {Math.min(endIndex, filteredAffiliations.length)} of {filteredAffiliations.length} results
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Previous
-                      </button>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`px-3 py-1 text-sm border rounded-md ${
-                            page === currentPage
-                              ? 'bg-green-600 text-white border-green-600'
-                              : 'border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <Pagination
+                page={currentPage}
+                totalItems={filteredAffiliations.length}
+                pageSize={itemsPerPage}
+                onChange={setCurrentPage}
+              />
             </div>
           )}
 

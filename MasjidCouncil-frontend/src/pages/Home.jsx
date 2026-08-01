@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, Home, CalendarDays } from 'lucide-react';
+import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, CalendarDays, ShieldCheck, Handshake } from 'lucide-react';
 import masjidBg from '../assets/masjid.png';
 import logo from '../assets/logo.png';
-import dxLogoWhite from '../assets/dxLogoWhite.png';
 import bgPattern from '../assets/bg.png';
 import aboutUsImage from '../assets/About Us Image.jpg';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +12,7 @@ const applications = [
     title: 'Masjid Affiliation',
     malayalam: 'മസ്ജിദ് അഫിലിയേഷൻ',
     description: 'Apply for masjid affiliation with Masjid Council Kerala',
-    icon: <Home className="w-5 h-5 text-white" />,
+    icon: <img src="/mosque.svg" alt="" className="w-6 h-6" />,
     bgColor: 'bg-[#8cbb58]',
   },
   {
@@ -96,8 +95,8 @@ const HeroSection = () => {
       </div>
 
       <div id="applications-section" className="bg-white py-10 sm:py-16 px-4">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 text-center mb-8 sm:mb-12 relative"
-        style={{ fontFamily: "Anek Malayalam Variable" }}
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 text-center mb-8 sm:mb-12 relative leading-tight"
+        style={{ fontFamily: "Noto Sans Malayalam" }}
         >
           അപേക്ഷകൾ
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5" style={{ backgroundColor: '#9ece88' }}></div>
@@ -111,15 +110,15 @@ const HeroSection = () => {
             >
               <div>
                 {/* Title and Icon in the same row */}
-                <div className="flex items-start space-x-3 mb-4">
+                <div className="flex items-center space-x-3 mb-4">
                   <div className={`w-10 h-10 shrink-0 rounded-md flex items-center justify-center ${app.bgColor}`}>
                     {app.icon}
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">{app.title}</h3>
+                  <h3 className="text-base font-semibold text-gray-900 leading-snug">{app.title}</h3>
                 </div>
                 
                 <p className="text-gray-600 text-sm mb-2" 
-        style={{ fontFamily: "Anek Malayalam Variable" }}
+        style={{ fontFamily: "Noto Sans Malayalam" }}
                 
                 >{app.malayalam}</p>
                 <p className="text-sm text-gray-500 mb-6">{app.description}</p>
@@ -137,24 +136,28 @@ const HeroSection = () => {
 
       {/* About Us Section */}
       <div className="px-4 md:px-8 lg:px-16">
-        <div 
+        <div
           id="about-section"
-          className="py-10 px-5 sm:py-16 sm:px-8 md:px-12 lg:px-16 relative rounded-2xl"
-          style={{
-            backgroundImage: `url(${bgPattern})`,
-            backgroundSize: 'auto',
-            backgroundPosition: 'top left',
-            backgroundRepeat: 'repeat'
-          }}
+          className="relative rounded-2xl overflow-hidden"
         >
+          <div
+            className="absolute inset-0 opacity-25"
+            style={{
+              backgroundImage: `url(${bgPattern})`,
+              backgroundSize: 'auto',
+              backgroundPosition: 'top left',
+              backgroundRepeat: 'repeat'
+            }}
+          />
+          <div className="relative py-10 px-5 sm:py-16 sm:px-8 md:px-12 lg:px-16">
           <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left side - About Us Image */}
-            <div className="order-2 lg:order-1">
+            {/* Left side - About Us Image (bottom-aligned so it lines up with the button) */}
+            <div className="order-2 lg:order-1 lg:self-end">
               <div className="relative">
-                <img 
-                  src={aboutUsImage} 
-                  alt="About Masjid Council Kerala" 
+                <img
+                  src={aboutUsImage}
+                  alt="About Masjid Council Kerala"
                   className="w-full h-56 sm:h-80 lg:h-[500px] object-cover rounded-xl shadow-2xl"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl"></div>
@@ -164,14 +167,14 @@ const HeroSection = () => {
             {/* Right side - About Us Content */}
             <div className="order-1 lg:order-2 space-y-6">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 relative"
-                  style={{ fontFamily: "Anek Malayalam Variable" }}
+                  style={{ fontFamily: "Noto Sans Malayalam" }}
               >
                 About Us
                 <div className="absolute bottom-0 left-0 w-24 h-0.5" style={{ backgroundColor: '#9ece88' }}></div>
               </h2>
               
               <div className="space-y-4 text-black leading-relaxed"
-                   style={{ fontFamily: "Anek Malayalam Variable" }}
+                   style={{ fontFamily: "Noto Sans Malayalam" }}
               >
                 <p className="text-sm sm:text-base">
                   മസ്ജിദുകളെ മികവിൻ്റെ കേന്ദ്രങ്ങളാക്കുക എന്ന ലക്ഷ്യത്തോടെ 1990-ൽ സ്ഥാപിതമായ സംവിധാനമാണ് മസ്ജിദ് കൗൺസിൽ കേരള.
@@ -191,13 +194,14 @@ const HeroSection = () => {
                 <button
                   onClick={() => navigate('/about')}
                   className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-                  style={{ fontFamily: "Anek Malayalam Variable" }}
+                  style={{ fontFamily: "Noto Sans Malayalam" }}
                 >
                   കൂടുതൽ അറിയുക
                 </button>
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
       </div>
@@ -248,67 +252,65 @@ const HeroSection = () => {
           <div id="contact-section" className="relative" style={{ backgroundColor: '#477d33' }}>
         {/* Dark green line at bottom */}
         <div className="h-3 w-full absolute bottom-0 left-0" style={{ backgroundColor: '#304e26' }}></div>
-        
-        <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-center">
-            {/* Left side - Masjid Council Logo (bigger) */}
-            <div className="flex flex-col items-center lg:items-start space-y-6 px-2 sm:pr-8 sm:pl-4">
-              <div className="w-32 h-32 lg:w-40 lg:h-40">
+
+        <div className="max-w-7xl mx-auto px-4 py-6 lg:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-10 items-center">
+            {/* Logo */}
+            <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div className="w-16 h-16 lg:w-24 lg:h-24">
                 <img src={logo} alt="Masjid Council Kerala" className="object-contain w-full h-full" />
               </div>
-              
-              {/* D4DX Logo (smaller) */}
-              <div className="flex flex-col items-center lg:items-start space-y-2">
-                <div className="w-16 h-10">
-                  <img src={dxLogoWhite} alt="D4DX" className="object-contain w-full h-full" />
+              <p className="hidden lg:block text-green-100/90 text-xs leading-relaxed max-w-xs mt-3">
+                Working for the development of mosques and the welfare of the Muslim community across Kerala.
+              </p>
+            </div>
+
+            {/* Contact Information */}
+            <div className="space-y-2.5 lg:space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+                  <MapPin className="h-4 w-4 text-white" />
                 </div>
-                <p className="text-green-100 text-sm font-medium text-center lg:text-left">
-                  © POWERED BY D4DX INNOVATIONS LLP
-                </p>
-              </div>
-          </div>
-            
-            {/* Right side - Contact Information */}
-            <div className="space-y-6 px-2 sm:pl-2 sm:pr-4">
-              <div className="flex items-start space-x-4">
-                <MapPin className="h-6 w-6 text-white mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold mb-1 text-white">Address</h3>
-                  <p className="text-green-100 text-sm leading-relaxed">
-                    Hira Centre, Mavoor Road<br />
-                    Kozhikode - 673001
+                <div className="flex flex-wrap items-baseline gap-x-2 lg:block">
+                  <h3 className="text-sm font-semibold text-white">Address</h3>
+                  <p className="text-green-100 text-[13px] leading-snug">
+                    Hira Centre, Mavoor Road, Kozhikode - 673001
                   </p>
                 </div>
               </div>
-              <div className="flex items-start space-x-4">
-                <Phone className="h-6 w-6 text-white mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold mb-1 text-white">Phone</h3>
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+                  <Phone className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex flex-wrap items-baseline gap-x-2 lg:block">
+                  <h3 className="text-sm font-semibold text-white">Phone</h3>
                   <a
                     href="tel:+914952720101"
-                    className="text-green-100 text-sm hover:text-white transition"
+                    className="text-green-100 text-[13px] hover:text-white transition"
                   >
                     +91 495 2720 101
                   </a>
                 </div>
               </div>
-              <div className="flex items-start space-x-4">
-                <Mail className="h-6 w-6 text-white mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold mb-1 text-white">Email</h3>
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+                  <Mail className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex flex-wrap items-baseline gap-x-2 lg:block">
+                  <h3 className="text-sm font-semibold text-white">Email</h3>
                   <a
                     href="mailto:info@masjidcouncilkerala.org"
-                    className="text-green-100 text-sm hover:text-white transition"
+                    className="text-green-100 text-[13px] hover:text-white transition break-all"
                   >
                     info@masjidcouncilkerala.org
                   </a>
                 </div>
               </div>
             </div>
-            
-            {/* Right side - Map */}
-            <div className="w-full max-w-md mx-auto lg:mx-0 px-2 sm:pl-2 sm:pr-4">
-              <div className="bg-white rounded-lg overflow-hidden shadow-lg h-52 sm:h-64 lg:h-80">
+
+            {/* Map (desktop only) */}
+            <div className="hidden lg:flex lg:items-center lg:justify-end">
+              <div className="bg-white rounded-2xl overflow-hidden shadow-lg w-full max-w-[300px] h-[180px]">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3913.0048853421154!2d75.7886534!3d11.2610504!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTHCsDE1JzM5LjgiTiA3NcKwNDcnMTkuMiJF!5e0!3m2!1sen!2sbh!4v1748684741914!5m2!1sen!2sbh"
                   width="100%"
@@ -321,6 +323,23 @@ const HeroSection = () => {
                 ></iframe>
               </div>
             </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="mt-5 lg:mt-8 pt-4 border-t border-white/15 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-2">
+            <p className="flex items-center gap-2 text-green-100 text-xs text-center">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+              © {new Date().getFullYear()} Masjid Council Kerala. All Rights Reserved.
+            </p>
+            <a
+              href="https://www.d4dx.co"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-green-100 text-xs hover:text-white transition"
+            >
+              <Handshake className="h-3.5 w-3.5 shrink-0" />
+              Powered by D4DX Innovations LLP
+            </a>
           </div>
         </div>
       </div>

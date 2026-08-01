@@ -1,236 +1,115 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Menu, X, LogOut, Home, FileText, Heart, Building2, User, CalendarDays } from 'lucide-react';
+import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays } from 'lucide-react';
 import logo from '../assets/logo.png';
 
+// Logout and the account details live in the page header's profile menu, not here.
 const SuperAdminSidebar = ({ onAddAdmin }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const confirmLogout = () => {
-    localStorage.removeItem('superAdminToken');
-    localStorage.removeItem('superAdminUser');
-    navigate('/');
-  };
-
-  const cancelLogout = () => {
-    setShowLogoutConfirm(false);
-  };
 
   const isActive = (path) => {
     return location.pathname === path;
   };
 
-  // Same destinations as the desktop sidebar, short labels for the mobile footer bar
+  // Desktop uses `label`; the mobile footer bar uses the shorter `short`.
   const navItems = [
-    { to: '/superadmin-dashboard', icon: Home, label: 'Home' },
-    { to: '/superadmin-affiliation-list', icon: FileText, label: 'Affiliation' },
-    { to: '/superadmin-medical-list', icon: Heart, label: 'Welfare' },
-    { to: '/superadmin-mosque-fund-list', icon: Building2, label: 'Fund' },
-    { to: '/superadmin-khateeb-list', icon: CalendarDays, label: 'Mirqath' },
+    { to: '/superadmin-dashboard', icon: Home, label: 'Dashboard', short: 'Home' },
+    { to: '/superadmin-affiliation-list', icon: FileText, label: 'Affiliation', short: 'Affiliation' },
+    { to: '/superadmin-medical-list', icon: Heart, label: 'Welfare Fund', short: 'Welfare' },
+    { to: '/superadmin-mosque-fund-list', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
+    { to: '/superadmin-khateeb-list', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
   ];
 
   return (
     <>
       {/* Sidebar (desktop) */}
-      <div className={`hidden md:flex ${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-xl transition-all duration-300 fixed h-full z-50 flex-col`}>
-        {/* Logo and Toggle */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <div className="flex items-center space-x-3">
-                <img src={logo} alt="MCK Logo" className="h-10 w-auto" />
-                <span className="font-bold text-gray-900 text-sm">Super Admin</span>
-              </div>
-            )}
-            {!sidebarOpen && (
-              <img src={logo} alt="MCK Logo" className="h-10 w-auto mx-auto" />
-            )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${!sidebarOpen ? 'mx-auto mt-2' : ''}`}
-            >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
+      <div className={`hidden md:flex ${sidebarOpen ? 'w-[280px]' : 'w-[90px]'} bg-white border-r border-[#E5E7EB] transition-all duration-300 fixed h-full z-50 flex-col`} style={{ boxShadow: '0 6px 24px rgba(0,0,0,.04)' }}>
+        {/* Brand and toggle */}
+        <div className={`h-16 flex items-center border-b border-gray-100 ${sidebarOpen ? 'justify-between px-5' : 'justify-center px-0'}`}>
+          {sidebarOpen && <img src={logo} alt="Masjid Council Kerala" className="h-9 w-auto flex-shrink-0" />}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors flex-shrink-0"
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <button
-            onClick={() => navigate('/superadmin-dashboard')}
-            className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors w-full ${
-              isActive('/superadmin-dashboard')
-                ? 'bg-green-50 text-green-700 font-medium'
-                : 'hover:bg-gray-100 text-gray-700'
-            }`}
-          >
-            <Home className="w-5 h-5" />
-            {sidebarOpen && <span>Dashboard</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/superadmin-affiliation-list')}
-            className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors w-full ${
-              isActive('/superadmin-affiliation-list')
-                ? 'bg-green-50 text-green-700 font-medium'
-                : 'hover:bg-gray-100 text-gray-700'
-            }`}
-          >
-            <FileText className="w-5 h-5" />
-            {sidebarOpen && <span>Affiliation</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/superadmin-medical-list')}
-            className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors w-full ${
-              isActive('/superadmin-medical-list')
-                ? 'bg-green-50 text-green-700 font-medium'
-                : 'hover:bg-gray-100 text-gray-700'
-            }`}
-          >
-            <Heart className="w-5 h-5" />
-            {sidebarOpen && <span>Welfare Fund</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/superadmin-mosque-fund-list')}
-            className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors w-full ${
-              isActive('/superadmin-mosque-fund-list')
-                ? 'bg-green-50 text-green-700 font-medium'
-                : 'hover:bg-gray-100 text-gray-700'
-            }`}
-          >
-            <Building2 className="w-5 h-5" />
-            {sidebarOpen && <span>Masjid Fund</span>}
-          </button>
-
-          <button
-            onClick={() => navigate('/superadmin-khateeb-list')}
-            className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors w-full ${
-              isActive('/superadmin-khateeb-list')
-                ? 'bg-green-50 text-green-700 font-medium'
-                : 'hover:bg-gray-100 text-gray-700'
-            }`}
-          >
-            <CalendarDays className="w-5 h-5" />
-            {sidebarOpen && <span>Mirqath '26</span>}
-          </button>
+        <nav className={`flex-1 py-5 space-y-1 overflow-y-auto ${sidebarOpen ? 'px-4' : 'px-3'}`}>
+          {navItems.map((item) => {
+            const active = isActive(item.to);
+            return (
+              <button
+                key={item.to}
+                onClick={() => navigate(item.to)}
+                title={!sidebarOpen ? item.label : undefined}
+                className={`relative flex items-center ${sidebarOpen ? 'gap-3 px-3' : 'justify-center px-0'} h-12 rounded-xl w-full transition-colors ${
+                  active ? 'bg-[#EAF6EF] text-[#1F6B3A] font-semibold' : 'hover:bg-gray-50 text-gray-600'
+                }`}
+              >
+                {active && <span className="absolute left-0 top-2.5 bottom-2.5 w-1 rounded-r-full bg-[#1F6B3A]" />}
+                <span className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${active ? 'bg-white' : 'bg-gray-50'}`}>
+                  <item.icon className="w-[18px] h-[18px]" />
+                </span>
+                {sidebarOpen && <span className="truncate text-sm">{item.label}</span>}
+              </button>
+            );
+          })}
 
           {onAddAdmin && (
-            <button
-              onClick={onAddAdmin}
-              className="flex items-center space-x-3 px-3 py-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors w-full mt-4"
-            >
-              <Plus className="w-5 h-5" />
-              {sidebarOpen && <span>Add Admin</span>}
-            </button>
+            <div className={`pt-5 mt-4 border-t border-gray-100 ${sidebarOpen ? '' : 'flex justify-center'}`}>
+              {sidebarOpen && (
+                <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-widest text-gray-400">Quick Actions</p>
+              )}
+              <button
+                onClick={onAddAdmin}
+                title={!sidebarOpen ? 'Add Admin' : undefined}
+                className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 w-full' : 'justify-center w-12'} h-12 rounded-xl bg-[#1F6B3A] text-white hover:bg-[#2E7D4F] transition-colors shadow-sm`}
+              >
+                <Plus className="w-5 h-5 flex-shrink-0" />
+                {sidebarOpen && <span className="text-sm font-semibold">Add Admin</span>}
+              </button>
+            </div>
           )}
         </nav>
 
-        {/* User Indicator - Above Logout */}
-        <div className="p-4 border-t border-gray-200">
-          {sidebarOpen ? (
-            <div className="mb-3 p-3 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">Super Admin</p>
-                  <p className="text-xs text-gray-600 truncate">Full Access</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-3 flex justify-center">
-              <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Logout Button */}
-        <div className="p-4 border-t border-gray-200">
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            {sidebarOpen && <span>Logout</span>}
-          </button>
-        </div>
-      </div>
-
-      {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
-              <LogOut className="w-6 h-6 text-red-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to logout?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={cancelLogout}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmLogout}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
+        {/* Brand card */}
+        {sidebarOpen && (
+          <div className="p-4">
+            <div className="rounded-2xl bg-[#1F6B3A] text-white p-5">
+              <p className="font-semibold text-sm mb-1.5">Masjid Council Kerala</p>
+              <p className="text-[12px] leading-relaxed text-white/80">
+                Working for the development of mosques and the welfare of the Muslim community across Kerala.
+              </p>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Spacer to push content (desktop only) */}
-      <div className={`hidden md:block ${sidebarOpen ? 'w-64' : 'w-20'}`}></div>
+      <div className={`hidden md:block ${sidebarOpen ? 'w-[280px]' : 'w-[90px]'} flex-shrink-0`}></div>
 
       {/* Footer menu (mobile) */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.06)] flex">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.to}
-              onClick={() => navigate(item.to)}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] ${
-                isActive(item.to) ? 'text-green-700 font-semibold' : 'text-gray-500'
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="truncate max-w-full px-0.5">{item.label}</span>
-            </button>
-          );
-        })}
-        <button
-          onClick={handleLogout}
-          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] text-red-600"
-        >
-          <LogOut className="w-5 h-5" />
-          <span>Logout</span>
-        </button>
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-gray-200 flex pb-[env(safe-area-inset-bottom)]">
+        {navItems.map((item) => (
+          <button
+            key={item.to}
+            onClick={() => navigate(item.to)}
+            className={`flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] ${
+              isActive(item.to) ? 'text-[#1F6B3A] font-semibold' : 'text-gray-500'
+            }`}
+          >
+            <item.icon className="w-5 h-5" />
+            <span className="truncate max-w-full px-0.5">{item.short}</span>
+          </button>
+        ))}
       </nav>
     </>
   );
 };
 
 export default SuperAdminSidebar;
-

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Info, ArrowRight } from 'lucide-react';
+import { Home, Info, ArrowRight, ChevronDown, Smartphone, Lock, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import adminLogin from '../assets/adminLogin.jpg';
@@ -14,6 +14,8 @@ const AdminLogin = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -66,14 +68,14 @@ const AdminLogin = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 relative bg-[#97cee2] bg-no-repeat bg-[position:left_top] bg-cover md:bg-fixed md:bg-[length:57%]"
-      style={{
-        backgroundImage: `url(${adminLogin})`
-      }}
-    >
-      {/* Overlay to reduce image opacity */}
-      <div className="absolute inset-0 bg-white/70"></div>
+    <div className="min-h-screen relative flex items-center justify-center lg:justify-end px-4 pb-4 pt-20 sm:px-6 sm:pb-6 sm:pt-6 lg:px-16 overflow-hidden">
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${adminLogin})` }}
+      />
+      {/* Readability overlay - keeps the masjid visible on the left, softens behind the card */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-white/70 lg:bg-gradient-to-r lg:from-white/10 lg:via-white/30 lg:to-white/75" />
 
       {/* Home Button (Top Right) */}
       <button
@@ -81,129 +83,158 @@ const AdminLogin = () => {
         onClick={handleGoHome}
         title="Go to Home"
         aria-label="Go to Home"
-        className="absolute top-5 right-5 z-30 inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 text-gray-700 hover:text-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+        className="absolute top-5 right-5 z-30 inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/70 backdrop-blur-md hover:bg-white shadow-lg ring-1 ring-white/60 text-gray-700 hover:text-green-700 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500"
       >
         <Home className="h-5 w-5" />
       </button>
-      
-      <div className="max-w-md w-full relative z-20 mx-auto md:ml-auto md:mr-18 mt-4 bg-white/80 md:bg-transparent rounded-xl p-4 sm:p-6 md:p-0">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex items-center justify-center mb-4 md:mr-16">
-            <img src={logo} alt="Masjid Council Kerala" className="h-12 sm:h-16 w-auto mr-3 sm:mr-4" />
+
+      {/* Card */}
+      <div className="relative z-20 w-full max-w-md">
+        <div className="rounded-3xl bg-white/75 backdrop-blur-2xl ring-1 ring-white/70 shadow-2xl p-6 sm:p-8">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <img src={logo} alt="Masjid Council Kerala" className="h-12 sm:h-14 w-auto shrink-0" />
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Admin Login</h1>
-              <p className="text-sm sm:text-base text-gray-600">അഡ്മിൻ ലോഗിൻ</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Admin Login</h1>
+              <p className="text-sm text-gray-600">അഡ്മിൻ ലോഗിൻ</p>
+              <div className="w-12 h-1 bg-gradient-to-r from-green-500 to-green-600 rounded-full mt-2" />
             </div>
           </div>
-          <div className="w-16 h-1 bg-green-500 mx-auto mt-3 rounded-full"></div>
-        </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6 flex items-center">
-            <Info className="h-5 w-5 mr-2" />
-            {error}
-          </div>
-        )}
+          {error && (
+            <div className="bg-red-50 ring-1 ring-red-200 text-red-700 px-4 py-3 rounded-xl mb-5 flex items-center text-sm">
+              <Info className="h-4 w-4 mr-2 shrink-0" />
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mobile Number (മൊബൈൽ നമ്പർ)
-            </label>
-            <input
-              type="text"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-              placeholder="Enter 10-digit mobile number"
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Mobile Number <span className="text-gray-400">(മൊബൈൽ നമ്പർ)</span>
+              </label>
+              <div className="relative">
+                <Smartphone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-200 bg-white/80 pl-10 pr-3 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/30 transition-all"
+                  placeholder="Enter 10-digit mobile number"
+                  required
+                />
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password (പാസ്വേഡ്)
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-              placeholder="Enter password"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              Default password: MCK + first 4 digits of mobile number
-            </p>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Password <span className="text-gray-400">(പാസ്വേഡ്)</span>
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-200 bg-white/80 pl-10 pr-11 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/30 transition-all"
+                  placeholder="Enter password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Default password: MCK + first 4 digits of mobile number
+              </p>
+            </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-48 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-60 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-green-600/20 transition-all hover:shadow-xl active:scale-[0.99] flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
                   Logging in...
                 </>
               ) : (
                 'Login'
               )}
             </button>
-            
+
             <button
               type="button"
-              className="w-full sm:w-40 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full bg-white/70 hover:bg-white ring-1 ring-gray-200 text-gray-700 hover:text-green-700 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 group"
               onClick={handleSuperAdminClick}
             >
-              <span className="text-sm">Super Admin</span>
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <span className="text-sm">Super Admin Login</span>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
-          </div>
-        </form>
+          </form>
 
-        {/* Login Instructions */}
-        <div className="mt-6 p-4 sm:p-6 bg-blue-50 rounded-lg border border-blue-100">
-          <div className="flex items-center mb-4">
-            <div className="bg-blue-100 p-2 rounded-full mr-3">
-              <Info className="h-4 w-4 text-blue-600" />
+          {/* Login Instructions - collapsed by default to keep the card compact */}
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={() => setShowInstructions((v) => !v)}
+              aria-expanded={showInstructions}
+              className="w-full flex items-center gap-2.5 text-left rounded-xl px-3 py-2.5 bg-white/60 ring-1 ring-gray-200 hover:bg-white transition-colors"
+            >
+              <span className="w-7 h-7 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                <Info className="h-3.5 w-3.5" />
+              </span>
+              <span className="flex-1">
+                <span className="block text-sm font-semibold text-gray-900 leading-tight">Login Instructions</span>
+                <span className="block text-xs text-gray-500">ലോഗിൻ നിർദ്ദേശങ്ങൾ</span>
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${
+                  showInstructions ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-out ${
+                showInstructions ? 'max-h-80 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
+              }`}
+            >
+            <div className="space-y-3 px-3">
+              {[
+                {
+                  en: 'Use your registered 10-digit mobile number',
+                  ml: 'നിങ്ങളുടെ രജിസ്റ്റർ ചെയ്ത 10 അക്ക മൊബൈൽ നമ്പർ ഉപയോഗിക്കുക',
+                },
+                {
+                  en: 'Default password: MCK + first 4 digits of mobile',
+                  ml: 'സ്ഥിര പാസ്വേഡ്: MCK + മൊബൈലിന്റെ ആദ്യ 4 അക്കങ്ങൾ',
+                },
+                {
+                  en: 'Example: Mobile 9876543210 → Password: MCK9876',
+                  ml: 'ഉദാഹരണം: മൊബൈൽ 9876543210 → പാസ്വേഡ്: MCK9876',
+                },
+              ].map(({ en, ml }) => (
+                <div key={en} className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-gray-700 text-xs mb-0.5">{en}</p>
+                    <p className="text-xs text-gray-500">{ml}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div>
-              <h3 className="text-base font-bold text-gray-900">Login Instructions</h3>
-              <p className="text-xs text-gray-600">ലോഗിൻ നിർദ്ദേശങ്ങൾ</p>
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex items-start">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
-              <div>
-                <p className="text-gray-700 text-xs mb-1">Use your registered 10-digit mobile number</p>
-                <p className="text-xs text-gray-500">നിങ്ങളുടെ രജിസ്റ്റർ ചെയ്ത 10 അക്ക മൊബൈൽ നമ്പർ ഉപയോഗിക്കുക</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
-              <div>
-                <p className="text-gray-700 text-xs mb-1">Default password: MCK + first 4 digits of mobile</p>
-                <p className="text-xs text-gray-500">സ്ഥിര പാസ്വേഡ്: MCK + മൊബൈലിന്റെ ആദ്യ 4 അക്കങ്ങൾ</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
-              <div>
-                <p className="text-gray-700 text-xs mb-1">Example: Mobile 9876543210 → Password: MCK9876</p>
-                <p className="text-xs text-gray-500">ഉദാഹരണം: മൊബൈൽ 9876543210 → പാസ്വേഡ്: MCK9876</p>
-              </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

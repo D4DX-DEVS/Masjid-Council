@@ -28,7 +28,7 @@ const About = () => {
              style={{ fontFamily: "Noto Sans Malayalam" }}
         >
           <h3 className="text-3xl font-semibold text-black mb-6"
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+              style={{ fontFamily: "Noto Sans Malayalam" }}
           >
             മസ്ജിദ് കൗൺസിൽ കേരള
           </h3>
@@ -52,7 +52,7 @@ const About = () => {
           </p>
             
           <h3 className="text-3xl font-semibold text-black mb-6 mt-12"
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+              style={{ fontFamily: "Noto Sans Malayalam" }}
           >
             മസ്ജിദുകൾ മികവിൻ്റെ കേന്ദ്രങ്ങൾ
           </h3>
@@ -76,7 +76,7 @@ const About = () => {
           </p>
           
           <h3 className="text-3xl font-semibold text-black mb-6 mt-12"
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+              style={{ fontFamily: "Noto Sans Malayalam" }}
           >
             ക്ഷേമ നിധികൾ
           </h3>
@@ -94,7 +94,7 @@ const About = () => {
           </p>
           
           <h3 className="text-3xl font-semibold text-black mb-6 mt-12"
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+              style={{ fontFamily: "Noto Sans Malayalam" }}
           >
             മസ്ജിദ് എക്സലൻസ് അവാർഡ്
           </h3>

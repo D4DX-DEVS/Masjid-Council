@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
+import SelectField from '../components/SelectField';
 import logo from '../assets/logo.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -733,33 +734,33 @@ const MedicalAidForm = () => {
 
   if (!showForm) {
     return (
-      <div className="max-w-4xl mx-auto p-4 bg-white mt-4">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="mc-form max-w-4xl mx-auto p-4 sm:p-6 bg-white mt-4 rounded-2xl sm:shadow-xl sm:ring-1 sm:ring-gray-100">
+        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
           {/* Logo */}
           <div className="flex-shrink-0">
             <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto" />
           </div>
-          
+
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            <h1 className="text-2xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "Noto Sans Malayalam" }}>
               ഇമാം മൗഅ്‌ദിൻ കക്ഷമനിദി
             </h1>
-            <p className="text-lg text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>സഹായം ലഭിക്കുന്നതിന് അപേക്ഷ</p>
+            <p className="text-lg text-gray-500" style={{ fontFamily: "Noto Sans Malayalam" }}>സഹായം ലഭിക്കുന്നതിന് അപേക്ഷ</p>
           </div>
         </div>
 
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3" style={{ fontFamily: "Anek Malayalam Variable" }}>
+        <div className="bg-green-50 ring-1 ring-green-100 rounded-xl p-4 mb-6">
+          <h2 className="text-xl font-semibold text-green-900 flex items-center gap-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
             അപേക്ഷ പൂരിപ്പിക്കുന്നതിന് മുൻപ് ശ്രദ്ധിക്കേണ്ട കാര്യങ്ങൾ
           </h2>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Anek Malayalam Variable" }}>
+        <div className="space-y-4">
+          <div className="bg-gray-50 ring-1 ring-gray-100 p-4 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Noto Sans Malayalam" }}>
             ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി - പൊതു നിര്‍ദ്ദേശങ്ങൾ:
             </h3>
-            <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Noto Sans Malayalam" }}>
               <li>• MCK യിൽ അഫിലിയേറ്റ് ചെയ്‌ത മസ്‌ജിദിലെ ജീവനക്കാർക്ക് വേണ്ടിയാണ് അപേക്ഷ നൽകേണ്ടത്.</li>
               <li>• മസ്‌ജിദ് കമ്മിറ്റിയാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്.</li>
               <li>• ജീവനക്കാരനെ സംബന്ധിച്ച വിശദവിവരങ്ങൾ രേഖപ്പെടുത്തേണ്ട ഫോറവും നിർബന്ധമായും പൂരിപ്പിച്ച് നൽകേണ്ടതാണ്.</li>
@@ -769,11 +770,11 @@ const MedicalAidForm = () => {
             </ul>
           </div>
 
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <div className="bg-emerald-50 ring-1 ring-emerald-100 p-4 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Noto Sans Malayalam" }}>
               സഹായം ലഭിക്കുന്ന ഇനങ്ങൾ:
             </h3>
-            <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Noto Sans Malayalam" }}>
               <li>• <strong>വീട് റിപ്പയർ:</strong> സ്വന്തമായി വീടുള്ള ജീവനക്കർക്ക് വീട് റിപ്പയർ ചെയ്യുന്നതിനാണ് സഹായം അനുവദിക്കുക</li>
               <li>• <strong>വിവാഹം:</strong> സ്വന്തം വിവാഹത്തിനും മക്കൾ, സഹോദരിമാർ എന്നിവരുടെ വിവാഹത്തിനും</li>
               <li>• <strong>ചികിത്സ:</strong> ഭാര്യ, മക്കൾ, മാതാപിതാക്കൾ എന്നിവരുടെ ചികിത്സക്കും സഹായം അനുവദിക്കും.</li>
@@ -781,11 +782,11 @@ const MedicalAidForm = () => {
             </ul>
           </div>
 
-          <div className="bg-orange-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Anek Malayalam Variable" }}>
+          <div className="bg-amber-50 ring-1 ring-amber-100 p-4 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Noto Sans Malayalam" }}>
               അപേക്ഷയോടൊപ്പം ചേർക്കേണ്ട രേഖകൾ:
             </h3>
-            <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Noto Sans Malayalam" }}>
               <li>• സഹായം ആവശ്യമായ ജീവനക്കാരൻ്റെ ആധാർ കോപ്പി</li>
               <li>• മസ്‌ജിദിൻ്റെ ബാങ്ക് പാസ് ബുക്കിൻ്റെ കോപ്പി (അക്കൗണ്ട് നമ്പർ, അക്കൗണ്ട് ഹോൾഡറുടെ പേര് ഉള്ള ഭാഗം)</li>
               <li>• ചികിത്സക്ക്: ഡോക്ടറുടെ ശിപാർശ</li>
@@ -808,15 +809,15 @@ const MedicalAidForm = () => {
   setShowForm(false);
   navigate("/");
 }}
-    className="px-4 py-2 border border-orange-500 text-orange-500 hover:bg-orange-100 rounded"
-    style={{ fontFamily: "Anek Malayalam Variable" }}
+    className="px-5 py-2.5 rounded-xl ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+    style={{ fontFamily: "Noto Sans Malayalam" }}
   >
-    വീട്ടിലേക്ക് മടങ്ങുക
+    ← Back to Home
   </button>
   <button
     onClick={() => setShowForm(true)}
-    className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded"
-    style={{ fontFamily: "Anek Malayalam Variable" }}
+    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold shadow-lg shadow-green-600/20 transition-all hover:shadow-xl active:scale-[0.99]"
+    style={{ fontFamily: "Noto Sans Malayalam" }}
   >
     അപേക്ഷ പൂരിപ്പിക്കുക
   </button>
@@ -827,7 +828,7 @@ const MedicalAidForm = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white">
+    <div className="mc-form max-w-4xl mx-auto p-6 bg-white">
       <div className="mb-6 relative">
         {/* Cross button */}
         <button
@@ -845,10 +846,10 @@ const MedicalAidForm = () => {
           </div>
           
           <div>
-            <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: "Noto Sans Malayalam" }}>
               ഇമാം മൗഅ്‌ദിൻ കക്ഷമനിദി
             </h1>
-            <p className="text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>സഹായം ലഭിക്കുന്നതിന് അപേക്ഷ</p>
+            <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>സഹായം ലഭിക്കുന്നതിന് അപേക്ഷ</p>
           </div>
         </div>
       </div>
@@ -856,7 +857,7 @@ const MedicalAidForm = () => {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Mosque Details Section */}
         <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -927,7 +928,7 @@ const MedicalAidForm = () => {
 
         {/* Management Details Section */}
         <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>മാനേജ്മെന്റ് വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മാനേജ്മെന്റ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -949,7 +950,7 @@ const MedicalAidForm = () => {
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 മാനേജ്മെന്റ് കമ്മിറ്റി/ബോർഡ് <span className="text-red-500">*</span>
               </label>
-              <select
+              <SelectField
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 name="managementType"
                 value={formData.managementType}
@@ -963,7 +964,7 @@ const MedicalAidForm = () => {
                 <option value="managing_committee">മാനേജിംഗ് കമ്മിറ്റി</option>
                 <option value="trust">ട്രസ്‌റ്റ്</option>
                 <option value="association">അസോസിയേഷൻ</option>
-              </select>
+              </SelectField>
             </div>
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1029,7 +1030,7 @@ const MedicalAidForm = () => {
 
         {/* Jamaat Details Section */}
         <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>ജമാഅത്തിന്റെ ഇസ്ലാമി വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>ജമാഅത്തിന്റെ ഇസ്ലാമി വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1038,7 +1039,7 @@ const MedicalAidForm = () => {
                   <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
                 )}
               </label>
-              <select
+              <SelectField
                 name="district"
                 value={formData.district}
                 onChange={handleInputChange}
@@ -1056,7 +1057,7 @@ const MedicalAidForm = () => {
                     {district.title || district.name}
                   </option>
                 ))}
-              </select>
+              </SelectField>
             </div>
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1065,7 +1066,7 @@ const MedicalAidForm = () => {
                   <span className="text-green-600 text-xs ml-2">(ഓട്ടോ ഫിൽ ചെയ്തു)</span>
                 )}
               </label>
-              <select
+              <SelectField
                 name="area"
                 value={formData.area}
                 onChange={handleInputChange}
@@ -1085,14 +1086,14 @@ const MedicalAidForm = () => {
                     {area.title || area.name}
                   </option>
                 ))}
-              </select>
+              </SelectField>
             </div>
           </div>
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               ജമാഅത്തിന്റെ പ്രാദേശിക ഘടകം
             </label>
-            <select
+            <SelectField
               name="jammatDetails"
               value={formData.jammatDetails}
               onChange={handleInputChange}
@@ -1108,13 +1109,13 @@ const MedicalAidForm = () => {
                   {unit.title || unit.name}
                 </option>
               ))}
-            </select>
+            </SelectField>
           </div>
         </div>
 
         {/* Application Details Section */}
         <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>അപേക്ഷ വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>അപേക്ഷ വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1167,13 +1168,13 @@ const MedicalAidForm = () => {
 
         {/* Help Details Section */}
         <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>സഹായ വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>സഹായ വിവരങ്ങൾ</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 സഹായം ആവശ്യമുള്ള ഉദ്ദേശം <span className="text-red-500">*</span>
               </label>
-              <select
+              <SelectField
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 name="helpPurpose"
                 value={formData.helpPurpose}
@@ -1189,7 +1190,7 @@ const MedicalAidForm = () => {
                 <option value="marriage">വിവാഹം</option>
                 <option value="medical">ചികിത്സ</option>
                 <option value="education">വിദ്യാഭ്യാസം</option>
-              </select>
+              </SelectField>
             </div>
             
             <div>
@@ -1247,7 +1248,7 @@ const MedicalAidForm = () => {
 
         {/* Previous Help Section */}
         <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>മുമ്പത്തെ സഹായം</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മുമ്പത്തെ സഹായം</h2>
           <div className="mb-4">
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
             മസ്ജിദ് കൗൺസിലിൽ നിന്ന് മുമ്പ് സഹായം ലഭ്യമായിട്ടുണ്ടോ <span className="text-red-500">*</span>
@@ -1285,7 +1286,7 @@ const MedicalAidForm = () => {
 
         {/* Mosque Official Details */}
         <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്‌ജിദ് ഉദ്യോഗസ്ഥ വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മസ്‌ജിദ് ഉദ്യോഗസ്ഥ വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1325,7 +1326,7 @@ const MedicalAidForm = () => {
         {/* Submit Button */}
         <div className="flex justify-end space-x-4 mt-8">
         <button
-        style={{ fontFamily: "Anek Malayalam Variable" }}
+        style={{ fontFamily: "Noto Sans Malayalam" }}
   type="button"
   onClick={() => {
   setShowForm(false);
@@ -1337,7 +1338,7 @@ const MedicalAidForm = () => {
 </button>
 
           <button
-          style={{ fontFamily: "Anek Malayalam Variable" }}
+          style={{ fontFamily: "Noto Sans Malayalam" }}
             type="button"
             onClick={handleSubmitClick}
             className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200"
@@ -1386,7 +1387,7 @@ const MedicalAidForm = () => {
 
             {/* Modal Body */}
             <div className="px-6 py-4">
-              <p className="text-gray-700 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
                 {modalMessage}
               </p>
               
@@ -1395,7 +1396,7 @@ const MedicalAidForm = () => {
                   <p className="text-sm text-green-800 font-medium">
                     ട്രാക്കിംഗ് ഐഡി:
                   </p>
-                  <p className="text-lg font-bold text-green-900" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                  <p className="text-lg font-bold text-green-900" style={{ fontFamily: "Noto Sans Malayalam" }}>
                     {trackingId}
                   </p>
                 </div>
@@ -1411,7 +1412,7 @@ const MedicalAidForm = () => {
                   } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     modalType === 'success' ? 'focus:ring-green-400' : 'focus:ring-red-400'
                   }`}
-                  style={{ fontFamily: "Anek Malayalam Variable" }}
+                  style={{ fontFamily: "Noto Sans Malayalam" }}
                 >
                   {modalType === 'success' ? 'ശരി' : 'ശരി'}
                 </button>
@@ -1452,7 +1453,7 @@ const MedicalAidForm = () => {
 
             {/* Modal Body */}
             <div className="px-6 py-4">
-              <p className="text-gray-700 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
                 നിങ്ങൾ ഉപേക്ഷിക്കുന്നത് ഉറപ്പാണോ? നിങ്ങൾ നൽകിയ എല്ലാ വിവരങ്ങളും നഷ്ടമാകും.
               </p>
 
@@ -1460,14 +1461,14 @@ const MedicalAidForm = () => {
                 <button
                   onClick={closeCancelModal}
                   className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
-                  style={{ fontFamily: "Anek Malayalam Variable" }}
+                  style={{ fontFamily: "Noto Sans Malayalam" }}
                 >
                   റദ്ദാക്കുക
                 </button>
                 <button
                   onClick={handleCancelForm}
                   className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-red-400"
-                  style={{ fontFamily: "Anek Malayalam Variable" }}
+                  style={{ fontFamily: "Noto Sans Malayalam" }}
                 >
                   ഉപേക്ഷിക്കുക
                 </button>
@@ -1508,7 +1509,7 @@ const MedicalAidForm = () => {
 
             {/* Modal Body */}
             <div className="px-6 py-4">
-              <p className="text-gray-700 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
                 ദയവായി നിങ്ങളുടെ വിവരങ്ങൾ പരിശോധിക്കുക:
               </p>
               
@@ -1516,23 +1517,23 @@ const MedicalAidForm = () => {
               <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
                       മസ്ജിദിന്റെ പേര്:
                     </h4>
-                    <p className="text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
                       {formData.mosqueName || 'നൽകിയിട്ടില്ല'}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
                       ജില്ല:
                     </h4>
-                    <p className="text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
                       {formData.district || 'നൽകിയിട്ടില്ല'}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
                       ഫോൺ നമ്പർ:
                     </h4>
                     <p className="text-gray-600">
@@ -1540,17 +1541,17 @@ const MedicalAidForm = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
                       സഹായ ഉദ്ദേശം:
                     </h4>
-                    <p className="text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
                       {formData.helpPurpose || 'നൽകിയിട്ടില്ല'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
                 ഈ വിവരങ്ങൾ ശരിയാണെങ്കിൽ "സമർപ്പിക്കുക" ക്ലിക്ക് ചെയ്യുക. തിരുത്താൻ ആഗ്രഹിക്കുന്നുവെങ്കിൽ "തിരുത്തുക" ക്ലിക്ക് ചെയ്യുക.
               </p>
 
@@ -1558,14 +1559,14 @@ const MedicalAidForm = () => {
                 <button
                   onClick={closeSubmitModal}
                   className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
-                  style={{ fontFamily: "Anek Malayalam Variable" }}
+                  style={{ fontFamily: "Noto Sans Malayalam" }}
                 >
                   തിരുത്തുക
                 </button>
                 <button
                   onClick={handleConfirmSubmit}
                   className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
-                  style={{ fontFamily: "Anek Malayalam Variable" }}
+                  style={{ fontFamily: "Noto Sans Malayalam" }}
                 >
                   സമർപ്പിക്കുക
                 </button>

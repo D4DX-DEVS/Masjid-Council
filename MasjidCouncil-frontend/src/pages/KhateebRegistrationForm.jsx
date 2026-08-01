@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import SelectField from '../components/SelectField';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,8 +27,8 @@ const EMPTY_FORM = {
   feePaid: ''
 };
 
-// Matches the other forms: Anek for headings, Noto Sans Malayalam for body/labels/inputs
-const headingFont = { fontFamily: 'Anek Malayalam Variable' };
+// Matches the other forms: Noto Sans Malayalam throughout (the family loaded in index.html)
+const headingFont = { fontFamily: 'Noto Sans Malayalam' };
 const bodyFont = { fontFamily: 'Noto Sans Malayalam, sans-serif' };
 
 const KhateebRegistrationForm = () => {
@@ -164,7 +165,7 @@ const KhateebRegistrationForm = () => {
 
   if (!showForm) {
     return (
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow mt-2" style={bodyFont}>
+      <div className="mc-form max-w-6xl mx-auto p-4 sm:p-6 bg-white rounded-2xl sm:shadow-xl sm:ring-1 sm:ring-gray-100 mt-2" style={bodyFont}>
         <div className="flex items-center gap-3 sm:gap-4 mb-4">
           <img src={logo} alt="Masjid Council Kerala" className="h-10 sm:h-12 w-auto flex-shrink-0" />
           <div>
@@ -207,11 +208,11 @@ const KhateebRegistrationForm = () => {
             onClick={() => navigate('/')}
             className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2.5 px-4 sm:py-3 sm:px-6 rounded-lg transition-colors"
           >
-            ← ഹോമിലേക്ക് മടങ്ങുക
+            ← Back to Home
           </button>
           <button
             onClick={() => setShowForm(true)}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 sm:py-3 sm:px-6 rounded-lg transition-colors"
+            className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-5 sm:py-3 sm:px-6 rounded-xl shadow-lg shadow-green-600/20 transition-all hover:shadow-xl active:scale-[0.99]"
           >
             വിവരങ്ങൾ വായിച്ചു, രജിസ്ട്രേഷൻ പൂരിപ്പിക്കുക
           </button>
@@ -224,7 +225,7 @@ const KhateebRegistrationForm = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white" style={bodyFont}>
+    <div className="mc-form max-w-4xl mx-auto p-4 sm:p-6 bg-white" style={bodyFont}>
       <div className="bg-white border-b pb-4 mb-6 relative">
         <button
           onClick={() => setShowCancelModal(true)}
@@ -306,12 +307,12 @@ const KhateebRegistrationForm = () => {
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                 ജില്ല (District) <span className="text-red-500">*</span>
               </label>
-              <select name="district" value={formData.district} onChange={handleInputChange} className={inputClass('district')}>
+              <SelectField name="district" value={formData.district} onChange={handleInputChange} className={inputClass('district')}>
                 <option value="">ജില്ല തിരഞ്ഞെടുക്കുക</option>
                 {KERALA_DISTRICTS.map((district) => (
                   <option key={district} value={district}>{district}</option>
                 ))}
-              </select>
+              </SelectField>
             </div>
             <div className="md:col-span-2">
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">

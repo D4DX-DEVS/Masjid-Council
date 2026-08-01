@@ -1,38 +1,148 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Plus,
+  Edit,
+  Trash2,
   Search,
   AlertCircle,
   CheckCircle,
-  Menu,
-  X,
-  LogOut,
-  Home,
   FileText,
   Heart,
   Building2,
   Users,
   User,
-  TrendingUp,
-  CalendarDays
+  CalendarDays,
+  ArrowRight,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import { StatCardsSkeleton } from '../components/Skeleton';
+import PageHeader from '../components/PageHeader';
+import { cachedJson, peekJson } from "../lib/apiCache";
+import SelectField from '../components/SelectField';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+const readSuperAdminName = () => {
+  try {
+    return JSON.parse(localStorage.getItem('superAdminUser') || '{}').username || 'Super Admin';
+  } catch {
+    return 'Super Admin';
+  }
+};
+
+/* Design tokens from the redesign spec */
+const C = {
+  green: '#1F6B3A',
+  green2: '#2E7D4F',
+  greenSoft: '#EAF6EF',
+  text: '#111827',
+  sub: '#6B7280',
+  border: '#E5E7EB',
+  danger: '#EF4444',
+  warning: '#F59E0B',
+  blue: '#3B82F6',
+  purple: '#8B5CF6',
+  orange: '#F97316'
+};
+const cardShadow = { boxShadow: '0 6px 24px rgba(0,0,0,.06)' };
+
+const timeAgo = (date) => {
+  const s = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (s < 3600) return `${Math.max(1, Math.floor(s / 60))} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)} hours ago`;
+  if (s < 604800) return `${Math.floor(s / 86400)} days ago`;
+  return new Date(date).toLocaleDateString('en-GB');
+};
+
+/* Smooth cubic path through monthly points */
+const buildLinePath = (pts) => {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [x0, y0] = pts[i];
+    const [x1, y1] = pts[i + 1];
+    const mx = (x0 + x1) / 2;
+    d += ` C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`;
+  }
+  return d;
+};
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const TrendChart = ({ counts }) => {
+  const W = 640, H = 200, PAD = 28;
+  const max = Math.max(4, ...counts);
+  const pts = counts.map((v, i) => [
+    PAD + (i * (W - PAD * 2)) / 11,
+    H - PAD - (v / max) * (H - PAD * 2)
+  ]);
+  const line = buildLinePath(pts);
+  const area = `${line} L ${pts[pts.length - 1][0]} ${H - PAD} L ${pts[0][0]} ${H - PAD} Z`;
+  return (
+    <svg viewBox={`0 0 ${W} ${H + 16}`} className="w-full h-auto" role="img" aria-label="Applications per month">
+      <defs>
+        <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={C.green2} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={C.green2} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {[0.25, 0.5, 0.75, 1].map((t) => (
+        <line key={t} x1={PAD} x2={W - PAD} y1={H - PAD - t * (H - PAD * 2)} y2={H - PAD - t * (H - PAD * 2)}
+          stroke={C.border} strokeWidth="1" strokeDasharray="3 5" />
+      ))}
+      <path d={area} fill="url(#trendFill)" />
+      <path d={line} fill="none" stroke={C.green2} strokeWidth="2.5" strokeLinecap="round" />
+      {MONTHS.map((m, i) => (
+        <text key={m} x={pts[i][0]} y={H + 8} textAnchor="middle" fontSize="11" fill={C.sub}>{m}</text>
+      ))}
+    </svg>
+  );
+};
+
+const DonutChart = ({ approved, pending, rejected }) => {
+  const total = approved + pending + rejected || 1;
+  const R = 54, CIRC = 2 * Math.PI * R;
+  const segs = [
+    { v: approved, color: C.green2 },
+    { v: pending, color: C.warning },
+    { v: rejected, color: C.danger }
+  ];
+  let offset = 0;
+  return (
+    <svg viewBox="0 0 140 140" className="w-36 h-36 flex-shrink-0" role="img" aria-label="Status distribution">
+      {segs.map((s, i) => {
+        const len = (s.v / total) * CIRC;
+        const el = (
+          <circle key={i} cx="70" cy="70" r={R} fill="none" stroke={s.color} strokeWidth="18"
+            strokeDasharray={`${len} ${CIRC - len}`} strokeDashoffset={-offset}
+            transform="rotate(-90 70 70)" />
+        );
+        offset += len;
+        return el;
+      })}
+      <text x="70" y="66" textAnchor="middle" fontSize="22" fontWeight="700" fill={C.text}>{approved + pending + rejected}</text>
+      <text x="70" y="84" textAnchor="middle" fontSize="11" fill={C.sub}>Total</text>
+    </svg>
+  );
+};
+
+const PAGE_SIZE = 10;
+
 const SuperAdminDashboard = () => {
+  const superAdminName = readSuperAdminName();
   const [admins, setAdmins] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => peekJson(`${API_BASE_URL}/api/mosqueAffiliation/all`) === undefined);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -41,8 +151,9 @@ const SuperAdminDashboard = () => {
     mosqueFund: { total: 0, pending: 0, approved: 0, rejected: 0 },
     khateeb: { total: 0, pending: 0, approved: 0, rejected: 0 }
   });
-  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(() => peekJson(`${API_BASE_URL}/api/mosqueAffiliation/all`) === undefined);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
+  const [allSubmissions, setAllSubmissions] = useState([]);
   const [recentAdmins, setRecentAdmins] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -81,7 +192,7 @@ const SuperAdminDashboard = () => {
       const data = await response.json();
       if (data.success) {
         setAdmins(data.data);
-        const sortedAdmins = [...data.data].sort((a, b) => 
+        const sortedAdmins = [...data.data].sort((a, b) =>
           new Date(b.createdAt) - new Date(a.createdAt)
         ).slice(0, 3);
         setRecentAdmins(sortedAdmins);
@@ -99,44 +210,24 @@ const SuperAdminDashboard = () => {
   const fetchStatistics = async () => {
     try {
       setStatsLoading(true);
-      
-      const affiliationResponse = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/all`);
-      const affiliationData = await affiliationResponse.json();
-      
-      const medicalResponse = await fetch(`${API_BASE_URL}/api/welfarefund/all`);
-      const medicalData = await medicalResponse.json();
-      
-      const mosqueResponse = await fetch(`${API_BASE_URL}/api/mosqueFund/all`);
-      const mosqueData = await mosqueResponse.json();
 
-      const khateebResponse = await fetch(`${API_BASE_URL}/api/khateebRegistration/all`);
-      const khateebData = await khateebResponse.json();
+      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
+      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
+      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
+      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`);
+
+      const count = (data) => ({
+        total: data.data?.length || 0,
+        pending: data.data?.filter(item => item.status === 'pending').length || 0,
+        approved: data.data?.filter(item => item.status === 'approved').length || 0,
+        rejected: data.data?.filter(item => item.status === 'rejected').length || 0
+      });
 
       setStats({
-        affiliation: {
-          total: affiliationData.data?.length || 0,
-          pending: affiliationData.data?.filter(item => item.status === 'pending').length || 0,
-          approved: affiliationData.data?.filter(item => item.status === 'approved').length || 0,
-          rejected: affiliationData.data?.filter(item => item.status === 'rejected').length || 0
-        },
-        medicalAid: {
-          total: medicalData.data?.length || 0,
-          pending: medicalData.data?.filter(item => item.status === 'pending').length || 0,
-          approved: medicalData.data?.filter(item => item.status === 'approved').length || 0,
-          rejected: medicalData.data?.filter(item => item.status === 'rejected').length || 0
-        },
-        mosqueFund: {
-          total: mosqueData.data?.length || 0,
-          pending: mosqueData.data?.filter(item => item.status === 'pending').length || 0,
-          approved: mosqueData.data?.filter(item => item.status === 'approved').length || 0,
-          rejected: mosqueData.data?.filter(item => item.status === 'rejected').length || 0
-        },
-        khateeb: {
-          total: khateebData.data?.length || 0,
-          pending: khateebData.data?.filter(item => item.status === 'pending').length || 0,
-          approved: khateebData.data?.filter(item => item.status === 'approved').length || 0,
-          rejected: khateebData.data?.filter(item => item.status === 'rejected').length || 0
-        }
+        affiliation: count(affiliationData),
+        medicalAid: count(medicalData),
+        mosqueFund: count(mosqueData),
+        khateeb: count(khateebData)
       });
     } catch (error) {
       console.error('Error fetching statistics:', error);
@@ -147,26 +238,20 @@ const SuperAdminDashboard = () => {
 
   const fetchRecentSubmissions = async () => {
     try {
-      const affiliationResponse = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/all`);
-      const affiliationData = await affiliationResponse.json();
-      
-      const medicalResponse = await fetch(`${API_BASE_URL}/api/welfarefund/all`);
-      const medicalData = await medicalResponse.json();
-      
-      const mosqueResponse = await fetch(`${API_BASE_URL}/api/mosqueFund/all`);
-      const mosqueData = await mosqueResponse.json();
+      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
+      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
+      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
+      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`);
 
-      const khateebResponse = await fetch(`${API_BASE_URL}/api/khateebRegistration/all`);
-      const khateebData = await khateebResponse.json();
-
-      const allSubmissions = [
+      const all = [
         ...(affiliationData.data || []).map(item => ({ ...item, type: 'affiliation' })),
         ...(medicalData.data || []).map(item => ({ ...item, type: 'medical' })),
         ...(mosqueData.data || []).map(item => ({ ...item, type: 'mosque' })),
         ...(khateebData.data || []).map(item => ({ ...item, type: 'khateeb' }))
-      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      setRecentSubmissions(allSubmissions);
+      setAllSubmissions(all);
+      setRecentSubmissions(all.slice(0, 5));
     } catch (error) {
       console.error('Error fetching recent submissions:', error);
     }
@@ -177,7 +262,7 @@ const SuperAdminDashboard = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
       const result = await response.json();
-      
+
       if (result.success && result.districts && Array.isArray(result.districts)) {
         setDistricts(result.districts);
       } else {
@@ -194,7 +279,7 @@ const SuperAdminDashboard = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
       const result = await response.json();
-      
+
       if (result.success && result.areas && Array.isArray(result.areas)) {
         setFilteredAreas(result.areas);
         return result.areas;
@@ -237,18 +322,18 @@ const SuperAdminDashboard = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'district') {
       setFormData({
         ...formData,
         district: value,
         area: ''
       });
-      
-      const selectedDistrict = districts.find(d => 
+
+      const selectedDistrict = districts.find(d =>
         (d.title || d.name) === value
       );
-      
+
       if (selectedDistrict && selectedDistrict.id) {
         fetchAreasForDistrict(selectedDistrict.id);
       } else {
@@ -259,7 +344,7 @@ const SuperAdminDashboard = () => {
       const phoneNumber = value.replace(/\D/g, '');
       const firstFourDigits = phoneNumber.substring(0, 4);
       const autoPassword = firstFourDigits.length === 4 ? `MCK${firstFourDigits}` : '';
-      
+
       setFormData({
         ...formData,
         phoneNumber: value,
@@ -289,12 +374,12 @@ const SuperAdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('superAdminToken');
-      const url = editingAdmin 
+      const url = editingAdmin
         ? `${API_BASE_URL}/api/superadmin/admin/${editingAdmin._id}`
         : `${API_BASE_URL}/api/superadmin/admin`;
-      
+
       const method = editingAdmin ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -337,12 +422,12 @@ const SuperAdminDashboard = () => {
     });
     setShowModal(true);
     fetchDistricts();
-    
+
     if (admin.district) {
-      const selectedDistrict = districts.find(d => 
+      const selectedDistrict = districts.find(d =>
         (d.title || d.name) === admin.district
       );
-      
+
       if (selectedDistrict && selectedDistrict.id) {
         fetchAreasForDistrict(selectedDistrict.id);
       } else {
@@ -394,6 +479,20 @@ const SuperAdminDashboard = () => {
     setFilteredAreas([]);
   };
 
+  const exportAdminsCsv = () => {
+    const rows = [
+      ['Username', 'Phone Number', 'District', 'Area', 'Created'],
+      ...filteredAdmins.map(a => [a.username, a.phoneNumber, a.district, a.area, new Date(a.createdAt).toLocaleDateString('en-GB')])
+    ];
+    const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'admins.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const filteredAdmins = admins.filter(admin =>
     admin.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     admin.phoneNumber.includes(searchTerm) ||
@@ -401,30 +500,60 @@ const SuperAdminDashboard = () => {
     admin.area.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalPages = Math.max(1, Math.ceil(filteredAdmins.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedAdmins = filteredAdmins.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const monthlyCounts = useMemo(() => {
+    const counts = Array(12).fill(0);
+    const year = new Date().getFullYear();
+    allSubmissions.forEach(s => {
+      const d = new Date(s.createdAt);
+      if (d.getFullYear() === year) counts[d.getMonth()]++;
+    });
+    return counts;
+  }, [allSubmissions]);
+
+  const agg = useMemo(() => {
+    const keys = ['affiliation', 'medicalAid', 'mosqueFund', 'khateeb'];
+    return {
+      approved: keys.reduce((n, k) => n + stats[k].approved, 0),
+      pending: keys.reduce((n, k) => n + stats[k].pending, 0),
+      rejected: keys.reduce((n, k) => n + stats[k].rejected, 0)
+    };
+  }, [stats]);
+
   const getTypeDisplay = (type) => {
     const types = {
-      affiliation: { text: 'Affiliation', color: 'bg-blue-100 text-blue-800', icon: FileText },
-      medical: { text: 'Welfare Fund', color: 'bg-green-100 text-green-800', icon: Heart },
-      mosque: { text: 'Masjid Fund', color: 'bg-purple-100 text-purple-800', icon: Building2 },
-      khateeb: { text: "Mirqath '26", color: 'bg-amber-100 text-amber-800', icon: CalendarDays }
+      affiliation: { text: 'Affiliation', color: C.blue, bg: '#EFF6FF', icon: FileText },
+      medical: { text: 'Welfare Fund', color: C.green2, bg: C.greenSoft, icon: Heart },
+      mosque: { text: 'Masjid Fund', color: C.purple, bg: '#F5F3FF', icon: Building2 },
+      khateeb: { text: "Mirqath '26", color: C.orange, bg: '#FFF7ED', icon: CalendarDays }
     };
     return types[type] || types.affiliation;
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-50 text-green-800',
-      rejected: 'bg-red-100 text-red-800'
+  const statusBadge = (status) => {
+    const map = {
+      pending: 'bg-amber-50 text-amber-700 border border-amber-200',
+      approved: 'bg-[#EAF6EF] text-[#1F6B3A] border border-green-200',
+      rejected: 'bg-red-50 text-red-600 border border-red-200'
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return map[status] || 'bg-gray-100 text-gray-600 border border-gray-200';
   };
+
+  const kpiCards = [
+    { key: 'affiliation', title: 'Masjid Affiliation', icon: FileText, color: C.green2, bg: C.greenSoft, to: '/superadmin-affiliation-list' },
+    { key: 'medicalAid', title: 'Welfare Fund', icon: Heart, color: C.blue, bg: '#EFF6FF', to: '/superadmin-medical-list' },
+    { key: 'mosqueFund', title: 'Masjid Fund', icon: Building2, color: C.purple, bg: '#F5F3FF', to: '/superadmin-mosque-fund-list' },
+    { key: 'khateeb', title: "Mirqath '26", icon: CalendarDays, color: C.orange, bg: '#FFF7ED', to: '/superadmin-khateeb-list' }
+  ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F7F9FB] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6db14e] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F6B3A] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -432,295 +561,246 @@ const SuperAdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#F7F9FB] flex">
       <SuperAdminSidebar onAddAdmin={openCreateModal} />
 
-      {/* Main Content - No Header */}
       <div className="flex-1 min-w-0">
-        <div className="p-4 sm:p-8 pb-24 md:pb-8">
+        <PageHeader
+          role="superadmin"
+          title={`Welcome back, ${superAdminName} 👋`}
+          shortTitle=""
+          subtitle="Masjid Council Kerala — full access"
+        />
+
+        <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto">
           {/* Alerts */}
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center">
               <AlertCircle className="h-5 w-5 mr-2" />
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="mb-6 bg-[#EAF6EF] border border-green-200 text-[#1F6B3A] px-4 py-3 rounded-xl flex items-center">
               <CheckCircle className="h-5 w-5 mr-2" />
               {success}
             </div>
           )}
 
-          {/* Statistics Grid */}
+          {/* KPI cards — compact row */}
           {statsLoading && <StatCardsSkeleton />}
-          <div className={`grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 ${statsLoading ? 'hidden' : ''}`}>
-            <button
-              onClick={() => navigate('/superadmin-affiliation-list')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
-            >
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <FileText className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-[#6db14e]" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Masjid Affiliation</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-[#6db14e]">{statsLoading ? '...' : stats.affiliation.total}</span>
-              </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Pending:</span>
-                  <span className="font-semibold text-yellow-600">{statsLoading ? '...' : stats.affiliation.pending}</span>
+          <div className={`grid grid-cols-2 xl:grid-cols-12 gap-3 sm:gap-6 mb-8 ${statsLoading ? 'hidden' : ''}`}>
+            {kpiCards.map(({ key, title, icon: Icon, color, bg, to }) => (
+              <button
+                key={key}
+                onClick={() => navigate(to)}
+                className="group xl:col-span-3 text-left bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-5 relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                style={cardShadow}
+              >
+                <span className="absolute inset-x-0 top-0 h-1" style={{ background: color }} />
+                <div className="flex items-center gap-2.5 sm:gap-3.5 mb-2.5 sm:mb-3.5">
+                  <span className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: bg }}>
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color }} />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-[11px] sm:text-[13px] font-medium text-[#6B7280] truncate">{title}</h3>
+                    <span className="text-2xl sm:text-3xl font-bold tracking-tight leading-none" style={{ color }}>
+                      {stats[key].total}
+                    </span>
+                  </div>
+                  <ArrowRight className="hidden sm:block w-4 h-4 ml-auto text-gray-300 group-hover:text-gray-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Approved:</span>
-                  <span className="font-semibold text-green-600">{statsLoading ? '...' : stats.affiliation.approved}</span>
+                <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 text-[11px] sm:text-[12px] border-t border-gray-100 pt-2.5 sm:pt-3">
+                  <span className="inline-flex items-center gap-1 sm:gap-1.5 text-[#6B7280]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />{stats[key].pending}<span className="hidden sm:inline"> pending</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 sm:gap-1.5 text-[#6B7280]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] flex-shrink-0" />{stats[key].approved}<span className="hidden sm:inline"> approved</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 sm:gap-1.5 text-[#6B7280]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />{stats[key].rejected}<span className="hidden sm:inline"> rejected</span>
+                  </span>
                 </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Rejected:</span>
-                  <span className="font-semibold text-red-600">{statsLoading ? '...' : stats.affiliation.rejected}</span>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => navigate('/superadmin-medical-list')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
-            >
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <Heart className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-blue-600" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Welfare Fund</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-blue-600">{statsLoading ? '...' : stats.medicalAid.total}</span>
-              </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Pending:</span>
-                  <span className="font-semibold text-yellow-600">{statsLoading ? '...' : stats.medicalAid.pending}</span>
-                </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Approved:</span>
-                  <span className="font-semibold text-green-600">{statsLoading ? '...' : stats.medicalAid.approved}</span>
-                </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Rejected:</span>
-                  <span className="font-semibold text-red-600">{statsLoading ? '...' : stats.medicalAid.rejected}</span>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => navigate('/superadmin-mosque-fund-list')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
-            >
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <Building2 className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-purple-600" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Masjid Fund</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-purple-600">{statsLoading ? '...' : stats.mosqueFund.total}</span>
-              </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Pending:</span>
-                  <span className="font-semibold text-yellow-600">{statsLoading ? '...' : stats.mosqueFund.pending}</span>
-                </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Approved:</span>
-                  <span className="font-semibold text-green-600">{statsLoading ? '...' : stats.mosqueFund.approved}</span>
-                </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Rejected:</span>
-                  <span className="font-semibold text-red-600">{statsLoading ? '...' : stats.mosqueFund.rejected}</span>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => navigate('/superadmin-khateeb-list')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
-            >
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <CalendarDays className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-amber-600" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Mirqath '26</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-amber-600">{statsLoading ? '...' : stats.khateeb.total}</span>
-              </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Pending:</span>
-                  <span className="font-semibold text-yellow-600">{statsLoading ? '...' : stats.khateeb.pending}</span>
-                </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Approved:</span>
-                  <span className="font-semibold text-green-600">{statsLoading ? '...' : stats.khateeb.approved}</span>
-                </div>
-                <div className="flex justify-between gap-1">
-                  <span className="text-gray-500">Rejected:</span>
-                  <span className="font-semibold text-red-600">{statsLoading ? '...' : stats.khateeb.rejected}</span>
-                </div>
-              </div>
-            </button>
+              </button>
+            ))}
           </div>
 
-          {/* Two Column Layout for Recent Info */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Recent Admins */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <Users className="w-5 h-5 mr-2 text-[#6db14e]" />
-                Recently Added Admins
-              </h2>
-              {recentAdmins.length > 0 ? (
-                <div className="space-y-3">
-                  {recentAdmins.map((admin, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-[#6db14e]" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{admin.username}</p>
-                          <p className="text-xs text-gray-500">{admin.district}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500">
-                          {new Date(admin.createdAt).toLocaleDateString('en-GB')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500">
-                  <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm">No admins yet</p>
-                </div>
-              )}
+          {/* Analytics — primary focus, asymmetric 8/4 */}
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
+            {/* Trend */}
+            <div className="xl:col-span-8 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8" style={cardShadow}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-[#111827] flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-[#2E7D4F]" />
+                  Applications Trend
+                </h2>
+                <span className="text-xs font-medium text-[#6B7280] border border-[#E5E7EB] rounded-full px-3 py-1.5 bg-white">
+                  This Year
+                </span>
+              </div>
+              <TrendChart counts={monthlyCounts} />
             </div>
 
+            {/* Donut */}
+            <div className="xl:col-span-4 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 flex flex-col" style={cardShadow}>
+              <h2 className="text-xl font-semibold text-[#111827] mb-4">Status Distribution</h2>
+              <div className="flex items-center gap-6 flex-1">
+                <DonutChart approved={agg.approved} pending={agg.pending} rejected={agg.rejected} />
+                <div className="space-y-3 text-sm min-w-0">
+                  {[
+                    ['Approved', agg.approved, C.green2],
+                    ['Pending', agg.pending, C.warning],
+                    ['Rejected', agg.rejected, C.danger]
+                  ].map(([label, v, color]) => {
+                    const total = agg.approved + agg.pending + agg.rejected || 1;
+                    return (
+                      <div key={label} className="flex items-center gap-2.5">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                        <span className="font-medium text-[#111827]">{label}</span>
+                        <span className="text-[#6B7280]">{Math.round((v / total) * 100)}% ({v})</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent row — asymmetric 7/5 */}
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
             {/* Recent Submissions */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-[#6db14e]" />
-                Recent Submissions
-              </h2>
+            <div className="xl:col-span-7 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
+              <h2 className="text-xl font-semibold text-[#111827] mb-4">Recent Submissions</h2>
               {recentSubmissions.length > 0 ? (
-                <div className="space-y-3">
-                  {recentSubmissions.slice(0, 3).map((submission, index) => {
+                <div className="divide-y divide-gray-100">
+                  {recentSubmissions.slice(0, 4).map((submission, index) => {
                     const typeInfo = getTypeDisplay(submission.type);
                     const TypeIcon = typeInfo.icon;
-                    
                     return (
-                      <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                        <div className="flex items-center space-x-3 flex-1 min-w-0">
-                          <div className={`w-10 h-10 ${typeInfo.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                            <TypeIcon className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 truncate">
-                              {submission.name || submission.mosqueName || submission.fullName || 'Unknown'}
-                            </p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(submission.status)}`}>
-                                {submission.status}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-2">
-                          <p className="text-xs text-gray-500">
-                            {new Date(submission.createdAt).toLocaleDateString('en-GB')}
+                      <div key={index} className="flex items-center gap-4 py-3.5 first:pt-0 last:pb-0">
+                        <span className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: typeInfo.bg }}>
+                          <TypeIcon className="w-5 h-5" style={{ color: typeInfo.color }} />
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-[#111827] text-sm truncate">
+                            {submission.name || submission.mosqueName || submission.fullName || 'Unknown'}
                           </p>
+                          <span className={`inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium capitalize ${statusBadge(submission.status)}`}>
+                            {submission.status}
+                          </span>
                         </div>
+                        <span className="text-xs text-[#6B7280] flex-shrink-0">{timeAgo(submission.createdAt)}</span>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-4 text-gray-500">
-                  <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <div className="text-center py-8 text-[#6B7280]">
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p className="text-sm">No recent submissions</p>
+                </div>
+              )}
+            </div>
+
+            {/* Recent Admins */}
+            <div className="xl:col-span-5 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
+              <h2 className="text-xl font-semibold text-[#111827] mb-4">Recently Added Admins</h2>
+              {recentAdmins.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {recentAdmins.map((admin, index) => (
+                    <div key={index} className="flex items-center gap-4 py-3.5 first:pt-0 last:pb-0">
+                      <span className="w-11 h-11 rounded-full bg-[#EAF6EF] flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-[#1F6B3A]" />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-[#111827] text-sm truncate">{admin.username}</p>
+                        <p className="text-xs text-[#6B7280] truncate">{admin.district}{admin.area ? ` · ${admin.area}` : ''}</p>
+                      </div>
+                      <span className="text-xs text-[#6B7280] flex-shrink-0">
+                        {new Date(admin.createdAt).toLocaleDateString('en-GB')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[#6B7280]">
+                  <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm">No admins yet</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Admin Management Table */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            {/* Section Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#6db14e] to-[#5fa644]">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">Admin Management</h2>
-                <div className="flex items-center space-x-3">
-                  {!showSearch ? (
-                    <button
-                      onClick={() => setShowSearch(true)}
-                      className="flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors"
-                    >
-                      <Search className="h-4 w-4" />
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        placeholder="Search admins..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6db14e] text-gray-900"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => {setShowSearch(false); setSearchTerm('');}}
-                        className="p-2 text-white hover:bg-white/20 rounded-lg"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
+          {/* Admin Management */}
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden" style={cardShadow}>
+            {/* Toolbar */}
+            <div className="px-6 py-5 border-b border-gray-100 flex flex-wrap items-center gap-3">
+              <h2 className="text-xl font-semibold text-[#111827] flex items-center gap-2.5 mr-auto">
+                <span className="w-9 h-9 rounded-full bg-[#EAF6EF] flex items-center justify-center">
+                  <Users style={{ width: 18, height: 18 }} className="text-[#1F6B3A]" />
+                </span>
+                Admin Management
+              </h2>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search admin..."
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                  className="h-10 w-44 sm:w-56 pl-9 pr-3 border border-[#E5E7EB] rounded-xl text-sm text-[#111827] bg-white focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all"
+                />
               </div>
+              <button
+                onClick={exportAdminsCsv}
+                className="h-10 inline-flex items-center gap-2 px-4 border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#111827] bg-white hover:bg-gray-50 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
+              <button
+                onClick={openCreateModal}
+                className="h-10 inline-flex items-center gap-2 px-4 rounded-xl text-sm font-semibold text-white bg-[#1F6B3A] hover:bg-[#2E7D4F] shadow-sm transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Add Admin</span>
+              </button>
             </div>
 
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full">
-                <thead className="bg-gray-50">
+                <thead className="sticky top-0 bg-[#F7F9FB]">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-green-800 uppercase tracking-wider">Username</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-green-800 uppercase tracking-wider">Phone Number</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-green-800 uppercase tracking-wider">District</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-green-800 uppercase tracking-wider">Area</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-green-800 uppercase tracking-wider">Created</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-green-800 uppercase tracking-wider">Actions</th>
+                    {['Username', 'Phone Number', 'District', 'Area', 'Created', 'Actions'].map(h => (
+                      <th key={h} className="px-6 py-3.5 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
-                  {filteredAdmins.map((admin) => (
-                    <tr key={admin._id} className="hover:bg-green-50/30 transition-colors">
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">{admin.username}</div>
+                <tbody className="divide-y divide-gray-100">
+                  {pagedAdmins.map((admin, i) => (
+                    <tr key={admin._id} className={`transition-colors hover:bg-[#EAF6EF]/40 ${i % 2 ? 'bg-[#F7F9FB]/50' : 'bg-white'}`}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#111827]">{admin.username}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.phoneNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.district}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.area}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
+                        {new Date(admin.createdAt).toLocaleDateString('en-GB')}
                       </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm text-gray-700 font-medium">{admin.phoneNumber}</div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm text-gray-700 font-medium">{admin.district}</div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm text-gray-700 font-medium">{admin.area}</div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm text-gray-600">
-                          {new Date(admin.createdAt).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex gap-1.5">
                           <button
                             onClick={() => handleEdit(admin)}
-                            className="text-[#6db14e] hover:text-[#5fa644] p-2 rounded-lg hover:bg-green-100 transition-all"
+                            aria-label={`Edit ${admin.username}`}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#1F6B3A] bg-[#EAF6EF] hover:bg-green-100 transition-colors"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(admin._id)}
-                            className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-100 transition-all"
+                            aria-label={`Delete ${admin.username}`}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -732,13 +812,48 @@ const SuperAdminDashboard = () => {
               </table>
             </div>
 
-            {filteredAdmins.length === 0 && (
+            {filteredAdmins.length === 0 ? (
               <div className="text-center py-12">
-                <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-base font-medium text-gray-900 mb-2">No admins found</h3>
-                <p className="text-gray-500 text-sm">
+                <Users className="w-14 h-14 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-base font-medium text-[#111827] mb-1">No admins found</h3>
+                <p className="text-[#6B7280] text-sm">
                   {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating your first admin.'}
                 </p>
+              </div>
+            ) : (
+              <div className="px-6 py-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 text-sm text-[#6B7280]">
+                <span>
+                  Showing {(safePage - 1) * PAGE_SIZE + 1} to {Math.min(safePage * PAGE_SIZE, filteredAdmins.length)} of {filteredAdmins.length} results
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={safePage === 1}
+                    aria-label="Previous page"
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#E5E7EB] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                    <button
+                      key={n}
+                      onClick={() => setPage(n)}
+                      className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                        n === safePage ? 'bg-[#1F6B3A] text-white' : 'border border-[#E5E7EB] bg-white text-[#111827] hover:bg-gray-50'
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={safePage === totalPages}
+                    aria-label="Next page"
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#E5E7EB] bg-white hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -747,48 +862,50 @@ const SuperAdminDashboard = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-6 w-full max-w-md shadow-2xl rounded-xl bg-white border border-gray-200">
-            <div className="flex items-center justify-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm overflow-y-auto p-4">
+          <div className="relative mx-auto my-8 w-full max-w-md p-6 rounded-2xl bg-white border border-[#E5E7EB]" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold text-[#111827]">
                 {editingAdmin ? 'Edit Admin' : 'Create New Admin'}
               </h3>
+              <p className="text-sm text-[#6B7280] mt-1">
+                {editingAdmin ? 'Update the admin account details.' : 'Password is auto-generated from the phone number.'}
+              </p>
             </div>
-               
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Username</label>
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#6db14e] focus:border-[#6db14e] transition-all"
+                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all"
                   placeholder="Enter admin username"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Phone Number</label>
                 <input
                   type="text"
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#6db14e] focus:border-[#6db14e] transition-all"
+                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all"
                   placeholder="Enter 10-digit mobile number"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">District</label>
-                <select
+                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">District</label>
+                <SelectField
                   name="district"
                   value={formData.district}
                   onChange={handleInputChange}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#6db14e] focus:border-[#6db14e] transition-all"
                   required
                   disabled={loadingDropdowns}
                 >
@@ -798,18 +915,17 @@ const SuperAdminDashboard = () => {
                       {district.title || district.name}
                     </option>
                   ))}
-                </select>
+                </SelectField>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Area {!formData.district && <span className="text-gray-500 font-normal">(Select district first)</span>}
+                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">
+                  Area {!formData.district && <span className="text-[#6B7280] font-normal">(Select district first)</span>}
                 </label>
-                <select
+                <SelectField
                   name="area"
                   value={formData.area}
                   onChange={handleInputChange}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#6db14e] focus:border-[#6db14e] transition-all"
                   required
                   disabled={loadingDropdowns || !formData.district}
                 >
@@ -821,20 +937,20 @@ const SuperAdminDashboard = () => {
                       {area.title || area.name}
                     </option>
                   ))}
-                </select>
+                </SelectField>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-100">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 border-2 border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-all font-semibold"
+                  className="h-10 px-5 border border-[#E5E7EB] rounded-xl text-[#374151] hover:bg-gray-50 transition-colors text-sm font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-[#6db14e] text-white rounded-xl hover:bg-[#5fa644] transition-all font-semibold shadow-lg"
+                  className="h-10 px-5 bg-[#1F6B3A] text-white rounded-xl hover:bg-[#2E7D4F] transition-colors text-sm font-semibold shadow-sm"
                 >
                   {editingAdmin ? 'Update Admin' : 'Create Admin'}
                 </button>
@@ -843,8 +959,6 @@ const SuperAdminDashboard = () => {
           </div>
         </div>
       )}
-
-      {/* Logout Confirmation Modal */}
     </div>
   );
 };

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { TrendingUp, FileText, Heart, Building2, User, AlertCircle, CalendarDays } from "lucide-react";
 import AdminSidebar from "../components/AdminSidebar";
 import { StatCardsSkeleton, SkeletonBar } from "../components/Skeleton";
+import PageHeader from "../components/PageHeader";
+import { cachedJson, peekJson } from "../lib/apiCache";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -14,7 +16,7 @@ const AdminHome = () => {
     mosque: { total: 0, pending: 0, approved: 0, rejected: 0 },
     khateeb: { total: 0, pending: 0, approved: 0, rejected: 0 }
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => peekJson(`${API_BASE_URL}/api/mosqueAffiliation/all`) === undefined);
   const [error, setError] = useState('');
   const [adminInfo, setAdminInfo] = useState(null);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
@@ -38,17 +40,13 @@ const AdminHome = () => {
 
   const fetchStatistics = async () => {
     try {
-      const affiliationResponse = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/all`);
-      const affiliationData = await affiliationResponse.json();
+      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
       
-      const medicalResponse = await fetch(`${API_BASE_URL}/api/welfarefund/all`);
-      const medicalData = await medicalResponse.json();
+      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
       
-      const mosqueResponse = await fetch(`${API_BASE_URL}/api/mosqueFund/all`);
-      const mosqueData = await mosqueResponse.json();
+      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
 
-      const khateebResponse = await fetch(`${API_BASE_URL}/api/khateebRegistration/all`);
-      const khateebData = await khateebResponse.json();
+      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`);
 
       setStats({
         affiliation: {
@@ -86,17 +84,13 @@ const AdminHome = () => {
 
   const fetchRecentSubmissions = async () => {
     try {
-      const affiliationResponse = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/all`);
-      const affiliationData = await affiliationResponse.json();
+      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
       
-      const medicalResponse = await fetch(`${API_BASE_URL}/api/welfarefund/all`);
-      const medicalData = await medicalResponse.json();
+      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
       
-      const mosqueResponse = await fetch(`${API_BASE_URL}/api/mosqueFund/all`);
-      const mosqueData = await mosqueResponse.json();
+      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
 
-      const khateebResponse = await fetch(`${API_BASE_URL}/api/khateebRegistration/all`);
-      const khateebData = await khateebResponse.json();
+      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`);
 
       const allSubmissions = [
         ...(affiliationData.data || []).map(item => ({ ...item, type: 'affiliation' })),
@@ -154,8 +148,14 @@ const AdminHome = () => {
     <div className="min-h-screen bg-gray-50 flex">
       <AdminSidebar />
 
-      {/* Main Content - No Header */}
       <div className="flex-1 min-w-0">
+        <PageHeader
+          role="admin"
+          title={`Welcome back, ${adminInfo?.username || 'Admin'} 👋`}
+          shortTitle=""
+          subtitle={adminInfo?.district ? `${adminInfo.district} district` : 'Masjid Council Kerala'}
+        />
+
         <div className="p-4 sm:p-8 pb-24 md:pb-8">
           {/* Alerts */}
           {error && (
@@ -169,14 +169,14 @@ const AdminHome = () => {
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <button
               onClick={() => navigate('/affiliation-list-admin')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+              className="text-left rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
             >
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <FileText className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-[#6db14e]" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Masjid Affiliation</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-[#6db14e]">{stats.affiliation.total}</span>
+                <FileText className="order-1 w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-[#6db14e]" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-xs sm:text-sm leading-tight">Masjid Affiliation</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-lg sm:text-2xl font-bold text-[#6db14e]">{stats.affiliation.total}</span>
               </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-xs">
                 <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Pending:</span>
                   <span className="font-semibold text-yellow-600">{stats.affiliation.pending}</span>
@@ -194,14 +194,14 @@ const AdminHome = () => {
 
             <button
               onClick={() => navigate('/medical-list-admin')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+              className="text-left rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
             >
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <Heart className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-blue-600" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Welfare Fund</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-blue-600">{stats.medical.total}</span>
+                <Heart className="order-1 w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-blue-600" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-xs sm:text-sm leading-tight">Welfare Fund</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-lg sm:text-2xl font-bold text-blue-600">{stats.medical.total}</span>
               </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-xs">
                 <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Pending:</span>
                   <span className="font-semibold text-yellow-600">{stats.medical.pending}</span>
@@ -219,14 +219,14 @@ const AdminHome = () => {
 
             <button
               onClick={() => navigate('/mosque-list-admin')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+              className="text-left rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
             >
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <Building2 className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-purple-600" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Masjid Fund</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-purple-600">{stats.mosque.total}</span>
+                <Building2 className="order-1 w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-purple-600" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-xs sm:text-sm leading-tight">Masjid Fund</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-lg sm:text-2xl font-bold text-purple-600">{stats.mosque.total}</span>
               </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-xs">
                 <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Pending:</span>
                   <span className="font-semibold text-yellow-600">{stats.mosque.pending}</span>
@@ -244,14 +244,14 @@ const AdminHome = () => {
 
             <button
               onClick={() => navigate('/khateeb-list-admin')}
-              className="text-left rounded-lg p-3 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
+              className="text-left rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all bg-white"
             >
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-3 mb-1 sm:mb-2">
-                <CalendarDays className="order-1 w-5 h-5 sm:w-7 sm:h-7 shrink-0 text-amber-600" />
-                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-sm sm:text-lg xl:text-xl leading-tight">Mirqath '26</h3>
-                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-xl sm:text-3xl font-bold text-amber-600">{stats.khateeb.total}</span>
+                <CalendarDays className="order-1 w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-600" />
+                <h3 className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 min-w-0 font-bold text-gray-900 text-xs sm:text-sm leading-tight">Mirqath '26</h3>
+                <span className="order-2 ml-auto sm:order-3 sm:ml-0 text-lg sm:text-2xl font-bold text-amber-600">{stats.khateeb.total}</span>
               </div>
-              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-sm">
+              <div className="space-y-0.5 sm:space-y-1 text-[11px] sm:text-xs">
                 <div className="flex justify-between gap-1">
                   <span className="text-gray-500">Pending:</span>
                   <span className="font-semibold text-yellow-600">{stats.khateeb.pending}</span>
@@ -271,8 +271,8 @@ const AdminHome = () => {
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Admin Profile */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <div className="bg-white rounded-xl shadow-md p-4 sm:p-5">
+              <h2 className="text-base font-bold text-gray-900 mb-3 flex items-center">
                 <User className="w-5 h-5 mr-2 text-[#6db14e]" />
                 Admin Profile
               </h2>
@@ -299,9 +299,9 @@ const AdminHome = () => {
           </div>
 
           {/* Recent Submissions */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-[#6db14e]" />
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-5">
+              <h2 className="text-base font-bold text-gray-900 mb-3 flex items-center">
+                <TrendingUp className="w-4 h-4 mr-2 text-[#6db14e]" />
                 Recent Submissions
             </h2>
             {recentSubmissions.length > 0 ? (
@@ -313,11 +313,11 @@ const AdminHome = () => {
                   return (
                       <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                         <div className="flex items-center space-x-3 flex-1 min-w-0">
-                          <div className={`w-10 h-10 ${typeInfo.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                          <TypeIcon className="w-5 h-5" />
+                          <div className={`w-8 h-8 ${typeInfo.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                          <TypeIcon className="w-4 h-4" />
                         </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 truncate">
+                            <p className="font-semibold text-gray-900 text-sm truncate">
                             {submission.name || submission.mosqueName || submission.fullName || 'Unknown'}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
