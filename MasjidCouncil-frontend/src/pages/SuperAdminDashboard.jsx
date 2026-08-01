@@ -590,12 +590,13 @@ const SuperAdminDashboard = () => {
 
           {/* KPI cards — compact row */}
           {statsLoading && <StatCardsSkeleton />}
-          <div className={`grid grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-6 mb-8 ${statsLoading ? 'hidden' : ''}`}>
+          {/* ponytail: xl: not lg: — fixed 280px sidebar eats the viewport, so at lg the content box is only ~744px */}
+          <div className={`grid grid-cols-2 xl:grid-cols-12 gap-3 sm:gap-6 mb-8 ${statsLoading ? 'hidden' : ''}`}>
             {kpiCards.map(({ key, title, icon: Icon, color, bg, to }) => (
               <button
                 key={key}
                 onClick={() => navigate(to)}
-                className="group lg:col-span-3 text-left bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-5 relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                className="group xl:col-span-3 text-left bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-5 relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                 style={cardShadow}
               >
                 <span className="absolute inset-x-0 top-0 h-1" style={{ background: color }} />
@@ -604,14 +605,15 @@ const SuperAdminDashboard = () => {
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color }} />
                   </span>
                   <div className="min-w-0">
-                    <h3 className="text-[11px] sm:text-[13px] font-medium text-[#6B7280] truncate">{title}</h3>
+                    <h3 className="text-[11px] sm:text-[12px] xl:text-[13px] font-medium text-[#6B7280] leading-tight">{title}</h3>
                     <span className="text-2xl sm:text-3xl font-bold tracking-tight leading-none" style={{ color }}>
                       {stats[key].total}
                     </span>
                   </div>
                   <ArrowRight className="hidden sm:block w-4 h-4 ml-auto text-gray-300 group-hover:text-gray-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 text-[11px] sm:text-[12px] border-t border-gray-100 pt-2.5 sm:pt-3">
+                {/* ponytail: wrap + shrink instead of clipping — 3 labelled counts don't fit a ~230px card on one line */}
+                <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[10px] sm:text-[11px] 2xl:text-[12px] border-t border-gray-100 pt-2.5 sm:pt-3">
                   <span className="inline-flex items-center gap-1 sm:gap-1.5 text-[#6B7280]">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />{stats[key].pending}<span className="hidden sm:inline"> pending</span>
                   </span>
@@ -627,9 +629,9 @@ const SuperAdminDashboard = () => {
           </div>
 
           {/* Analytics — primary focus, asymmetric 8/4 */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
             {/* Trend */}
-            <div className="lg:col-span-8 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8" style={cardShadow}>
+            <div className="xl:col-span-8 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8" style={cardShadow}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-[#111827] flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-[#2E7D4F]" />
@@ -643,11 +645,12 @@ const SuperAdminDashboard = () => {
             </div>
 
             {/* Donut */}
-            <div className="lg:col-span-4 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 flex flex-col" style={cardShadow}>
+            <div className="xl:col-span-4 bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 flex flex-col" style={cardShadow}>
               <h2 className="text-xl font-semibold text-[#111827] mb-4">Status Distribution</h2>
-              <div className="flex items-center gap-6 flex-1">
+              {/* ponytail: wrap, not min-w-0 — legend drops under the donut when the card is too narrow instead of spilling out */}
+              <div className="flex flex-wrap items-center justify-center gap-6 flex-1">
                 <DonutChart approved={agg.approved} pending={agg.pending} rejected={agg.rejected} />
-                <div className="space-y-3 text-sm min-w-0">
+                <div className="space-y-3 text-sm flex-1 min-w-[170px]">
                   {[
                     ['Approved', agg.approved, C.green2],
                     ['Pending', agg.pending, C.warning],
@@ -658,7 +661,7 @@ const SuperAdminDashboard = () => {
                       <div key={label} className="flex items-center gap-2.5">
                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
                         <span className="font-medium text-[#111827]">{label}</span>
-                        <span className="text-[#6B7280]">{Math.round((v / total) * 100)}% ({v})</span>
+                        <span className="text-[#6B7280] whitespace-nowrap ml-auto">{Math.round((v / total) * 100)}% ({v})</span>
                       </div>
                     );
                   })}
@@ -668,9 +671,9 @@ const SuperAdminDashboard = () => {
           </div>
 
           {/* Recent row — asymmetric 7/5 */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
             {/* Recent Submissions */}
-            <div className="lg:col-span-7 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
+            <div className="xl:col-span-7 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
               <h2 className="text-xl font-semibold text-[#111827] mb-4">Recent Submissions</h2>
               {recentSubmissions.length > 0 ? (
                 <div className="divide-y divide-gray-100">
@@ -704,7 +707,7 @@ const SuperAdminDashboard = () => {
             </div>
 
             {/* Recent Admins */}
-            <div className="lg:col-span-5 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
+            <div className="xl:col-span-5 bg-white rounded-2xl border border-[#E5E7EB] p-6" style={cardShadow}>
               <h2 className="text-xl font-semibold text-[#111827] mb-4">Recently Added Admins</h2>
               {recentAdmins.length > 0 ? (
                 <div className="divide-y divide-gray-100">
