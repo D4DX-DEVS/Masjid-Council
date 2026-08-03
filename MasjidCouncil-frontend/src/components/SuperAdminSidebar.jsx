@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays } from 'lucide-react';
 import logo from '../assets/logo.png';
+import dxLogo from '../assets/dx-logo-sml.png';
 
 // Logout and the account details live in the page header's profile menu, not here.
 const SuperAdminSidebar = ({ onAddAdmin }) => {
@@ -77,15 +78,17 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
           )}
         </nav>
 
-        {/* Brand card */}
         {sidebarOpen && (
-          <div className="p-4">
-            <div className="rounded-2xl bg-[#1F6B3A] text-white p-5">
-              <p className="font-semibold text-sm mb-1.5">Masjid Council Kerala</p>
-              <p className="text-[12px] leading-relaxed text-white/80">
-                Working for the development of mosques and the welfare of the Muslim community across Kerala.
-              </p>
-            </div>
+          <div className="p-4 border-t border-gray-100">
+            <a
+              href="https://www.d4dx.co"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              Powered by
+              <img src={dxLogo} alt="D4DX Innovations LLP" className="h-8 w-auto flex-shrink-0" />
+            </a>
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LogIn, Menu, X, FileText, Info, Phone, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // for navigation
+import { useNavigate, Link } from 'react-router-dom'; // for navigation
 import logo from '../assets/logo.png';
 
 const navFont = {
@@ -118,9 +118,9 @@ const Navbar = () => {
         <div className="px-4 md:px-6">
           <div className="flex items-center justify-between gap-2 py-3 md:py-6">
             {/* Logo and Text */}
-            <div className="flex items-center">
+            <Link to="/" aria-label="Go to home" className="flex items-center">
               <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto md:h-12 shrink-0" />
-            </div>
+            </Link>
 
             {/* Center Navigation Buttons - desktop only, pushed toward the right */}
             <div className="hidden md:flex items-center md:space-x-8 min-w-0 md:ml-auto md:mr-3">

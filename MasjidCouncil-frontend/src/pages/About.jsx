@@ -22,9 +22,9 @@ const About = () => {
       {/* Overlay to reduce image opacity */}
       <div className="absolute inset-0 bg-white/70"></div>
       {/* Main Content */}
-      <div className="pl-16 pr-8 md:pl-20 md:pr-12 lg:pl-24 lg:pr-16 py-16 pt-32 relative z-20">
-        
-        <div className="space-y-4 text-black leading-relaxed text-justify"
+      <div className="px-4 sm:px-6 lg:px-8 py-16 pt-32 relative z-20 max-w-6xl mx-auto">
+
+        <div className="space-y-4 text-black leading-relaxed text-justify bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl ring-1 ring-black/5 p-6 sm:p-10 lg:p-14"
              style={{ fontFamily: "Noto Sans Malayalam" }}
         >
           <h3 className="text-3xl font-semibold text-black mb-6"

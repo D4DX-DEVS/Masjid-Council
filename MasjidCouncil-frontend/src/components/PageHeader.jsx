@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown, LogOut, User } from 'lucide-react';
 import logo from '../assets/logo.png';
 import { invalidate } from '../lib/apiCache';
+import ConfirmDialog from './ConfirmDialog';
 
 const ACCOUNTS = {
   superadmin: { storageKey: 'superAdminUser', tokenKey: 'superAdminToken', fallback: 'Super Admin', after: '/' },
@@ -27,6 +28,7 @@ const readAccount = (role) => {
 // Exported so the detail pages — which keep their own in-card header — still get a logout.
 export const ProfileMenu = ({ role }) => {
   const [open, setOpen] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const boxRef = useRef(null);
   const navigate = useNavigate();
   const { cfg, name, detail } = readAccount(role);
@@ -73,7 +75,7 @@ export const ProfileMenu = ({ role }) => {
             {detail && <p className="text-xs text-gray-500 truncate">{detail}</p>}
           </div>
           <button
-            onClick={logout}
+            onClick={() => { setOpen(false); setConfirming(true); }}
             role="menuitem"
             className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
           >
@@ -82,6 +84,15 @@ export const ProfileMenu = ({ role }) => {
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirming}
+        title="Confirm logout"
+        description="Are you sure you want to logout? You will need to login again to access the panel."
+        confirmLabel="Logout"
+        onConfirm={logout}
+        onCancel={() => setConfirming(false)}
+      />
     </div>
   );
 };
