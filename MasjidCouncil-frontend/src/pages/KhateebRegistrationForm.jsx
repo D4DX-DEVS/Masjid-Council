@@ -23,8 +23,7 @@ const EMPTY_FORM = {
   khutbaRegular: '',
   movementRelation: '',
   attending: '',
-  notAttendingReason: '',
-  feePaid: ''
+  notAttendingReason: ''
 };
 
 // Matches the other forms: Noto Sans Malayalam throughout (the family loaded in index.html)
@@ -60,7 +59,7 @@ const KhateebRegistrationForm = () => {
   const validateAllFields = () => {
     const errors = {};
 
-    ['fullName', 'phone', 'masjidName', 'mahallu', 'district', 'khutbaRegular', 'movementRelation', 'attending', 'feePaid'].forEach((field) => {
+    ['fullName', 'phone', 'masjidName', 'mahallu', 'district', 'khutbaRegular', 'movementRelation', 'attending'].forEach((field) => {
       if (!formData[field] || !formData[field].trim()) errors[field] = true;
     });
 
@@ -225,7 +224,7 @@ const KhateebRegistrationForm = () => {
   }
 
   return (
-    <div className="mc-form max-w-4xl mx-auto p-4 sm:p-6 bg-white" style={bodyFont}>
+    <div className="mc-form max-w-4xl mx-auto my-4 sm:my-8 p-4 sm:p-8 bg-white rounded-2xl shadow-xl ring-1 ring-gray-200" style={bodyFont}>
       <div className="bg-white border-b pb-4 mb-6 relative">
         <button
           onClick={() => setShowCancelModal(true)}
@@ -247,7 +246,7 @@ const KhateebRegistrationForm = () => {
 
       <div className="space-y-6">
         {/* 1. Personal Details */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={headingFont}>
             1. വ്യക്തിഗത വിവരങ്ങൾ (Personal Details)
           </h2>
@@ -282,7 +281,7 @@ const KhateebRegistrationForm = () => {
         </div>
 
         {/* 2. Masjid Details */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={headingFont}>
             2. മഹല്ല് / മസ്ജിദ് വിവരങ്ങൾ (Masjid Details)
           </h2>
@@ -342,7 +341,7 @@ const KhateebRegistrationForm = () => {
         </div>
 
         {/* 3. Participation */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={headingFont}>
             3. സംഗമത്തിലെ പങ്കാളിത്തം (Participation Confirmation) <span className="text-red-500">*</span>
           </h2>
@@ -366,20 +365,6 @@ const KhateebRegistrationForm = () => {
               />
             </div>
           )}
-        </div>
-
-        {/* 4. Payment */}
-        <div className="border rounded-lg p-4 sm:p-6">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={headingFont}>
-            4. ഫീസ് അടച്ചതിന്റെ വിവരങ്ങൾ (Payment Details)
-          </h2>
-          <p className="text-sm text-gray-600 mb-3">രജിസ്ട്രേഷൻ ഫീസ് (₹250) <span className="text-red-500">*</span></p>
-          <div className="space-y-3">
-            {renderRadios('feePaid', [
-              { value: 'yes', label: 'അടച്ചു' },
-              { value: 'no', label: 'ഇല്ല' }
-            ])}
-          </div>
         </div>
 
         {/* Actions */}
@@ -437,7 +422,6 @@ const KhateebRegistrationForm = () => {
               <p><span className="font-semibold">മസ്ജിദ്:</span> {formData.masjidName}</p>
               <p><span className="font-semibold">ജില്ല:</span> {formData.district}</p>
               <p><span className="font-semibold">പങ്കെടുക്കുന്നു:</span> {formData.attending === 'yes' ? 'അതെ' : 'ഇല്ല'}</p>
-              <p><span className="font-semibold">ഫീസ്:</span> {formData.feePaid === 'yes' ? 'അടച്ചു' : 'ഇല്ല'}</p>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
               <button onClick={() => setShowSubmitModal(false)} className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">

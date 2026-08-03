@@ -56,11 +56,11 @@ const khateebRegistrationSchema = new mongoose.Schema({
     required: false,
   },
 
-  // Payment
+  // Payment — retired from the form; kept optional so existing records keep their value.
   feePaid: {
     type: String,
     enum: ["yes", "no"],
-    required: true,
+    required: false,
   },
 
   // Application Status

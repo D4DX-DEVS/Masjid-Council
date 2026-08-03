@@ -94,7 +94,8 @@ body {
     line-height: 1.3;
   }
 
-  .mc-form section > h2 {
+  .mc-form section > h2,
+  .mc-form .mc-section > h2 {
     font-size: 1rem;
     padding-bottom: 0.4rem;
   }
@@ -115,7 +116,8 @@ body {
   }
 
   /* Sections and the page shell carry generous desktop padding - halve it. */
-  .mc-form section {
+  .mc-form section,
+  .mc-form .mc-section {
     margin-bottom: 0.5rem;
   }
 
@@ -155,8 +157,16 @@ body {
   }
 }
 
-/* Section headings get a green accent rule instead of plain bold text. */
-.mc-form section > h2 {
+/* ponytail: grey page behind the form card — a white card on a white page reads as no card.
+   :has() beats restructuring every form's JSX to add a wrapper element. */
+body:has(.mc-form) {
+  background-color: #f1f5f9;
+}
+
+/* ponytail: .mc-section is the div equivalent of <section> — the other three forms
+   used bordered boxes that ran taller than the affiliation form's flat sections. */
+.mc-form section > h2,
+.mc-form .mc-section > h2 {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -164,7 +174,8 @@ body {
   border-bottom: 1px solid #f1f5f9;
 }
 
-.mc-form section > h2::before {
+.mc-form section > h2::before,
+.mc-form .mc-section > h2::before {
   content: "";
   width: 0.25rem;
   height: 1.15em;
