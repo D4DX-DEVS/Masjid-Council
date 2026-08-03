@@ -72,6 +72,7 @@ app.use("/api/welfarefund", welfarefundRoutes);
 app.use("/api/mosqueFund", mosqueFundRoutes);
 app.use("/api/khateebRegistration", khateebRegistrationRoutes);
 app.use("/api/superadmin", superAdminRoutes);
+app.use("/api/track", require("./routes/trackRoutes"));
 // app.use("/api/admin", adminRoutes);
 
 PORT = process.env.PORT;

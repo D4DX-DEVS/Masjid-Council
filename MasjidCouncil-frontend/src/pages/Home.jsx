@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, CalendarDays, ShieldCheck } from 'lucide-react';
+import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, CalendarDays, ShieldCheck, X } from 'lucide-react';
 import masjidBg from '../assets/masjid.png';
 import dxLogo from '../assets/dx-logo-sml.png';
 import logo from '../assets/logo.png';
 import bgPattern from '../assets/bg.png';
 import aboutUsImage from '../assets/About Us Image.jpg';
 import { useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 const applications = [
@@ -44,17 +46,45 @@ const HeroSection = () => {
   const [referenceNumber, setReferenceNumber] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [tracking, setTracking] = useState(false);
+  const [results, setResults] = useState(null);
 
-  const handleTrackStatus = () => {
-    if (referenceNumber.trim()) {
-      setErrorMessage('');
-      console.log('Tracking application for:', referenceNumber);
-      // Navigate or call API here
-    } else {
+  const clearTracking = () => {
+    setReferenceNumber('');
+    setResults(null);
+    setErrorMessage('');
+    document.getElementById('reference')?.focus();
+  };
+
+  const handleTrackStatus = async () => {
+    const q = referenceNumber.trim();
+    if (!q) {
       setErrorMessage('Please enter a reference number or mobile number');
+      setResults(null);
+      return;
+    }
+    setErrorMessage('');
+    setTracking(true);
+    setResults(null);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/track?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      if (data.success) {
+        setResults(data.data);
+        if (data.data.length === 0) {
+          setErrorMessage('No application found for that reference or mobile number.');
+        }
+      } else {
+        setErrorMessage(data.message || 'Lookup failed. Please try again.');
+      }
+    } catch {
+      setErrorMessage('Network error. Please try again.');
+    } finally {
+      setTracking(false);
     }
   };
-  
+
+
 
   const handleNavigation = (title) => {
     if (title === 'Masjid Affiliation') {
@@ -208,7 +238,7 @@ const HeroSection = () => {
       </div>
 
       <div className="px-4 sm:px-6 lg:px-8 py-10 max-w-xl mx-auto">
-        <div className="space-y-6">
+        <div className="space-y-5 bg-white rounded-2xl shadow-xl ring-1 ring-gray-100 p-6 sm:p-8">
           <div>
             <label
               htmlFor="reference"
@@ -217,17 +247,30 @@ const HeroSection = () => {
               Reference Number or Mobile Number
             </label>
 
-            <input
-              type="text"
-              id="reference"
-              value={referenceNumber}
-              onChange={(e) => setReferenceNumber(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Enter reference number or mobile number"
-              className={`w-full px-4 py-3 border ${
-                errorMessage ? 'border-red-500' : 'border-gray-300'
-              } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-gray-900 placeholder-gray-500 outline-none text-sm sm:text-base`}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                id="reference"
+                value={referenceNumber}
+                onChange={(e) => setReferenceNumber(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Enter reference number or mobile number"
+                className={`w-full px-4 py-3 ${referenceNumber ? 'pr-11' : ''} border ${
+                  errorMessage ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-gray-900 placeholder-gray-500 outline-none text-sm sm:text-base`}
+              />
+              {referenceNumber && (
+                <button
+                  type="button"
+                  onClick={clearTracking}
+                  aria-label="Clear and track another"
+                  title="Track another"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
 
             {errorMessage && (
               <p className="mt-2 text-sm text-red-600">{errorMessage}</p>
@@ -236,11 +279,34 @@ const HeroSection = () => {
 
           <button
             onClick={handleTrackStatus}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg focus:ring-2 focus:ring-green-500 focus:ring-offset-2 outline-none text-sm sm:text-base"
+            disabled={tracking}
+            className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F6B3A] hover:bg-[#2E7D4F] disabled:opacity-60 text-white text-sm sm:text-base font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#2E7D4F]/30"
           >
-            <Search className="h-5 w-5" />
-            <span>Track Status</span>
+            <Search className={`h-5 w-5 ${tracking ? 'animate-pulse' : ''}`} />
+            {tracking ? 'Searching…' : 'Track Status'}
           </button>
+
+          {results && results.length > 0 && (
+            <div className="space-y-3 pt-2 border-t border-gray-100" style={{ animation: 'mc-modal-in .25s ease-out' }}>
+              {results.map((r, i) => (
+                <div key={i} className="rounded-xl border border-gray-200 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-semibold text-gray-900 text-sm truncate">{r.name || 'Application'}</p>
+                    <span className={`text-[11px] px-2.5 py-1 rounded-full font-medium capitalize flex-shrink-0 ${
+                      r.status === 'approved' ? 'bg-[#EAF6EF] text-[#1F6B3A] border border-green-200'
+                      : r.status === 'rejected' ? 'bg-red-50 text-red-600 border border-red-200'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    }`}>{r.status}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {r.type}
+                    {r.reference ? ` · ${r.reference}` : ''}
+                    {r.createdAt ? ` · ${new Date(r.createdAt).toLocaleDateString('en-GB')}` : ''}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-6 text-center px-2">
