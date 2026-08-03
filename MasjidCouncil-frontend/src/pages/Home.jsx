@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, CalendarDays, ShieldCheck, Handshake } from 'lucide-react';
+import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, CalendarDays, ShieldCheck } from 'lucide-react';
 import masjidBg from '../assets/masjid.png';
+import dxLogo from '../assets/dx-logo-sml.png';
 import logo from '../assets/logo.png';
 import bgPattern from '../assets/bg.png';
 import aboutUsImage from '../assets/About Us Image.jpg';
@@ -337,8 +338,9 @@ const HeroSection = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-green-100 text-xs hover:text-white transition"
             >
-              <Handshake className="h-3.5 w-3.5 shrink-0" />
-              Powered by D4DX Innovations LLP
+              Powered by
+              {/* ponytail: white pill — the logo is dark navy and would vanish on the green footer */}
+              <img src={dxLogo} alt="D4DX Innovations LLP" className="h-6 w-auto shrink-0 bg-white rounded px-1.5 py-1" />
             </a>
           </div>
         </div>

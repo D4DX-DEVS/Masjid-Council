@@ -71,6 +71,55 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Admin Login (regular admin, by phone number)
+router.post('/admin/login', async (req, res) => {
+    try {
+        const { phoneNumber, password } = req.body;
+
+        if (!phoneNumber || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number and password are required'
+            });
+        }
+
+        const admin = await Admin.findOne({ phoneNumber });
+        if (!admin || !(await admin.comparePassword(password))) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
+
+        const token = jwt.sign(
+            { adminId: admin._id, role: 'admin' },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Admin login successful',
+            token,
+            user: {
+                _id: admin._id,
+                username: admin.username,
+                phoneNumber: admin.phoneNumber,
+                district: admin.district,
+                area: admin.area,
+                role: 'admin'
+            }
+        });
+
+    } catch (error) {
+        console.error('Admin login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+});
+
 // Create Admin (Protected Route)
 router.post('/admin', authenticateSuperAdmin, async (req, res) => {
     try {
@@ -183,6 +232,66 @@ router.get('/admin/:id', authenticateSuperAdmin, async (req, res) => {
 });
 
 
+
+// Update Admin (Protected Route)
+router.put('/admin/:id', authenticateSuperAdmin, async (req, res) => {
+    try {
+        const { username, phoneNumber, password, district, area } = req.body;
+
+        const admin = await Admin.findById(req.params.id);
+        if (!admin) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admin not found'
+            });
+        }
+
+        if (username || phoneNumber) {
+            const duplicate = await Admin.findOne({
+                _id: { $ne: admin._id },
+                $or: [
+                    ...(username ? [{ username }] : []),
+                    ...(phoneNumber ? [{ phoneNumber }] : [])
+                ]
+            });
+            if (duplicate) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Another admin with this username or phone number already exists'
+                });
+            }
+        }
+
+        if (username) admin.username = username;
+        if (phoneNumber) admin.phoneNumber = phoneNumber;
+        if (district) admin.district = district;
+        if (area) admin.area = area;
+        if (password) admin.password = password; // re-hashed by the pre-save hook
+
+        await admin.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Admin updated successfully',
+            data: {
+                _id: admin._id,
+                username: admin.username,
+                phoneNumber: admin.phoneNumber,
+                district: admin.district,
+                area: admin.area,
+                createdAt: admin.createdAt,
+                updatedAt: admin.updatedAt
+            }
+        });
+
+    } catch (error) {
+        console.error('Update admin error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+});
 
 // Delete Admin (Protected Route)
 router.delete('/admin/:id', authenticateSuperAdmin, async (req, res) => {

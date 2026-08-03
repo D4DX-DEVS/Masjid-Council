@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, FileText, Heart, Building2, CalendarDays } from 'lucide-react';
 import logo from '../assets/logo.png';
+import dxLogo from '../assets/dx-logo-sml.png';
 
 // Logout and the account details live in the page header's profile menu, not here.
 const AdminSidebar = () => {
@@ -53,6 +54,19 @@ const AdminSidebar = () => {
           ))}
         </nav>
 
+        {sidebarOpen && (
+          <div className="p-4 border-t border-gray-100">
+            <a
+              href="https://www.d4dx.co"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              Powered by
+              <img src={dxLogo} alt="D4DX Innovations LLP" className="h-8 w-auto flex-shrink-0" />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Spacer to push content (desktop only) */}
