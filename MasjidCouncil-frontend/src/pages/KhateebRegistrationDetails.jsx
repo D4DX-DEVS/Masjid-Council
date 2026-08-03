@@ -176,7 +176,6 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.class}`}>{statusConfig.text}</span>
                 </div>
               </div>
-              <Field label="രജിസ്ട്രേഷൻ ഫീസ് (₹250)" value={data.feePaid === 'yes' ? 'അടച്ചു' : 'അടച്ചിട്ടില്ല'} />
             </div>
           </div>
 

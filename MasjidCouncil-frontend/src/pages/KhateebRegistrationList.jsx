@@ -67,10 +67,10 @@ const KhateebRegistrationList = ({ role = 'admin' }) => {
   );
 
   const searchFields = useMemo(() => ["fullName", "phone", "masjidName", "mahallu", "district", "area"], []);
-  const filterFields = useMemo(() => ["status", "district", "attending", "feePaid"], []);
+  const filterFields = useMemo(() => ["status", "district", "attending"], []);
   const uniqueFieldValues = useMemo(() => ({ district: uniqueDistricts }), [uniqueDistricts]);
   const filterFieldLabels = useMemo(
-    () => ({ status: "Status", district: "District", attending: "Attending", feePaid: "Fee Paid" }),
+    () => ({ status: "Status", district: "District", attending: "Attending" }),
     []
   );
 
@@ -135,7 +135,7 @@ const KhateebRegistrationList = ({ role = 'admin' }) => {
                           {[item.masjidName, item.district, item.area, item.phone].filter(Boolean).join(' · ') || 'Not specified'}
                         </p>
                         <p className="mt-0.5 text-[11px] text-gray-400 truncate">
-                          {item.attending === 'yes' ? 'പങ്കെടുക്കും' : 'ഇല്ല'} · ഫീസ്: {item.feePaid === 'yes' ? 'അടച്ചു' : 'ഇല്ല'}
+                          {item.attending === 'yes' ? 'പങ്കെടുക്കും' : 'ഇല്ല'}
                         </p>
                       </button>
                     ))
@@ -154,7 +154,6 @@ const KhateebRegistrationList = ({ role = 'admin' }) => {
                         <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Location</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Phone</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Attending</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Fee</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Status</th>
                         <th className="px-4 py-3 text-center text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Action</th>
                       </tr>
@@ -168,13 +167,12 @@ const KhateebRegistrationList = ({ role = 'admin' }) => {
                             onClick={() => openDetails(item)}
                           >
                             <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{item.fullName || 'Unknown'}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{item.masjidName || '-'}</td>
+                            <td className="px-4 py-3 max-w-[220px] truncate text-sm text-gray-900" title={item.masjidName || '-'}>{item.masjidName || '-'}</td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                               {[item.district, item.area].filter(Boolean).join(', ') || 'Not specified'}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{item.phone || '-'}</td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{item.attending === 'yes' ? 'Yes' : 'No'}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{item.feePaid === 'yes' ? 'Paid' : 'Not paid'}</td>
                             <td className="px-4 py-3 whitespace-nowrap"><StatusBadge status={item.status} /></td>
                             <td className="px-4 py-3 whitespace-nowrap text-center">
                               <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-50 hover:bg-green-100 transition-colors">

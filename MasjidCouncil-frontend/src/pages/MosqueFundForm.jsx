@@ -840,7 +840,7 @@ const MosqueFundForm = () => {
   }
 
   return (
-    <div className="mc-form max-w-4xl mx-auto p-6 bg-white">
+    <div className="mc-form max-w-4xl mx-auto my-4 sm:my-8 p-4 sm:p-8 bg-white rounded-2xl shadow-xl ring-1 ring-gray-200">
       <div className="mt-2">
         <div className="bg-white border-b p-6 relative">
           {/* Cross button */}
@@ -870,7 +870,7 @@ const MosqueFundForm = () => {
 
       <div className="space-y-8">
         {/* Mosque Details Section */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4"style={{ fontFamily: "Noto Sans Malayalam" }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -1059,7 +1059,7 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Help Status Section */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>മുമ്പ് സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -1104,7 +1104,7 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Current Help Section */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>നലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="space-y-4">
             <div>
@@ -1174,7 +1174,7 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Welfare Fund Details */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>കോൺടാക്റ്റ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -1229,7 +1229,7 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Required Documents */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>ആവശ്യമായ ഡോക്യുമെന്റുകൾ</h2>
           <div className="space-y-6">
             {/* Bank Passbook Upload */}
@@ -1357,7 +1357,7 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Declarations */}
-        <div className="border rounded-lg p-4 sm:p-6">
+        <div className="mc-section">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>പ്രഖ്യാപനങ്ങൾ</h2>
           <div className="space-y-4">
             <label className="flex items-start space-x-3">
