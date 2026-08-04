@@ -257,7 +257,7 @@ const MosqueFundForm = () => {
   const fetchDistricts = async () => {
     setLoadingDropdowns(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/districts`);
       const result = await response.json();
       
       if (result.success && result.districts && Array.isArray(result.districts)) {
@@ -275,7 +275,7 @@ const MosqueFundForm = () => {
   // Fetch areas for a specific district
   const fetchAreasForDistrict = async (districtId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/areas/${districtId}`);
       const result = await response.json();
       
       if (result.success && result.areas && Array.isArray(result.areas)) {
@@ -296,7 +296,7 @@ const MosqueFundForm = () => {
   // Fetch units for a specific area
   const fetchUnitsForArea = async (areaId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/units/${areaId}`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/units/${areaId}`);
       const result = await response.json();
       
       if (result.success && result.units && Array.isArray(result.units)) {
@@ -315,45 +315,13 @@ const MosqueFundForm = () => {
   };
 
   // Fallback data for districts
-  const getFallbackDistricts = () => [
-    { id: 1, title: 'Kozhikode', name: 'Kozhikode' },
-    { id: 2, title: 'Malappuram', name: 'Malappuram' },
-    { id: 3, title: 'Kannur', name: 'Kannur' },
-    { id: 4, title: 'Kasaragod', name: 'Kasaragod' },
-    { id: 5, title: 'Wayanad', name: 'Wayanad' },
-    { id: 6, title: 'Thrissur', name: 'Thrissur' },
-    { id: 7, title: 'Ernakulam', name: 'Ernakulam' },
-    { id: 8, title: 'Kottayam', name: 'Kottayam' },
-    { id: 9, title: 'Alappuzha', name: 'Alappuzha' },
-    { id: 10, title: 'Pathanamthitta', name: 'Pathanamthitta' },
-    { id: 11, title: 'Kollam', name: 'Kollam' },
-    { id: 12, title: 'Thiruvananthapuram', name: 'Thiruvananthapuram' },
-    { id: 13, title: 'Palakkad', name: 'Palakkad' },
-    { id: 14, title: 'Idukki', name: 'Idukki' }
-  ];
+  const getFallbackDistricts = () => []; // ponytail: master data is the source of truth — no invented rows
 
   // Fallback data for areas
-  const getFallbackAreas = () => [
-    { id: 1, title: 'Kozhikode City', name: 'Kozhikode City' },
-    { id: 2, title: 'Feroke', name: 'Feroke' },
-    { id: 3, title: 'Koyilandy', name: 'Koyilandy' },
-    { id: 4, title: 'Vadakara', name: 'Vadakara' },
-    { id: 5, title: 'Thiruvambady', name: 'Thiruvambady' },
-    { id: 6, title: 'Koduvally', name: 'Koduvally' },
-    { id: 7, title: 'Balussery', name: 'Balussery' },
-    { id: 8, title: 'Perambra', name: 'Perambra' },
-    { id: 9, title: 'Thiruvallur', name: 'Thiruvallur' },
-    { id: 10, title: 'Elathur', name: 'Elathur' }
-  ];
+  const getFallbackAreas = () => []; // ponytail: master data is the source of truth — no invented rows
 
   // Fallback data for units
-  const getFallbackUnits = () => [
-    { id: 1, title: 'Unit 1', name: 'Unit 1' },
-    { id: 2, title: 'Unit 2', name: 'Unit 2' },
-    { id: 3, title: 'Unit 3', name: 'Unit 3' },
-    { id: 4, title: 'Unit 4', name: 'Unit 4' },
-    { id: 5, title: 'Unit 5', name: 'Unit 5' }
-  ];
+  const getFallbackUnits = () => []; // ponytail: master data is the source of truth — no invented rows
 
   // Auto-fill function for mosque data by affiliation number
   const fetchMosqueByAffiliation = async (affiliationNumber) => {
@@ -362,7 +330,7 @@ const MosqueFundForm = () => {
     try {
       setLoadingAffiliation(true);
       
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/${affiliationNumber}`);
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/affiliation/${affiliationNumber}`);
       const result = await response.json();
       
       if (result.success && result.data) {

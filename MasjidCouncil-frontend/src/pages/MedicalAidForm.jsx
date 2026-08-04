@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import SelectField from '../components/SelectField';
 import logo from '../assets/logo.png';
+import { getRequiredDocuments, getMissingRequiredDocs } from '../lib/welfareFundDocs';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -39,10 +40,17 @@ const MedicalAidForm = () => {
     ownContribution: '',
     previousHelp: '',
     mosquePresident: '',
-    mosquePhone: ''
+    mosquePhone: '',
+
+    // Uploaded supporting documents, keyed by doc key from welfareFundDocs
+    documents: {}
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+
+  // File upload state, keyed by doc key
+  const [uploadedFiles, setUploadedFiles] = useState({});
+  const [uploadingDoc, setUploadingDoc] = useState('');
 
   // State for dropdown data
   const [districts, setDistricts] = useState([]);
@@ -94,7 +102,7 @@ const MedicalAidForm = () => {
   const fetchDistricts = async () => {
     setLoadingDropdowns(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/districts`);
       const result = await response.json();
       
       if (result.success && result.districts && Array.isArray(result.districts)) {
@@ -112,7 +120,7 @@ const MedicalAidForm = () => {
   // Fetch areas for a specific district
   const fetchAreasForDistrict = async (districtId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/areas/${districtId}`);
       const result = await response.json();
       
       if (result.success && result.areas && Array.isArray(result.areas)) {
@@ -134,7 +142,7 @@ const MedicalAidForm = () => {
   const fetchUnitsForArea = async (areaId) => {
     try {
       console.log('Fetching units for area ID:', areaId);
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/units/${areaId}`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/units/${areaId}`);
       const result = await response.json();
       
       console.log('Units API response:', result);
@@ -159,45 +167,13 @@ const MedicalAidForm = () => {
   };
 
   // Fallback data for districts
-  const getFallbackDistricts = () => [
-    { id: 1, title: 'Kozhikode', name: 'Kozhikode' },
-    { id: 2, title: 'Malappuram', name: 'Malappuram' },
-    { id: 3, title: 'Kannur', name: 'Kannur' },
-    { id: 4, title: 'Kasaragod', name: 'Kasaragod' },
-    { id: 5, title: 'Wayanad', name: 'Wayanad' },
-    { id: 6, title: 'Thrissur', name: 'Thrissur' },
-    { id: 7, title: 'Ernakulam', name: 'Ernakulam' },
-    { id: 8, title: 'Kottayam', name: 'Kottayam' },
-    { id: 9, title: 'Alappuzha', name: 'Alappuzha' },
-    { id: 10, title: 'Pathanamthitta', name: 'Pathanamthitta' },
-    { id: 11, title: 'Kollam', name: 'Kollam' },
-    { id: 12, title: 'Thiruvananthapuram', name: 'Thiruvananthapuram' },
-    { id: 13, title: 'Palakkad', name: 'Palakkad' },
-    { id: 14, title: 'Idukki', name: 'Idukki' }
-  ];
+  const getFallbackDistricts = () => []; // ponytail: master data is the source of truth — no invented rows
 
   // Fallback data for areas
-  const getFallbackAreas = () => [
-    { id: 1, title: 'Kozhikode City', name: 'Kozhikode City' },
-    { id: 2, title: 'Feroke', name: 'Feroke' },
-    { id: 3, title: 'Koyilandy', name: 'Koyilandy' },
-    { id: 4, title: 'Vadakara', name: 'Vadakara' },
-    { id: 5, title: 'Thiruvambady', name: 'Thiruvambady' },
-    { id: 6, title: 'Koduvally', name: 'Koduvally' },
-    { id: 7, title: 'Balussery', name: 'Balussery' },
-    { id: 8, title: 'Perambra', name: 'Perambra' },
-    { id: 9, title: 'Thiruvallur', name: 'Thiruvallur' },
-    { id: 10, title: 'Elathur', name: 'Elathur' }
-  ];
+  const getFallbackAreas = () => []; // ponytail: master data is the source of truth — no invented rows
 
   // Fallback data for units
-  const getFallbackUnits = () => [
-    { id: 1, title: 'Unit 1', name: 'Unit 1' },
-    { id: 2, title: 'Unit 2', name: 'Unit 2' },
-    { id: 3, title: 'Unit 3', name: 'Unit 3' },
-    { id: 4, title: 'Unit 4', name: 'Unit 4' },
-    { id: 5, title: 'Unit 5', name: 'Unit 5' }
-  ];
+  const getFallbackUnits = () => []; // ponytail: master data is the source of truth — no invented rows
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -342,7 +318,7 @@ const MedicalAidForm = () => {
     try {
       setLoadingAffiliation(true);
       
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/${affiliationNumber}`);
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/affiliation/${affiliationNumber}`);
       const result = await response.json();
       
       if (result.success && result.data) {
@@ -622,7 +598,75 @@ const MedicalAidForm = () => {
       return false;
     }
 
+    const missingDocs = getMissingRequiredDocs(formData.helpPurpose, formData.documents);
+    if (missingDocs.length > 0) {
+      showErrorModal(
+        'ദയവായി ഈ രേഖകൾ അപ്‌ലോഡ് ചെയ്യുക: ' + missingDocs.map((doc) => doc.ml).join(', ')
+      );
+      return false;
+    }
+
     return true;
+  };
+
+  const ALLOWED_UPLOAD_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+  const handleDocumentUpload = async (file, docKey) => {
+    if (!file) return;
+
+    if (!ALLOWED_UPLOAD_TYPES.includes(file.type)) {
+      showErrorModal('ദയവായി PDF, JPEG, PNG, GIF, WEBP ഫയലുകൾ മാത്രം അപ്‌ലോഡ് ചെയ്യുക');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showErrorModal('ഫയൽ സൈസ് 5MB ൽ കുറവായിരിക്കണം');
+      return;
+    }
+
+    setUploadingDoc(docKey);
+
+    try {
+      const body = new FormData();
+      body.append(docKey, file);
+
+      const response = await fetch(`${API_BASE_URL}/api/welfarefund/upload-files`, {
+        method: 'POST',
+        body,
+      });
+
+      const result = await response.json();
+      const fileData = result.success && result.data?.[docKey];
+
+      if (!fileData) {
+        showErrorModal('ഫയൽ അപ്‌ലോഡ് ചെയ്യുന്നതിൽ പിശക്: ' + (result.message || ''));
+        return;
+      }
+
+      setUploadedFiles((prev) => ({ ...prev, [docKey]: fileData.originalName }));
+      setFormData((prev) => ({
+        ...prev,
+        documents: { ...prev.documents, [docKey]: fileData.cdnUrl },
+      }));
+    } catch (error) {
+      console.error('File upload error:', error);
+      showErrorModal('ഫയൽ അപ്‌ലോഡ് ചെയ്യുന്നതിൽ പിശക് സംഭവിച്ചു');
+    } finally {
+      setUploadingDoc('');
+    }
+  };
+
+  const removeDocument = (docKey) => {
+    setUploadedFiles((prev) => {
+      const next = { ...prev };
+      delete next[docKey];
+      return next;
+    });
+    setFormData((prev) => {
+      const documents = { ...prev.documents };
+      delete documents[docKey];
+      return { ...prev, documents };
+    });
   };
 
   // Updated function to handle submit button click
@@ -680,13 +724,20 @@ const MedicalAidForm = () => {
       return;
     }
     
+    // Drop uploads that belong to a purpose the applicant switched away from
+    const applicableDocs = Object.fromEntries(
+      getRequiredDocuments(formData.helpPurpose)
+        .filter((doc) => formData.documents[doc.key])
+        .map((doc) => [doc.key, formData.documents[doc.key]])
+    );
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/welfarefund/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, documents: applicableDocs }),
       });
 
       const result = await response.json();
@@ -716,8 +767,10 @@ const MedicalAidForm = () => {
           ownContribution: '',
           previousHelp: '',
           mosquePresident: '',
-          mosquePhone: ''
+          mosquePhone: '',
+          documents: {}
         });
+        setUploadedFiles({});
         // Navigate after modal is closed
         setTimeout(() => {
           navigate('/');
@@ -1245,6 +1298,65 @@ const MedicalAidForm = () => {
             </div>
           </div>
         </div>
+
+        {/* Supporting Documents - the list depends on the selected help purpose */}
+        {formData.helpPurpose && (
+          <div className="mc-section">
+            <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
+              അപേക്ഷയോടൊപ്പം ചേർക്കേണ്ട രേഖകൾ
+            </h2>
+            <div className="space-y-3">
+              {getRequiredDocuments(formData.helpPurpose).map((doc) => (
+                <div key={doc.key} className="border border-gray-300 rounded-lg p-3">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                    {doc.ml}{' '}
+                    {doc.required
+                      ? <span className="text-red-500">*</span>
+                      : <span className="text-gray-400">(നിർബന്ധമില്ല)</span>}
+                  </label>
+
+                  {formData.documents[doc.key] ? (
+                    <div className="flex items-center justify-between gap-3 bg-green-50 rounded-lg px-3 py-2">
+                      <a
+                        href={formData.documents[doc.key]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-700 font-medium truncate hover:underline"
+                      >
+                        {uploadedFiles[doc.key] || 'അപ്‌ലോഡ് ചെയ്തു'}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => removeDocument(doc.key)}
+                        className="text-sm text-red-600 hover:text-red-700 flex-shrink-0"
+                        style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                      >
+                        നീക്കം ചെയ്യുക
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
+                      disabled={uploadingDoc === doc.key}
+                      onChange={(e) => handleDocumentUpload(e.target.files[0], doc.key)}
+                      className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100 disabled:opacity-50"
+                    />
+                  )}
+
+                  {uploadingDoc === doc.key && (
+                    <p className="text-xs text-gray-500 mt-1" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      അപ്‌ലോഡ് ചെയ്യുന്നു...
+                    </p>
+                  )}
+                </div>
+              ))}
+              <p className="text-xs text-gray-500" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                PDF, JPG, PNG ഫയലുകൾ - പരമാവധി 5MB
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Previous Help Section */}
         <div className="mc-section">

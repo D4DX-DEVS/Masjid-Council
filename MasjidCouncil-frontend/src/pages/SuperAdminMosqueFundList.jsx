@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { authHeaders } from '../lib/auth';
 import { useNavigate } from "react-router-dom";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
@@ -31,7 +32,7 @@ const SuperAdminMosqueFundList = () => {
 
   const fetchMosqueFunds = async () => {
     try {
-      const data = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
+      const data = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`, { headers: authHeaders() });
       if (data.success) {
         setMosqueFunds(data.data || []);
       } else {

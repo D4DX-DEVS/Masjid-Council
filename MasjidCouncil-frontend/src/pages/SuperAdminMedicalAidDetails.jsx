@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { authHeaders } from '../lib/auth';
 import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
+import { getPurposeLabel, getRequiredDocuments, isViewableUrl } from '../lib/welfareFundDocs';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
@@ -40,9 +42,7 @@ const SuperAdminMedicalAidDetails = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/welfarefund/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
       });
 
       const data = await response.json();
@@ -450,7 +450,7 @@ const SuperAdminMedicalAidDetails = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-gray-500">Purpose of Help</label>
-                <p className="text-lg font-medium text-blue-600">{displayData.helpPurpose || 'N/A'}</p>
+                <p className="text-lg font-medium text-blue-600">{getPurposeLabel(displayData.helpPurpose, 'en') || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-500">Detailed Description</label>
@@ -503,38 +503,47 @@ const SuperAdminMedicalAidDetails = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Required Documents</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">Employee Aadhaar Copy</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">Mosque Bank Passbook Copy</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">House Repair Estimate</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">House Photos</span>
-              </div>
+              {getRequiredDocuments(displayData.helpPurpose).map((doc) => {
+                const stored = displayData.documents?.[doc.key];
+                const url = isViewableUrl(stored) ? stored : null;
+                return (
+                  <div key={doc.key} className="flex items-center space-x-2">
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${url ? 'bg-green-500' : 'bg-gray-300'}`}>
+                      <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        {url ? (
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        ) : (
+                          <path fillRule="evenodd" d="M4 9h12v2H4V9z" clipRule="evenodd" />
+                        )}
+                      </svg>
+                    </div>
+                    <span className="text-sm text-gray-900 break-words">{doc.en}</span>
+                    {url ? (
+                      <span className="flex items-center gap-2">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-blue-600 hover:underline"
+                        >
+                          View
+                        </a>
+                        <a
+                          href={url}
+                          download
+                          className="text-xs font-medium text-green-600 hover:underline"
+                        >
+                          Download
+                        </a>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">
+                        {doc.required ? 'Not attached' : 'Optional'}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

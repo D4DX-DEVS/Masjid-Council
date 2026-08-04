@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { authHeaders } from '../lib/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -34,9 +35,7 @@ const AffiliationFormList = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
       });
 
       const data = await response.json();
@@ -338,6 +337,12 @@ const AffiliationFormList = () => {
                 <label className="text-xs font-medium text-gray-500">ഖബറിസ്ഥാൻ ഉണ്ടോ?</label>
                 <p className="text-sm text-gray-900 break-words">{formData.hasCemetery ? 'ഉണ്ട്' : 'ഇല്ല'}</p>
                 </div>
+              {formData.hasCemetery && (
+                <div>
+                  <label className="text-xs font-medium text-gray-500">ഖബറിസ്ഥാൻ വിശദാംശങ്ങൾ</label>
+                  <p className="text-sm text-gray-900 break-words">{formData.cemeteryDescription || 'വിവരം ഇല്ല'}</p>
+                </div>
+              )}
             </div>
           </section>
 

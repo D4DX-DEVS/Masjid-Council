@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { authHeaders } from '../lib/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -34,9 +35,7 @@ const MosqueFundList = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/mosqueFund/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
       });
 
       const data = await response.json();

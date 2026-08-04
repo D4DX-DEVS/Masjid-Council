@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { authHeaders } from '../lib/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { getPurposeLabel, getRequiredDocuments, isViewableUrl } from '../lib/welfareFundDocs';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -34,9 +36,7 @@ const MedicalAidDataList = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/welfarefund/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
       });
 
       const data = await response.json();
@@ -353,7 +353,7 @@ const MedicalAidDataList = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-gray-500">സഹായത്തിന്റെ ഉദ്ദേശ്യം</label>
-                <p className="text-lg font-medium text-blue-600">{formData.helpPurpose || 'വിവരം ഇല്ല'}</p>
+                <p className="text-lg font-medium text-blue-600">{getPurposeLabel(formData.helpPurpose) || 'വിവരം ഇല്ല'}</p>
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-500">ആവശ്യത്തിന്റെ വിശദവിവരം</label>
@@ -410,38 +410,47 @@ const MedicalAidDataList = () => {
           <section className="border border-gray-200 rounded-lg p-4">
             <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">ആവശ്യമായ രേഖകൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">ജീവനക്കാരന്റെ ആധാർ കോപ്പി</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">മസ്ജിദ് ബാങ്ക് പാസ് ബുക്ക് കോപ്പി</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">വീട് റിപ്പയർ എസ്റ്റിമേറ്റ്</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-900 break-words">വീടിന്റെ ഫോട്ടോകൾ</span>
-              </div>
+              {getRequiredDocuments(formData.helpPurpose).map((doc) => {
+                const stored = formData.documents?.[doc.key];
+                const url = isViewableUrl(stored) ? stored : null;
+                return (
+                  <div key={doc.key} className="flex items-center space-x-2">
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${url ? 'bg-green-500' : 'bg-gray-300'}`}>
+                      <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        {url ? (
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        ) : (
+                          <path fillRule="evenodd" d="M4 9h12v2H4V9z" clipRule="evenodd" />
+                        )}
+                      </svg>
+                    </div>
+                    <span className="text-sm text-gray-900 break-words">{doc.ml}</span>
+                    {url ? (
+                      <span className="flex items-center gap-2">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-blue-600 hover:underline"
+                        >
+                          കാണുക
+                        </a>
+                        <a
+                          href={url}
+                          download
+                          className="text-xs font-medium text-green-600 hover:underline"
+                        >
+                          ഡൗൺലോഡ്
+                        </a>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">
+                        {doc.required ? 'നൽകിയിട്ടില്ല' : 'നിർബന്ധമില്ല'}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
 

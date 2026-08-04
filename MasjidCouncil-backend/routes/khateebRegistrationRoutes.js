@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const khateebRegistration = require("../models/khateebRegistration");
+const { authenticateAdmin } = require("../middleware/auth");
 
 // TEST ROUTE
 router.get("/test", (req, res) => {
@@ -58,7 +59,7 @@ router.post("/create", async (req, res) => {
 });
 
 // READ ALL
-router.get("/all", async (req, res) => {
+router.get("/all", authenticateAdmin, async (req, res) => {
     try {
         const registrations = await khateebRegistration.find().sort({ createdAt: -1 });
 
@@ -78,7 +79,7 @@ router.get("/all", async (req, res) => {
 });
 
 // READ ONE
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateAdmin, async (req, res) => {
     try {
         const registration = await khateebRegistration.findById(req.params.id);
 
@@ -104,7 +105,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE (also used by admin / super admin for status changes)
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateAdmin, async (req, res) => {
     try {
         const updated = await khateebRegistration.findByIdAndUpdate(
             req.params.id,
@@ -134,7 +135,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateAdmin, async (req, res) => {
     try {
         const deleted = await khateebRegistration.findByIdAndDelete(req.params.id);
 

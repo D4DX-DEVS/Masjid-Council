@@ -145,36 +145,10 @@ const AffiliationForm = () => {
 
 
   // Fallback data for districts
-  const getFallbackDistricts = () => [
-    { id: 1, name: 'Kozhikode', districtName: 'Kozhikode' },
-    { id: 2, name: 'Malappuram', districtName: 'Malappuram' },
-    { id: 3, name: 'Kannur', districtName: 'Kannur' },
-    { id: 4, name: 'Kasaragod', districtName: 'Kasaragod' },
-    { id: 5, name: 'Wayanad', districtName: 'Wayanad' },
-    { id: 6, name: 'Thrissur', districtName: 'Thrissur' },
-    { id: 7, name: 'Ernakulam', districtName: 'Ernakulam' },
-    { id: 8, name: 'Kottayam', districtName: 'Kottayam' },
-    { id: 9, name: 'Alappuzha', districtName: 'Alappuzha' },
-    { id: 10, name: 'Pathanamthitta', districtName: 'Pathanamthitta' },
-    { id: 11, name: 'Kollam', districtName: 'Kollam' },
-    { id: 12, name: 'Thiruvananthapuram', districtName: 'Thiruvananthapuram' },
-    { id: 13, name: 'Palakkad', districtName: 'Palakkad' },
-    { id: 14, name: 'Idukki', districtName: 'Idukki' }
-  ];
+  const getFallbackDistricts = () => []; // ponytail: master data is the source of truth — no invented rows
 
   // Fallback data for areas
-  const getFallbackAreas = () => [
-    { id: 1, name: 'Kozhikode City', areaName: 'Kozhikode City' },
-    { id: 2, name: 'Feroke', areaName: 'Feroke' },
-    { id: 3, name: 'Koyilandy', areaName: 'Koyilandy' },
-    { id: 4, name: 'Vadakara', areaName: 'Vadakara' },
-    { id: 5, name: 'Thiruvambady', areaName: 'Thiruvambady' },
-    { id: 6, name: 'Koduvally', areaName: 'Koduvally' },
-    { id: 7, name: 'Balussery', areaName: 'Balussery' },
-    { id: 8, name: 'Perambra', areaName: 'Perambra' },
-    { id: 9, name: 'Thiruvallur', areaName: 'Thiruvallur' },
-    { id: 10, name: 'Elathur', areaName: 'Elathur' }
-  ];
+  const getFallbackAreas = () => []; // ponytail: master data is the source of truth — no invented rows
 
 
   // Fetch districts from external API (Updated for Malarvadi pattern)
@@ -183,7 +157,7 @@ const AffiliationForm = () => {
     setApiError(null);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/districts`);
       const result = await response.json();
       
       if (result.success && result.districts && Array.isArray(result.districts)) {
@@ -222,8 +196,9 @@ const AffiliationForm = () => {
 
   // Fetch areas for a specific district using new Malarvadi pattern
   const fetchAreasForDistrict = async (districtId) => {
+    setLoadingAreas(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/areas/${districtId}`);
       const result = await response.json();
       
       if (result.success && result.areas && Array.isArray(result.areas)) {
@@ -244,43 +219,14 @@ const AffiliationForm = () => {
       setAreas(fallbackAreas);
       setFilteredAreas(fallbackAreas);
       return fallbackAreas;
-    }
-  };
-
-  // Fetch all areas from external API (for initial load) - Updated for Malarvadi pattern
-  const fetchAreas = async () => {
-    setLoadingAreas(true);
-    setApiError(null);
-    
-    try {
-      // Note: The new API requires districtId for areas, so we'll use fallback for now
-      // In a real implementation, you'd need to fetch areas per district
-      console.warn('New API requires districtId for areas, using fallback data');
-      const fallbackAreas = getFallbackAreas();
-      setAreas(fallbackAreas);
-      setFilteredAreas(fallbackAreas);
-    } catch (error) {
-      console.error('Error fetching areas:', error);
-      setApiError('Failed to load areas from new API');
-      const fallbackAreas = getFallbackAreas();
-      setAreas(fallbackAreas);
-      setFilteredAreas(fallbackAreas);
     } finally {
       setLoadingAreas(false);
     }
   };
 
-  // Load data on component mount
+  // Load data on component mount. Areas arrive only after a district is picked.
   useEffect(() => {
-    console.log('AffiliationForm mounted, fetching external API data...');
-    // Ensure we start with fallback data immediately
-    setDistricts(getFallbackDistricts());
-    const fallbackAreas = getFallbackAreas();
-    setAreas(fallbackAreas);
-    setFilteredAreas(fallbackAreas);
-    // Then try to fetch from API
     fetchDistricts();
-    fetchAreas();
   }, []);
 
 
@@ -914,13 +860,13 @@ const AffiliationForm = () => {
         });
       } else {
         console.error("Form submission failed:", result);
-        showErrorModal(`പിശക്: ${result.message || 'Unknown error occurred'}`);
+        showErrorModal(result.message || 'Could not submit the application. Please try again.');
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       console.error("Error details:", error.message);
       showErrorModal(
-        "അപേക്ഷ സമർപ്പിക്കുന്നതിൽ പിശക് സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക."
+        "Could not submit the application. Please check your connection and try again."
       );
     }
   };
@@ -2231,7 +2177,7 @@ const AffiliationForm = () => {
                   <h3 className={`text-lg font-semibold ${
                     modalType === 'success' ? 'text-green-600' : 'text-red-500'
                   }`}>
-                    {modalType === 'success' ? 'വിജയം!' : 'പിശക്!'}
+                    {modalType === 'success' ? 'Success!' : 'Error!'}
                   </h3>
                 </div>
               </div>
@@ -2246,7 +2192,7 @@ const AffiliationForm = () => {
               {modalType === 'success' && trackingId && (
                 <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
                   <p className="text-sm text-green-800 font-medium">
-                    ട്രാക്കിംഗ് ഐഡി:
+                    Tracking ID:
                   </p>
                   <p className="text-lg font-bold text-green-900" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                     {trackingId}
@@ -2266,7 +2212,7 @@ const AffiliationForm = () => {
                   }`}
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  {modalType === 'success' ? 'ശരി' : 'ശരി'}
+                  OK
                 </button>
               </div>
             </div>

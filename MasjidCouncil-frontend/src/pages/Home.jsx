@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, CalendarDays, ShieldCheck, X } from 'lucide-react';
 import masjidBg from '../assets/masjid.png';
-import dxLogo from '../assets/dx-logo-sml.png';
+import dxLogo from '../assets/dx-logo-sml2.png';
 import logo from '../assets/logo.png';
+import footerLogo from '../assets/mc-logo2.png';
 import bgPattern from '../assets/bg.png';
 import aboutUsImage from '../assets/About Us Image.jpg';
 import { useNavigate } from 'react-router-dom';
@@ -207,15 +208,15 @@ const HeroSection = () => {
               <div className="space-y-4 text-black leading-relaxed"
                    style={{ fontFamily: "Noto Sans Malayalam" }}
               >
-                <p className="text-sm sm:text-base">
+                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
                   മസ്ജിദുകളെ മികവിൻ്റെ കേന്ദ്രങ്ങളാക്കുക എന്ന ലക്ഷ്യത്തോടെ 1990-ൽ സ്ഥാപിതമായ സംവിധാനമാണ് മസ്ജിദ് കൗൺസിൽ കേരള.
                 </p>
                 
-                <p className="text-sm sm:text-base">
+                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
                   മസ്ജിദുകളുടെയും മഹല്ലുകളുടെയും പ്രവർത്തനങ്ങൾക്ക് മേൽനോട്ടം വഹിക്കുകയും ആവശ്യമായ മാർഗ്ഗനിർദ്ദേശങ്ങൾ നൽകുകയും ചെയ്യുക, ഖുത്ബയും ഇമാമത്തും നിർവ്വഹിക്കുവാൻ പ്രാപ്തരായ വ്യക്തികളെ കണ്ടെത്തി പരിശീലനം നൽകുക, നിലവിൽ മസ്ജിദുകളിൽ സേവനം ചെയ്തുവരുന്ന ഖത്വീബുമാരെയും ഇമാമുമാരെയും ശാക്തീകരിക്കുന്നതിനാവശ്യമായ പദ്ധതികൾ നടപ്പിലാക്കുക, മസ്ജിദ്, മഹല്ല് കമ്മിറ്റി ഭാരവാഹികൾക്ക് ആവശ്യമായ പരിശീലന പരിപാടികൾ സംഘടിപ്പിക്കുക തുടങ്ങിയ സുപ്രധാന ഉദ്ദേശ്യ ലക്ഷ്യങ്ങളോടെയാണ് മസ്ജിദ് കൗൺസിൽ കേരള പ്രവർത്തിക്കുന്നത്.
                 </p>
                 
-                <p className="text-sm sm:text-base">
+                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
                   കൂടാതെ ഖത്വീബുമാർക്ക് ഖുത്ബ നിർവ്വഹിക്കുന്നതിന് സഹായകമാകും വിധം വിവിധ വിഷയങ്ങളിൽ സിനോപ്സിസുകൾ തയ്യാറാക്കി നൽകുകയും ചെയ്യുന്നുണ്ട്.
                 </p>
               </div>
@@ -280,7 +281,7 @@ const HeroSection = () => {
           <button
             onClick={handleTrackStatus}
             disabled={tracking}
-            className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F6B3A] hover:bg-[#2E7D4F] disabled:opacity-60 text-white text-sm sm:text-base font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#2E7D4F]/30"
+            className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm sm:text-base font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-green-700/30"
           >
             <Search className={`h-5 w-5 ${tracking ? 'animate-pulse' : ''}`} />
             {tracking ? 'Searching…' : 'Track Status'}
@@ -325,7 +326,7 @@ const HeroSection = () => {
             {/* Logo */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
               <div className="w-16 h-16 lg:w-24 lg:h-24">
-                <img src={logo} alt="Masjid Council Kerala" className="object-contain w-full h-full" />
+                <img src={footerLogo} alt="Masjid Council Kerala" className="object-contain w-full h-full" />
               </div>
               <p className="hidden lg:block text-green-100/90 text-xs leading-relaxed max-w-xs mt-3">
                 Working for the development of mosques and the welfare of the Muslim community across Kerala.
@@ -405,8 +406,7 @@ const HeroSection = () => {
               className="flex items-center gap-2 text-green-100 text-xs hover:text-white transition"
             >
               Powered by
-              {/* ponytail: white pill — the logo is dark navy and would vanish on the green footer */}
-              <img src={dxLogo} alt="D4DX Innovations LLP" className="h-6 w-auto shrink-0 bg-white rounded px-1.5 py-1" />
+              <img src={dxLogo} alt="D4DX Innovations LLP" className="h-6 w-auto shrink-0" />
             </a>
           </div>
         </div>

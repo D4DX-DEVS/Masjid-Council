@@ -74,6 +74,13 @@ const welfarefundSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // Uploaded supporting documents, keyed by document id (see welfareFundDocs.js on
+    // the frontend). Values are public CDN urls. Which keys apply depends on helpPurpose.
+    documents: {
+      type: Map,
+      of: String,
+      default: {},
+    },
     expectedExpense: {
       type: Number,
       required: true,

@@ -40,10 +40,10 @@ const mosqueAffiliationSchema = new mongoose.Schema({
             type: Number,
             required: true,
         },
+        // ponytail: optional + not unique — the form only format-checks email when filled,
+        // so `required` rejected every blank-email submission with a ValidationError.
         email: {
             type: String,
-            required: true,
-            unique: true,
         },
         website: {
             type: String
@@ -65,6 +65,9 @@ const mosqueAffiliationSchema = new mongoose.Schema({
 
     hasCemetery: {
         type: Boolean,
+    },
+    cemeteryDescription: {
+        type: String,
     },
     //mosqueCapacity
     mosqueCapacity: {
@@ -137,13 +140,12 @@ const mosqueAffiliationSchema = new mongoose.Schema({
                 type: String,
                 required: true,
             },
+            // ponytail: optional in the form, so optional here
             phone: {
                 type: String,
-                required: true,
             },
             email: {
                 type: String,
-                required: true,
             },
         }],
         secretary: [{
@@ -151,13 +153,12 @@ const mosqueAffiliationSchema = new mongoose.Schema({
                 type: String,
                 required: true,
             },
+            // ponytail: optional in the form, so optional here
             phone: {
                 type: String,
-                required: true,
             },
             email: {
                 type: String,
-                required: true,
             },
         }],
         workers: [{

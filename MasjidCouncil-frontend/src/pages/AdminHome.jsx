@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { authHeaders } from '../lib/auth';
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, FileText, Heart, Building2, AlertCircle, CalendarDays, ArrowRight } from "lucide-react";
 import AdminSidebar from "../components/AdminSidebar";
@@ -38,10 +39,10 @@ const AdminHome = () => {
 
   const fetchDashboard = async () => {
     try {
-      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
-      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
-      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
-      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`);
+      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`, { headers: authHeaders() });
+      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`, { headers: authHeaders() });
+      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`, { headers: authHeaders() });
+      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`, { headers: authHeaders() });
 
       const count = (data) => ({
         total: data.data?.length || 0,
