@@ -25,6 +25,7 @@ import SuperAdminMosqueFundDetails from './pages/SuperAdminMosqueFundDetails';
 import KhateebRegistrationForm from './pages/KhateebRegistrationForm';
 import KhateebRegistrationList from './pages/KhateebRegistrationList';
 import KhateebRegistrationDetails from './pages/KhateebRegistrationDetails';
+import MasterDataSetup from './pages/MasterDataSetup';
 
 
 // Helper component to wrap Routes and conditional navbar
@@ -40,7 +41,8 @@ const Layout = () => {
     '/mosque-list',
     '/mosque-list-admin',
     '/khateeb-list-admin',
-    '/khateeb-details-admin'
+    '/khateeb-details-admin',
+    '/master-data'
   ];
 
   const superAdminRoutes = [
@@ -93,6 +95,7 @@ const Layout = () => {
         <Route path="/superadmin-affiliation-details" element={<SuperAdminAffiliationDetails />} />
         <Route path="/superadmin-medical-details" element={<SuperAdminMedicalAidDetails />} />
         <Route path="/superadmin-mosque-fund-details" element={<SuperAdminMosqueFundDetails />} />
+        <Route path="/master-data" element={<MasterDataSetup />} />
         <Route path="/khateeb-registration" element={<KhateebRegistrationForm />} />
         <Route path="/khateeb-list-admin" element={<KhateebRegistrationList role="admin" />} />
         <Route path="/khateeb-details-admin" element={<KhateebRegistrationDetails role="admin" />} />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { authHeaders } from '../lib/auth';
 import {
   Plus,
   Edit,
@@ -118,10 +119,10 @@ const SuperAdminDashboard = () => {
     try {
       setStatsLoading(true);
 
-      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
-      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
-      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
-      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`);
+      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`, { headers: authHeaders() });
+      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`, { headers: authHeaders() });
+      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`, { headers: authHeaders() });
+      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`, { headers: authHeaders() });
 
       const count = (data) => ({
         total: data.data?.length || 0,
@@ -145,10 +146,10 @@ const SuperAdminDashboard = () => {
 
   const fetchRecentSubmissions = async () => {
     try {
-      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`);
-      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
-      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`);
-      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`);
+      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`, { headers: authHeaders() });
+      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`, { headers: authHeaders() });
+      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`, { headers: authHeaders() });
+      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`, { headers: authHeaders() });
 
       const all = [
         ...(affiliationData.data || []).map(item => ({ ...item, type: 'affiliation' })),
@@ -167,16 +168,17 @@ const SuperAdminDashboard = () => {
   const fetchDistricts = async () => {
     setLoadingDropdowns(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/districts`);
       const result = await response.json();
 
-      if (result.success && result.districts && Array.isArray(result.districts)) {
-        setDistricts(result.districts);
-      } else {
-        setDistricts(getFallbackDistricts());
-      }
+      const list = result.success && Array.isArray(result.districts)
+        ? result.districts
+        : getFallbackDistricts();
+      setDistricts(list);
+      return list; // callers need it before state settles
     } catch (error) {
       setDistricts(getFallbackDistricts());
+      return getFallbackDistricts();
     } finally {
       setLoadingDropdowns(false);
     }
@@ -184,7 +186,7 @@ const SuperAdminDashboard = () => {
 
   const fetchAreasForDistrict = async (districtId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
+      const response = await fetch(`${API_BASE_URL}/api/master-data/areas/${districtId}`);
       const result = await response.json();
 
       if (result.success && result.areas && Array.isArray(result.areas)) {
@@ -202,30 +204,9 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const getFallbackDistricts = () => [
-    { id: 1, title: 'Kozhikode', name: 'Kozhikode' },
-    { id: 2, title: 'Malappuram', name: 'Malappuram' },
-    { id: 3, title: 'Kannur', name: 'Kannur' },
-    { id: 4, title: 'Kasaragod', name: 'Kasaragod' },
-    { id: 5, title: 'Wayanad', name: 'Wayanad' },
-    { id: 6, title: 'Thrissur', name: 'Thrissur' },
-    { id: 7, title: 'Ernakulam', name: 'Ernakulam' },
-    { id: 8, title: 'Kottayam', name: 'Kottayam' },
-    { id: 9, title: 'Alappuzha', name: 'Alappuzha' },
-    { id: 10, title: 'Pathanamthitta', name: 'Pathanamthitta' },
-    { id: 11, title: 'Kollam', name: 'Kollam' },
-    { id: 12, title: 'Thiruvananthapuram', name: 'Thiruvananthapuram' },
-    { id: 13, title: 'Palakkad', name: 'Palakkad' },
-    { id: 14, title: 'Idukki', name: 'Idukki' }
-  ];
+  const getFallbackDistricts = () => []; // ponytail: master data is the source of truth — no invented rows
 
-  const getFallbackAreas = () => [
-    { id: 1, title: 'Kozhikode City', name: 'Kozhikode City' },
-    { id: 2, title: 'Feroke', name: 'Feroke' },
-    { id: 3, title: 'Koyilandy', name: 'Koyilandy' },
-    { id: 4, title: 'Vadakara', name: 'Vadakara' },
-    { id: 5, title: 'Thiruvambady', name: 'Thiruvambady' }
-  ];
+  const getFallbackAreas = () => []; // ponytail: master data is the source of truth — no invented rows
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -271,12 +252,14 @@ const SuperAdminDashboard = () => {
     setSuccess('');
 
     let submitData = { ...formData };
-    if (!editingAdmin && formData.phoneNumber) {
-      const phoneNumber = formData.phoneNumber.replace(/\D/g, '');
-      const firstFourDigits = phoneNumber.substring(0, 4);
-      if (firstFourDigits.length === 4) {
-        submitData.password = `MCK${firstFourDigits}`;
-      }
+    const digits = (formData.phoneNumber || '').replace(/\D/g, '');
+    if (digits.length !== 10) {
+      setError('Enter a valid 10-digit mobile number');
+      return;
+    }
+    submitData.phoneNumber = digits;
+    if (!editingAdmin) {
+      submitData.password = `MCK${digits.substring(0, 4)}`;
     }
 
     try {
@@ -318,7 +301,8 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const handleEdit = (admin) => {
+  const handleEdit = async (admin) => {
+    setError('');
     setEditingAdmin(admin);
     setFormData({
       username: admin.username,
@@ -328,19 +312,16 @@ const SuperAdminDashboard = () => {
       area: admin.area
     });
     setShowModal(true);
-    fetchDistricts();
 
-    if (admin.district) {
-      const selectedDistrict = districts.find(d =>
-        (d.title || d.name) === admin.district
-      );
+    const list = await fetchDistricts(); // use returned list — `districts` state is stale this tick
+    const selectedDistrict = admin.district
+      ? list.find(d => (d.title || d.name) === admin.district)
+      : null;
 
-      if (selectedDistrict && selectedDistrict.id) {
-        fetchAreasForDistrict(selectedDistrict.id);
-      } else {
-        const fallbackAreas = getFallbackAreas();
-        setFilteredAreas(fallbackAreas);
-      }
+    if (selectedDistrict?.id) {
+      fetchAreasForDistrict(selectedDistrict.id);
+    } else {
+      setFilteredAreas(getFallbackAreas());
     }
   };
 
@@ -369,6 +350,7 @@ const SuperAdminDashboard = () => {
   };
 
   const openCreateModal = () => {
+    setError('');
     setEditingAdmin(null);
     setFormData({
       username: '',
@@ -467,7 +449,7 @@ const SuperAdminDashboard = () => {
 
         <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto">
           {/* Alerts */}
-          {error && (
+          {error && !showModal && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center">
               <AlertCircle className="h-5 w-5 mr-2" />
               {error}
@@ -784,6 +766,13 @@ const SuperAdminDashboard = () => {
                 {editingAdmin ? 'Update the admin account details.' : 'Password is auto-generated from the phone number.'}
               </p>
             </div>
+
+            {error && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center text-sm">
+                <AlertCircle className="h-4 w-4 mr-2 shrink-0" />
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

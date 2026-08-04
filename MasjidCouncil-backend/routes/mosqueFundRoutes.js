@@ -1,7 +1,9 @@
 const express = require("express");
+const { isUploadedDocumentUrl } = require("../utils/documentUrl");
 const router = express.Router();
 const mongoose = require("mongoose");
 const mosqueFund = require("../models/mosqueFund");
+const { authenticateAdmin } = require("../middleware/auth");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs").promises;
@@ -60,6 +62,19 @@ router.post("/create", async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "Both declarations must be accepted"
+            });
+        }
+
+        // Uploaded file urls are rendered in admin hrefs later, so only accept urls
+        // our own upload endpoint produced.
+        const badFileFields = ["bankPassbook", "fullEstimate"].filter(
+            (field) => req.body[field] && !isUploadedDocumentUrl(req.body[field])
+        );
+
+        if (badFileFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid document url for: ${badFileFields.join(", ")}`
             });
         }
 
@@ -160,7 +175,7 @@ router.post("/create", async (req, res) => {
 });
 
 // READ ALL - Get all mosque fund requests
-router.get("/all", async (req, res) => {
+router.get("/all", authenticateAdmin, async (req, res) => {
     try {
         const mosqueFunds = await mosqueFund.find().sort({ createdAt: -1 });
 
@@ -180,7 +195,7 @@ router.get("/all", async (req, res) => {
 });
 
 // READ ONE - Get a specific mosque fund request by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateAdmin, async (req, res) => {
     try {
         const mosqueFundData = await mosqueFund.findById(req.params.id);
 
@@ -206,7 +221,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE - Update a mosque fund request by ID
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateAdmin, async (req, res) => {
     try {
         const existingFund = await mosqueFund.findById(req.params.id);
         if (!existingFund) {
@@ -251,7 +266,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE - Delete a mosque fund request by ID
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateAdmin, async (req, res) => {
     try {
         const mosqueFundData = await mosqueFund.findById(req.params.id);
         if (!mosqueFundData) {
@@ -278,7 +293,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // GET BY STATUS - Get mosque fund requests by status
-router.get("/status/:status", async (req, res) => {
+router.get("/status/:status", authenticateAdmin, async (req, res) => {
     try {
         const validStatuses = ['pending', 'approved', 'rejected', 'under_review'];
         if (!validStatuses.includes(req.params.status)) {
@@ -308,7 +323,7 @@ router.get("/status/:status", async (req, res) => {
 });
 
 // GET BY AFFILIATION NUMBER - Get mosque fund requests by affiliation number
-router.get("/affiliation/:affiliationNumber", async (req, res) => {
+router.get("/affiliation/:affiliationNumber", authenticateAdmin, async (req, res) => {
     try {
         const mosqueFundData = await mosqueFund.find({ 
             mckAffiliation: req.params.affiliationNumber 

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const welfarefund = require("../models/welfarefund");
 const externalApiService = require("../services/externalApiService");
+const { authenticateAdmin } = require("../middleware/auth");
+const { isUploadedDocumentUrl } = require("../utils/documentUrl");
 
 // CREATE - Add a new welfare fund application
 router.post("/create", async (req, res) => {
@@ -35,6 +37,29 @@ router.post("/create", async (req, res) => {
             });
         }
 
+        // Only urls this server's upload endpoint produced may be stored - anything else
+        // ends up in an admin's href later.
+        const documents = req.body.documents || {};
+        const badDocuments = Object.keys(documents).filter((key) => !isUploadedDocumentUrl(documents[key]));
+
+        if (badDocuments.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid document url for: ${badDocuments.join(", ")}`
+            });
+        }
+
+        // Aadhaar copy and bank passbook must be attached for every purpose;
+        // purpose-specific documents stay optional.
+        const missingDocuments = ["aadhaarCopy", "bankPassbook"].filter((key) => !documents[key]);
+
+        if (missingDocuments.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing required documents: ${missingDocuments.join(", ")}`
+            });
+        }
+
         const newWelfareFund = new welfarefund(req.body);
         const savedWelfareFund = await newWelfareFund.save();
         
@@ -54,7 +79,7 @@ router.post("/create", async (req, res) => {
 });
 
 // READ ALL - Get all welfare fund applications
-router.get("/all", async (req, res) => {
+router.get("/all", authenticateAdmin, async (req, res) => {
     try {
         const welfareFunds = await welfarefund.find();
         res.status(200).json({
@@ -73,7 +98,7 @@ router.get("/all", async (req, res) => {
 });
 
 // READ ONE - Get a specific welfare fund application by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateAdmin, async (req, res) => {
     try {
         const welfareFundData = await welfarefund.findById(req.params.id);
         if (!welfareFundData) {
@@ -97,7 +122,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE - Update a welfare fund application by ID
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateAdmin, async (req, res) => {
     try {
         const updatedWelfareFund = await welfarefund.findByIdAndUpdate(
             req.params.id,
@@ -125,7 +150,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE - Delete a welfare fund application by ID
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateAdmin, async (req, res) => {
     try {
         const deletedWelfareFund = await welfarefund.findByIdAndDelete(req.params.id);
         if (!deletedWelfareFund) {

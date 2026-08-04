@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { authHeaders } from '../lib/auth';
 import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -56,7 +57,7 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
     const fetchDetails = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/khateebRegistration/${id}`, {
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
         });
         const result = await response.json();
         if (result.success) {

@@ -119,28 +119,28 @@ const Navbar = () => {
           <div className="flex items-center justify-between gap-2 py-3 md:py-6">
             {/* Logo and Text */}
             <Link to="/" aria-label="Go to home" className="flex items-center">
-              <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto md:h-12 shrink-0" />
+              <img src={logo} alt="Masjid Council Kerala" className="h-12 w-auto md:h-14 shrink-0" />
             </Link>
 
             {/* Center Navigation Buttons - desktop only, pushed toward the right */}
             <div className="hidden md:flex items-center md:space-x-8 min-w-0 md:ml-auto md:mr-3">
               <button
                 onClick={handleFormClick}
-                className="text-black md:text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                className="text-black md:text-lg font-medium tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 style={navFont}
               >
                 Applications
               </button>
               <button
                 onClick={handleAboutClick}
-                className="text-black md:text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                className="text-black md:text-lg font-medium tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 style={navFont}
               >
                 About
               </button>
               <button
                 onClick={handleContactClick}
-                className="text-black md:text-lg font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                className="text-black md:text-lg font-medium tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 style={navFont}
               >
                 Contact

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { authHeaders } from '../lib/auth';
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
@@ -37,7 +38,7 @@ const KhateebRegistrationList = ({ role = 'admin' }) => {
     const fetchRegistrations = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/khateebRegistration/all`, {
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
         });
         const data = await response.json();
         if (data.success) {

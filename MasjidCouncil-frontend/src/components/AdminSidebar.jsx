@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, FileText, Heart, Building2, CalendarDays } from 'lucide-react';
+import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database } from 'lucide-react';
 import logo from '../assets/logo.png';
 import dxLogo from '../assets/dx-logo-sml.png';
 
@@ -20,6 +20,7 @@ const AdminSidebar = () => {
     { to: '/medical-list-admin', icon: Heart, label: 'Welfare Fund', short: 'Welfare' },
     { to: '/mosque-list-admin', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
     { to: '/khateeb-list-admin', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
+    { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
   ];
 
   // Collapsed rail centers the icon instead of leaving it left-aligned in an 80px column.

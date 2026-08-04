@@ -10,6 +10,7 @@ const welfarefundRoutes = require("./routes/welfarefundRoutes");
 const mosqueFundRoutes = require("./routes/mosqueFundRoutes");
 const khateebRegistrationRoutes = require("./routes/khateebRegistrationRoutes");
 const superAdminRoutes = require("./routes/superAdminRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 // const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
@@ -67,12 +68,17 @@ const connectDB = async () => {
 connectDB();
 
 //Routes
+// Shared upload endpoint - mounted under both funds so each form keeps its own path.
+app.use("/api/mosqueFund", uploadRoutes);
+app.use("/api/welfarefund", uploadRoutes);
+
 app.use("/api/mosqueAffiliation", mosqueAffiliationRoutes);
 app.use("/api/welfarefund", welfarefundRoutes);
 app.use("/api/mosqueFund", mosqueFundRoutes);
 app.use("/api/khateebRegistration", khateebRegistrationRoutes);
 app.use("/api/superadmin", superAdminRoutes);
 app.use("/api/track", require("./routes/trackRoutes"));
+app.use("/api/master-data", require("./routes/masterDataRoutes"));
 // app.use("/api/admin", adminRoutes);
 
 PORT = process.env.PORT;

@@ -41,6 +41,42 @@ class ExternalApiService {
         }
     }
 
+    // Fetch areas belonging to a district
+    async getAreasByDistrict(districtId) {
+        try {
+            const response = await axios.get(`${this.baseUrl}/areas/district/${districtId}`);
+            return {
+                success: true,
+                data: response.data
+            };
+        } catch (error) {
+            console.error('Error fetching areas by district:', error.message);
+            return {
+                success: false,
+                error: error.message,
+                data: null
+            };
+        }
+    }
+
+    // Fetch units (halqas) belonging to an area
+    async getUnitsByArea(areaId) {
+        try {
+            const response = await axios.get(`${this.baseUrl}/halqas/area/${areaId}`);
+            return {
+                success: true,
+                data: response.data
+            };
+        } catch (error) {
+            console.error('Error fetching units by area:', error.message);
+            return {
+                success: false,
+                error: error.message,
+                data: null
+            };
+        }
+    }
+
     // Fetch unit details
     async getUnitDetails(unitId) {
         try {

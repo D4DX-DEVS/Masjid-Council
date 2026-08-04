@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { authHeaders } from '../lib/auth';
 import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -40,9 +41,7 @@ const SuperAdminAffiliationDetails = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
       });
 
       const data = await response.json();
@@ -431,6 +430,12 @@ const SuperAdminAffiliationDetails = () => {
                 <label className="text-xs font-medium text-gray-500">Has Cemetery?</label>
                 <p className="text-sm text-gray-900 break-words">{affiliation.hasCemetery ? 'Yes' : 'No'}</p>
               </div>
+              {affiliation.hasCemetery && (
+                <div>
+                  <label className="text-xs font-medium text-gray-500">Cemetery Details</label>
+                  <p className="text-sm text-gray-900 break-words">{affiliation.cemeteryDescription || 'N/A'}</p>
+                </div>
+              )}
             </div>
           </div>
 

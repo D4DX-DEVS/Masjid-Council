@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { authHeaders } from '../lib/auth';
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
@@ -31,7 +32,7 @@ const MedicalAidDataListAdmin = () => {
 
   const fetchMedicalAids = async () => {
     try {
-      const data = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`);
+      const data = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`, { headers: authHeaders() });
       if (data.success) {
         setMedicalAids(data.data || []);
       } else {

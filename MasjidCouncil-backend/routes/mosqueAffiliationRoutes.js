@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mosqueAffiliation = require("../models/mosqueAffiliation");
 const externalApiService = require("../services/externalApiService");
+const { authenticateAdmin } = require("../middleware/auth");
 
 // CREATE - Add a new mosque affiliation
 router.post("/create", async (req, res) => {
@@ -34,6 +35,7 @@ router.post("/create", async (req, res) => {
       }],
       facilities: req.body.facilities || [],
       hasCemetery: req.body.hasCemetery === "ഉണ്ട്",
+      cemeteryDescription: req.body.cemeteryDescription || "",
       mosqueCapacity: req.body.specialtyDescription || "",
       mosqueArea: req.body.category || "",
       fridayMaleAttendance: req.body.menCount || "0",
@@ -91,16 +93,27 @@ router.post("/create", async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating mosque affiliation:", error);
+
+    // ponytail: popup only renders `message`, so put the real reason there
+    let message = "Could not submit the application. Please try again.";
+    if (error.name === "ValidationError") {
+      const fields = Object.values(error.errors).map((e) => e.path).join(", ");
+      message = `Please fill these fields correctly: ${fields}`;
+    } else if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {}).join(", ") || "value";
+      message = `This ${field} is already registered.`;
+    }
+
     res.status(400).json({
       success: false,
-      message: "Error creating mosque affiliation",
+      message,
       error: error.message,
     });
   }
 });
 
 // READ ALL - Get all mosque affiliations
-router.get("/all", async (req, res) => {
+router.get("/all", authenticateAdmin, async (req, res) => {
   try {
     const mosqueAffiliations = await mosqueAffiliation.find();
     res.status(200).json({
@@ -121,9 +134,12 @@ router.get("/all", async (req, res) => {
 // GET BY AFFILIATION NUMBER - Get a specific mosque affiliation by affiliation number
 router.get("/affiliation/:affiliationNumber", async (req, res) => {
   try {
-    const mosqueAffiliationData = await mosqueAffiliation.findOne({
-      affiliationNumber: req.params.affiliationNumber,
-    });
+    // ponytail: public - the fund forms auto-fill from it before login, so only the
+    // fields those forms actually read are returned. No phone, email or committee data.
+    const mosqueAffiliationData = await mosqueAffiliation.findOne(
+      { affiliationNumber: req.params.affiliationNumber },
+      "affiliationNumber name address.address address.district jamathArea.area jamathArea.district"
+    );
     if (!mosqueAffiliationData) {
       return res.status(404).json({
         success: false,
@@ -145,7 +161,7 @@ router.get("/affiliation/:affiliationNumber", async (req, res) => {
 });
 
 // UPDATE BY AFFILIATION NUMBER - Update a mosque affiliation by affiliation number
-router.put("/affiliation/:affiliationNumber", async (req, res) => {
+router.put("/affiliation/:affiliationNumber", authenticateAdmin, async (req, res) => {
   try {
     const updatedMosqueAffiliation = await mosqueAffiliation.findOneAndUpdate(
       { affiliationNumber: req.params.affiliationNumber },
@@ -173,7 +189,7 @@ router.put("/affiliation/:affiliationNumber", async (req, res) => {
 });
 
 // READ ONE - Get a specific mosque affiliation by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateAdmin, async (req, res) => {
   try {
     const mosqueAffiliationData = await mosqueAffiliation.findById(
       req.params.id
@@ -199,7 +215,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE - Update a mosque affiliation by ID
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateAdmin, async (req, res) => {
   try {
     const updatedMosqueAffiliation = await mosqueAffiliation.findByIdAndUpdate(
       req.params.id,
@@ -227,7 +243,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE - Delete a mosque affiliation by ID
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateAdmin, async (req, res) => {
   try {
     const deletedMosqueAffiliation = await mosqueAffiliation.findByIdAndDelete(
       req.params.id
@@ -254,6 +270,17 @@ router.delete("/:id", async (req, res) => {
 
 // EXTERNAL API ROUTES - Fetch district, area, and unit details
 
+// ponytail: external API wraps lists as { success, data: [...] }; forms read {id, title}
+const normalizeList = (payload) =>
+  (payload?.data || [])
+    // ponytail: upstream has junk "Test" rows; hide them from the forms
+    .filter((item) => !/^\s*test\s*$/i.test(item.title || ""))
+    .map((item) => ({
+      id: item._id,
+      title: item.title,
+      name: item.title,
+    }));
+
 // Get all districts from external API
 router.get("/external/districts", async (req, res) => {
   try {
@@ -262,6 +289,7 @@ router.get("/external/districts", async (req, res) => {
       res.status(200).json({
         success: true,
         message: "Districts retrieved successfully from external API",
+        districts: normalizeList(result.data),
         data: result.data,
       });
     } else {
@@ -334,14 +362,17 @@ router.get("/external/areas", async (req, res) => {
   }
 });
 
-// Get specific area details from external API
-router.get("/external/areas/:areaId", async (req, res) => {
+// Get areas belonging to a district
+router.get("/external/areas/:districtId", async (req, res) => {
   try {
-    const result = await externalApiService.getAreaDetails(req.params.areaId);
+    const result = await externalApiService.getAreasByDistrict(
+      req.params.districtId
+    );
     if (result.success) {
       res.status(200).json({
         success: true,
-        message: "Area details retrieved successfully from external API",
+        message: "Areas retrieved successfully from external API",
+        areas: normalizeList(result.data),
         data: result.data,
       });
     } else {
@@ -387,13 +418,14 @@ router.get("/external/units", async (req, res) => {
 });
 
 // Get specific unit details from external API
-router.get("/external/units/:unitId", async (req, res) => {
+router.get("/external/units/:areaId", async (req, res) => {
   try {
-    const result = await externalApiService.getUnitDetails(req.params.unitId);
+    const result = await externalApiService.getUnitsByArea(req.params.areaId);
     if (result.success) {
       res.status(200).json({
         success: true,
-        message: "Unit details retrieved successfully from external API",
+        message: "Units retrieved successfully from external API",
+        units: normalizeList(result.data),
         data: result.data,
       });
     } else {
