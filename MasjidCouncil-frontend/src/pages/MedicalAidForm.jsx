@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import SelectField from '../components/SelectField';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import { getRequiredDocuments, getMissingRequiredDocs } from '../lib/welfareFundDocs';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

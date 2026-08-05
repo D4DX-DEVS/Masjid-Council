@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database } from 'lucide-react';
-import logo from '../assets/logo.png';
-import dxLogo from '../assets/dx-logo-sml.png';
+import logo from '../assets/logo.webp';
+import dxLogo from '../assets/dx-logo-sml.webp';
 
 // Logout and the account details live in the page header's profile menu, not here.
 const SuperAdminSidebar = ({ onAddAdmin }) => {

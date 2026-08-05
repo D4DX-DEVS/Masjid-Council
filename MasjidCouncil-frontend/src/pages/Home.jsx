@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { LogIn, Building2, UserRound, Search, MapPin, Phone, Mail, CalendarDays, ShieldCheck, X } from 'lucide-react';
-import masjidBg from '../assets/masjid.png';
-import dxLogo from '../assets/dx-logo-sml2.png';
-import logo from '../assets/logo.png';
-import footerLogo from '../assets/mc-logo2.png';
-import bgPattern from '../assets/bg.png';
-import aboutUsImage from '../assets/About Us Image.jpg';
+import { Search, MapPin, Phone, Mail, ShieldCheck, X, ArrowRight, Users, HandHeart, Landmark, Building2, Layers, BadgeCheck, PieChart } from 'lucide-react';
+import bannerBg from '../assets/banner3.webp';
+import dxLogo from '../assets/dx-logo-sml2.webp';
+import footerLogo from '../assets/mc-logo2.webp';
+import bgPattern from '../assets/bg.webp';
+import aboutUsImage from '../assets/About Us Image.webp';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -15,31 +14,38 @@ const applications = [
   {
     title: 'Masjid Affiliation',
     malayalam: 'മസ്ജിദ് അഫിലിയേഷൻ',
-    description: 'Apply for masjid affiliation with Masjid Council Kerala',
-    icon: <img src="/mosque.svg" alt="" className="w-6 h-6" />,
-    bgColor: 'bg-[#8cbb58]',
+    description: 'Apply for masjid affiliation with Masjid Council Kerala.',
+    icon: Users,
   },
   {
     title: 'Imam Muaddin Welfare Fund',
     malayalam: 'ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി',
-    description: 'Apply for welfare assistance for masjid staff',
-    icon: <UserRound className="w-5 h-5 text-white" />,
-    bgColor: 'bg-[#8cbb58]',
+    description: 'Apply for welfare assistance for masjid staff.',
+    icon: HandHeart,
   },
   {
     title: 'Masjid Fund',
     malayalam: 'മസ്ജിദ് ഫണ്ട്',
-    description: 'Apply for financial assistance for masjid maintenance and repairs',
-    icon: <Building2 className="w-5 h-5 text-white" />,
-    bgColor: 'bg-[#8cbb58]',
+    description: 'Apply for financial assistance for masjid maintenance and repairs.',
+    icon: Landmark,
   },
-  {
-    title: "MIRQATH '26",
-    malayalam: 'ഖത്തീബ് സംഗമം രജിസ്ട്രേഷൻ',
-    description: 'Register for the state khateeb meet',
-    icon: <CalendarDays className="w-5 h-5 text-white" />,
-    bgColor: 'bg-[#8cbb58]',
-  },
+  // ponytail: MIRQATH '26 hidden from the public list; /khateeb-registration route
+  // still works. Un-comment to bring the card back.
+  // {
+  //   title: "MIRQATH '26",
+  //   malayalam: 'ഖത്തീബ് സംഗമം രജിസ്ട്രേഷൻ',
+  //   description: 'Register for the state khateeb meet.',
+  //   icon: CalendarDays,
+  // },
+];
+
+// Reach at a glance — the total is the emphasised cell, so it carries the ivory accent.
+const stats = [
+  { value: '550', label: 'ജുമാമസ്ജിദുകൾ', icon: Landmark },
+  { value: '161', label: 'നമസ്കാര പള്ളികൾ', icon: Building2 },
+  { value: '711', label: 'ആകെ', icon: Layers, accent: '#F8F3D8' },
+  { value: '62', label: 'സമ്പൂർണ്ണ മഹല്ലുകൾ', icon: BadgeCheck },
+  { value: '200', label: 'ഭാഗിക മഹല്ല്', icon: PieChart },
 ];
 
 const HeroSection = () => {
@@ -115,54 +121,122 @@ const HeroSection = () => {
 
   return (
     <div>
-      <div className="px-4 py-4 sm:py-6 md:px-8 md:py-8 lg:px-16">
-        {/* Same 16px side padding as the application cards below, so both edges line up */}
+      {/* Hero — banner3.webp carries the mosque, green wash and the bottom wave.
+          Shown at full size (no crop) from sm up; text scales in vw so it keeps
+          its position on the banner at every width. */}
+      <div className="relative bg-[#186b3a]">
         <img
-          src={masjidBg}
-          alt="Masjid Council Kerala"
-          className={`block w-full h-auto md:h-[600px] md:object-cover rounded-xl shadow-lg sm:shadow-2xl mx-auto max-w-7xl transition-all duration-1000 ease-out ${
-            isImageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+          src={bannerBg}
+          alt=""
+          aria-hidden="true"
+          className={`block w-full h-[440px] object-cover object-[62%_center] sm:h-auto transition-opacity duration-700 ease-out ${
+            isImageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         />
+
+        {/* Text sits slightly above the optical centre, clear of the wave */}
+        <div className="absolute inset-0 flex items-center justify-center px-6 pb-[13%] sm:px-10">
+          <div className="w-full max-w-[1000px] text-center px-4 py-8 sm:py-10">
+            {/* Ayah */}
+            <p
+              className="mc-hero-in mc-hero-down text-white text-[20px] sm:text-[24px] md:text-[30px] lg:text-[36px] xl:text-[42px]"
+              dir="rtl"
+              style={{
+                fontFamily: "'Amiri', 'Noto Naskh Arabic', serif",
+                lineHeight: 1.8,
+              }}
+            >
+              وَأَنَّ الْمَسَاجِدَ لِلَّهِ فَلَا تَدْعُوا مَعَ اللَّهِ أَحَدًا
+            </p>
+
+            {/* Translation */}
+            <p
+              className="mc-hero-in mc-hero-fade mx-auto mt-3 sm:mt-4 max-w-[640px] italic font-medium leading-relaxed text-[12px] sm:text-[13px] md:text-[13px] lg:text-[14px] xl:text-[15px]"
+              style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                color: 'rgba(255,255,255,0.90)',
+                animationDelay: '150ms',
+              }}
+            >
+              "And the mosques are for Allah, so do not invoke with Allah anyone."
+            </p>
+
+            {/* Reference */}
+            <p
+              className="mc-hero-in mc-hero-fade mt-2 text-white/70 text-[10px] sm:text-[10px] lg:text-[11px] xl:text-[12px]"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", animationDelay: '250ms' }}
+            >
+              (Surah Al-Jinn : 18)
+            </p>
+
+            {/* Malayalam title */}
+            <h1
+              className="mc-hero-in mc-hero-up mx-auto mt-6 sm:mt-8 max-w-[1000px] font-bold text-[24px] sm:text-[28px] md:text-[34px] lg:text-[38px] xl:text-[42px]"
+              style={{
+                fontFamily: "'Noto Sans Malayalam', 'Manjari', sans-serif",
+                color: '#F8F3D8',
+                lineHeight: 1.1,
+                animationDelay: '350ms',
+              }}
+            >
+              മസ്ജിദുകൾ മികവിന്റെ കേന്ദ്രങ്ങൾ
+            </h1>
+
+            {/* English heading */}
+            <p
+              className="mc-hero-in mc-hero-up mt-4 sm:mt-5 text-white font-medium text-[16px] sm:text-[18px] md:text-[21px] lg:text-[24px] xl:text-[27px]"
+              style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                letterSpacing: '0.5px',
+                animationDelay: '550ms',
+              }}
+            >
+              Making Mosques Centers of Excellence
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div id="applications-section" className="bg-white py-10 sm:py-16 px-4">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 text-center mb-8 sm:mb-12 relative leading-tight"
+      <div id="applications-section" className="bg-white py-7 sm:py-10 px-4">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 text-center mb-6 sm:mb-8 relative leading-tight"
         style={{ fontFamily: "Noto Sans Malayalam" }}
         >
           അപേക്ഷകൾ
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5" style={{ backgroundColor: '#9ece88' }}></div>
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8 max-w-7xl mx-auto">
-          {applications.map((app, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
+          {applications.map((app, index) => {
+            const Icon = app.icon;
+            return (
             <div
               key={index}
-              className="bg-white rounded-xl shadow-lg p-4 sm:p-6 flex flex-col justify-between transition hover:shadow-xl"
+              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl p-6 sm:p-8 flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1 border border-gray-100"
             >
-              <div>
-                {/* Title and Icon in the same row */}
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className={`w-10 h-10 shrink-0 rounded-md flex items-center justify-center ${app.bgColor}`}>
-                    {app.icon}
-                  </div>
-                  <h3 className="text-base font-semibold text-gray-900 leading-snug">{app.title}</h3>
-                </div>
-                
-                <p className="text-gray-600 text-sm mb-2" 
-        style={{ fontFamily: "Noto Sans Malayalam" }}
-                
-                >{app.malayalam}</p>
-                <p className="text-sm text-gray-500 mb-6">{app.description}</p>
+              {/* Circular dark-green icon */}
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mb-5 shadow-md"
+                style={{ background: 'linear-gradient(135deg, #6fae44 0%, #3f7f34 55%, #1e5a30 100%)' }}
+              >
+                <Icon className="w-7 h-7 text-white" />
               </div>
+
+              <h3 className="text-lg font-bold text-gray-900 leading-snug">{app.title}</h3>
+              <p className="text-green-800 text-sm mt-1 mb-3" style={{ fontFamily: "Noto Sans Malayalam" }}>
+                {app.malayalam}
+              </p>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">{app.description}</p>
+
               <button
                 onClick={() => handleNavigation(app.title)}
-                className="mt-auto bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md"
+                className="mt-auto w-full inline-flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
               >
                 Start Application
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -181,7 +255,7 @@ const HeroSection = () => {
               backgroundRepeat: 'repeat'
             }}
           />
-          <div className="relative py-10 px-5 sm:py-16 sm:px-8 md:px-12 lg:px-16">
+          <div className="relative py-8 px-5 sm:py-10 sm:px-8 md:px-12 lg:px-16">
           <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left side - About Us Image (bottom-aligned so it lines up with the button) */}
@@ -198,37 +272,35 @@ const HeroSection = () => {
 
             {/* Right side - About Us Content */}
             <div className="order-1 lg:order-2 space-y-6">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 relative"
-                  style={{ fontFamily: "Noto Sans Malayalam" }}
-              >
-                About Us
-                <div className="absolute bottom-0 left-0 w-24 h-0.5" style={{ backgroundColor: '#9ece88' }}></div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 relative pb-2">
+                Masjid Council Kerala
+                <div className="absolute bottom-0 left-0 w-20 h-1 rounded-full" style={{ backgroundColor: '#2f6b2f' }}></div>
               </h2>
-              
+
               <div className="space-y-4 text-black leading-relaxed"
                    style={{ fontFamily: "Noto Sans Malayalam" }}
               >
                 <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
                   മസ്ജിദുകളെ മികവിൻ്റെ കേന്ദ്രങ്ങളാക്കുക എന്ന ലക്ഷ്യത്തോടെ 1990-ൽ സ്ഥാപിതമായ സംവിധാനമാണ് മസ്ജിദ് കൗൺസിൽ കേരള.
                 </p>
-                
+
                 <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
                   മസ്ജിദുകളുടെയും മഹല്ലുകളുടെയും പ്രവർത്തനങ്ങൾക്ക് മേൽനോട്ടം വഹിക്കുകയും ആവശ്യമായ മാർഗ്ഗനിർദ്ദേശങ്ങൾ നൽകുകയും ചെയ്യുക, ഖുത്ബയും ഇമാമത്തും നിർവ്വഹിക്കുവാൻ പ്രാപ്തരായ വ്യക്തികളെ കണ്ടെത്തി പരിശീലനം നൽകുക, നിലവിൽ മസ്ജിദുകളിൽ സേവനം ചെയ്തുവരുന്ന ഖത്വീബുമാരെയും ഇമാമുമാരെയും ശാക്തീകരിക്കുന്നതിനാവശ്യമായ പദ്ധതികൾ നടപ്പിലാക്കുക, മസ്ജിദ്, മഹല്ല് കമ്മിറ്റി ഭാരവാഹികൾക്ക് ആവശ്യമായ പരിശീലന പരിപാടികൾ സംഘടിപ്പിക്കുക തുടങ്ങിയ സുപ്രധാന ഉദ്ദേശ്യ ലക്ഷ്യങ്ങളോടെയാണ് മസ്ജിദ് കൗൺസിൽ കേരള പ്രവർത്തിക്കുന്നത്.
                 </p>
-                
+
                 <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
                   കൂടാതെ ഖത്വീബുമാർക്ക് ഖുത്ബ നിർവ്വഹിക്കുന്നതിന് സഹായകമാകും വിധം വിവിധ വിഷയങ്ങളിൽ സിനോപ്സിസുകൾ തയ്യാറാക്കി നൽകുകയും ചെയ്യുന്നുണ്ട്.
                 </p>
               </div>
-              
-              {/* Learn More Button */}
+
+              {/* Know More Button */}
               <div className="pt-6">
                 <button
                   onClick={() => navigate('/about')}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-                  style={{ fontFamily: "Noto Sans Malayalam" }}
+                  className="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                  കൂടുതൽ അറിയുക
+                  Know More About Us
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -238,17 +310,71 @@ const HeroSection = () => {
       </div>
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8 py-10 max-w-xl mx-auto">
-        <div className="space-y-5 bg-white rounded-2xl shadow-xl ring-1 ring-gray-100 p-6 sm:p-8">
-          <div>
-            <label
-              htmlFor="reference"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+      {/* Reach at a glance */}
+      <div className="px-4 pt-6 sm:pt-8">
+        <div
+          className="max-w-6xl mx-auto rounded-2xl sm:rounded-3xl px-3 py-4 sm:px-6 sm:py-8 shadow-lg"
+          style={{ background: 'linear-gradient(100deg, #78b247 0%, #4a8a3d 30%, #2f6b2f 65%, #17532b 100%)' }}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-3 sm:gap-y-7">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div
+                  key={stat.label}
+                  className={`flex items-center gap-2 sm:gap-4 px-1 sm:px-2 sm:justify-center ${
+                    index > 0 ? 'lg:border-l lg:border-white/25' : ''
+                  }`}
+                >
+                  <Icon className="w-5 h-5 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-white/85 shrink-0" strokeWidth={1.25} />
+                  {/* Number and label share a line on phones, stack from sm up */}
+                  <div className="min-w-0 flex items-baseline gap-1.5 sm:block text-left">
+                    <p
+                      className="text-[15px] sm:text-2xl font-bold leading-none"
+                      style={{ color: stat.accent || '#ffffff' }}
+                    >
+                      {stat.value}
+                    </p>
+                    <p
+                      className="text-[10px] sm:text-xs sm:mt-1.5 text-green-100 leading-snug truncate sm:whitespace-normal"
+                      style={{ fontFamily: 'Noto Sans Malayalam' }}
+                    >
+                      {stat.label}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 sm:px-6 lg:px-8 py-7 sm:py-9">
+        <div
+          className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-lg"
+          style={{ background: 'linear-gradient(135deg, #eef7e8 0%, #ffffff 55%, #e6f2df 100%)' }}
+        >
+          {/* Existing arabesque pattern doubles as this section's artwork */}
+          <div
+            className="absolute inset-0 opacity-[0.22] pointer-events-none"
+            style={{ backgroundImage: `url(${bgPattern})`, backgroundRepeat: 'repeat' }}
+          />
+
+          <div className="relative px-5 py-7 sm:px-10 sm:py-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-green-900 text-center">
+              Track Your Application
+            </h2>
+            <p className="mt-1.5 text-center text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
+              Enter your application reference number or the mobile number used during registration
+            </p>
+
+            <div className="mt-5 max-w-2xl mx-auto space-y-3 bg-white rounded-2xl shadow-lg ring-1 ring-gray-100 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <label htmlFor="reference" className="sr-only">
               Reference Number or Mobile Number
             </label>
 
-            <div className="relative">
+            <div className="relative flex-1">
               <input
                 type="text"
                 id="reference"
@@ -258,7 +384,7 @@ const HeroSection = () => {
                 placeholder="Enter reference number or mobile number"
                 className={`w-full px-4 py-3 ${referenceNumber ? 'pr-11' : ''} border ${
                   errorMessage ? 'border-red-500' : 'border-gray-300'
-                } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-gray-900 placeholder-gray-500 outline-none text-sm sm:text-base`}
+                } h-12 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-gray-900 placeholder-gray-500 outline-none text-sm sm:text-base`}
               />
               {referenceNumber && (
                 <button
@@ -273,19 +399,19 @@ const HeroSection = () => {
               )}
             </div>
 
-            {errorMessage && (
-              <p className="mt-2 text-sm text-red-600">{errorMessage}</p>
-            )}
+            <button
+              onClick={handleTrackStatus}
+              disabled={tracking}
+              className="h-12 shrink-0 px-6 inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm sm:text-base font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-green-700/30"
+            >
+              <Search className={`h-5 w-5 ${tracking ? 'animate-pulse' : ''}`} />
+              {tracking ? 'Searching…' : 'Track Status'}
+            </button>
           </div>
 
-          <button
-            onClick={handleTrackStatus}
-            disabled={tracking}
-            className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm sm:text-base font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-green-700/30"
-          >
-            <Search className={`h-5 w-5 ${tracking ? 'animate-pulse' : ''}`} />
-            {tracking ? 'Searching…' : 'Track Status'}
-          </button>
+          {errorMessage && (
+            <p className="text-sm text-red-600">{errorMessage}</p>
+          )}
 
           {results && results.length > 0 && (
             <div className="space-y-3 pt-2 border-t border-gray-100" style={{ animation: 'mc-modal-in .25s ease-out' }}>
@@ -308,12 +434,8 @@ const HeroSection = () => {
               ))}
             </div>
           )}
-        </div>
-
-        <div className="mt-6 text-center px-2">
-          <p className="text-xs sm:text-sm text-gray-500">
-            Enter your application reference number or the mobile number used during registration
-          </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -321,63 +443,65 @@ const HeroSection = () => {
         {/* Dark green line at bottom */}
         <div className="h-3 w-full absolute bottom-0 left-0" style={{ backgroundColor: '#304e26' }}></div>
 
-        <div className="max-w-7xl mx-auto px-4 py-6 lg:py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-10 items-center">
-            {/* Logo */}
-            <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="w-16 h-16 lg:w-24 lg:h-24">
+        <div className="max-w-7xl mx-auto px-4 py-6 lg:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
+            {/* Brand */}
+            <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
+              <div className="w-12 h-12 lg:w-20 lg:h-20">
                 <img src={footerLogo} alt="Masjid Council Kerala" className="object-contain w-full h-full" />
               </div>
-              <p className="hidden lg:block text-green-100/90 text-xs leading-relaxed max-w-xs mt-3">
+              <p className="text-green-100/90 text-[11px] lg:text-xs leading-relaxed max-w-xs mt-2 lg:mt-3">
                 Working for the development of mosques and the welfare of the Muslim community across Kerala.
               </p>
             </div>
 
             {/* Contact Information */}
-            <div className="space-y-2.5 lg:space-y-3">
+            <div className="space-y-2 lg:space-y-3">
+              <h3 className="text-sm lg:text-base font-semibold text-white">Contact Us</h3>
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+                <div className="shrink-0 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-white/15 flex items-center justify-center">
                   <MapPin className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex flex-wrap items-baseline gap-x-2 lg:block">
-                  <h3 className="text-sm font-semibold text-white">Address</h3>
+                <div className="min-w-0">
                   <p className="text-green-100 text-[13px] leading-snug">
-                    Hira Centre, Mavoor Road, Kozhikode - 673001
+                    Masjid Council Kerala,<br />
+                    Hira Centre, PB No. 833,<br />
+                    Mavoor Road, Kozhikode - 4,<br />
+                    673004
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+                <div className="shrink-0 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-white/15 flex items-center justify-center">
                   <Phone className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex flex-wrap items-baseline gap-x-2 lg:block">
-                  <h3 className="text-sm font-semibold text-white">Phone</h3>
+                <div className="min-w-0">
                   <a
-                    href="tel:+914952720101"
+                    href="tel:+919562478805"
                     className="text-green-100 text-[13px] hover:text-white transition"
                   >
-                    +91 495 2720 101
+                    +91 95624 78805
                   </a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+                <div className="shrink-0 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-white/15 flex items-center justify-center">
                   <Mail className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex flex-wrap items-baseline gap-x-2 lg:block">
-                  <h3 className="text-sm font-semibold text-white">Email</h3>
+                <div className="min-w-0">
                   <a
-                    href="mailto:info@masjidcouncilkerala.org"
+                    href="mailto:masjidcouncilkerala@gmail.com"
                     className="text-green-100 text-[13px] hover:text-white transition break-all"
                   >
-                    info@masjidcouncilkerala.org
+                    masjidcouncilkerala@gmail.com
                   </a>
                 </div>
               </div>
             </div>
 
-            {/* Map (desktop only) */}
-            <div className="hidden lg:flex lg:items-center lg:justify-end">
+            {/* Map — dropped on phones, it dominates the screen for little value */}
+            <div className="hidden lg:block">
+              <h3 className="text-base font-semibold text-white mb-4">Find Us</h3>
               <div className="bg-white rounded-2xl overflow-hidden shadow-lg w-full max-w-[300px] h-[180px]">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3913.0048853421154!2d75.7886534!3d11.2610504!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTHCsDE1JzM5LjgiTiA3NcKwNDcnMTkuMiJF!5e0!3m2!1sen!2sbh!4v1748684741914!5m2!1sen!2sbh"
@@ -394,8 +518,8 @@ const HeroSection = () => {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-5 lg:mt-8 pt-4 border-t border-white/15 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-2">
-            <p className="flex items-center gap-2 text-green-100 text-xs text-center">
+          <div className="mt-4 lg:mt-8 pt-3 lg:pt-4 border-t border-white/15 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-2">
+            <p className="flex items-center gap-2 text-green-100 text-[11px] lg:text-xs text-center">
               <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
               © {new Date().getFullYear()} Masjid Council Kerala. All Rights Reserved.
             </p>

@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LogIn, Menu, X, FileText, Info, Phone, ChevronRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom'; // for navigation
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 
 const navFont = {
   fontFamily: "'Poppins', sans-serif"
@@ -10,7 +10,6 @@ const navFont = {
 
 const Navbar = () => {
   const navigate = useNavigate(); // initialize navigation
-  const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLoginClick = () => {
@@ -83,43 +82,19 @@ const Navbar = () => {
     }
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentPath = window.location.pathname;
-      
-      // Always show navbar on About page
-      if (currentPath === '/about') {
-        setIsVisible(true);
-        return;
-      }
-      
-      // For other pages (like Home), show navbar after scroll
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      setIsVisible(scrollTop > 100);
-    };
-
-    // Check initial state
-    handleScroll();
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-      }`}
-    >
+    // ponytail: sticky (not fixed) keeps the bar always visible without needing
+    // per-page top padding to offset it.
+    <header className="sticky top-0 left-0 right-0 z-50">
       {/* Top green gradient bar */}
       <div className="h-1 w-full bg-gradient-to-r from-[#239a5a] via-[#6db14e] to-green-700" />
       {/* Main navbar content - matching hero section alignment */}
       <nav className="bg-white shadow-lg backdrop-blur-sm bg-white/95">
         <div className="px-4 md:px-6">
-          <div className="flex items-center justify-between gap-2 py-3 md:py-6">
+          <div className="flex items-center justify-between gap-2 py-2 md:py-2.5">
             {/* Logo and Text */}
             <Link to="/" aria-label="Go to home" className="flex items-center">
-              <img src={logo} alt="Masjid Council Kerala" className="h-12 w-auto md:h-14 shrink-0" />
+              <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto md:h-11 shrink-0" />
             </Link>
 
             {/* Center Navigation Buttons - desktop only, pushed toward the right */}
@@ -150,7 +125,7 @@ const Navbar = () => {
             {/* Admin Login Button - Icon Only (desktop; on mobile it lives in the menu) */}
             <button
               onClick={handleLoginClick}
-              className="hidden md:flex items-center justify-center shrink-0 md:w-12 md:h-12 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 group"
+              className="hidden md:flex items-center justify-center shrink-0 md:w-10 md:h-10 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 group"
               title="Admin Login"
             >
               <LogIn className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />

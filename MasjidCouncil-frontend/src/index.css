@@ -157,6 +157,37 @@ body {
   }
 }
 
+/* Hero entrance — each line enters on its own axis, staggered via inline delay. */
+@keyframes mc-hero-down {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes mc-hero-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes mc-hero-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.mc-hero-in {
+  opacity: 0;
+  animation-duration: 800ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: forwards;
+}
+
+.mc-hero-down { animation-name: mc-hero-down; }
+.mc-hero-up   { animation-name: mc-hero-up; }
+.mc-hero-fade { animation-name: mc-hero-fade; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-hero-in { animation: none; opacity: 1; }
+}
+
 /* ponytail: grey page behind the form card — a white card on a white page reads as no card.
    :has() beats restructuring every form's JSX to add a wrapper element. */
 body:has(.mc-form) {
