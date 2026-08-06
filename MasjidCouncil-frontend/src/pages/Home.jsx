@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Phone, Mail, ShieldCheck, X, ArrowRight, Users, HandHeart, Landmark, Building2, Layers, BadgeCheck, PieChart } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, ShieldCheck, X, ArrowRight, Landmark, Building2, Layers, BadgeCheck, PieChart } from 'lucide-react';
 import bannerBg from '../assets/banner3.webp';
 import dxLogo from '../assets/dx-logo-sml2.webp';
 import footerLogo from '../assets/mc-logo2.webp';
 import bgPattern from '../assets/bg.webp';
 import aboutUsImage from '../assets/About Us Image.webp';
-import { useNavigate } from 'react-router-dom';
+import trackBg from '../assets/btm-bg.webp';
+import affiliationIcon from '../assets/mosque.webp';
+import welfareIcon from '../assets/moududi2.webp';
+import mosqueFundIcon from '../assets/investment.webp';
+import { useNavigate, Link } from 'react-router-dom';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,19 +19,19 @@ const applications = [
     title: 'Masjid Affiliation',
     malayalam: 'മസ്ജിദ് അഫിലിയേഷൻ',
     description: 'Apply for masjid affiliation with Masjid Council Kerala.',
-    icon: Users,
+    icon: affiliationIcon,
   },
   {
     title: 'Imam Muaddin Welfare Fund',
     malayalam: 'ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി',
     description: 'Apply for welfare assistance for masjid staff.',
-    icon: HandHeart,
+    icon: welfareIcon,
   },
   {
     title: 'Masjid Fund',
     malayalam: 'മസ്ജിദ് ഫണ്ട്',
     description: 'Apply for financial assistance for masjid maintenance and repairs.',
-    icon: Landmark,
+    icon: mosqueFundIcon,
   },
   // ponytail: MIRQATH '26 hidden from the public list; /khateeb-registration route
   // still works. Un-comment to bring the card back.
@@ -124,26 +128,37 @@ const HeroSection = () => {
       {/* Hero — banner3.webp carries the mosque, green wash and the bottom wave.
           Shown at full size (no crop) from sm up; text scales in vw so it keeps
           its position on the banner at every width. */}
-      <div className="relative bg-[#186b3a]">
+      {/* ponytail: from sm up the box uses the banner's own 1751x898 aspect, so
+          object-cover becomes an exact fit — no top/bottom crop at any width and
+          the vw-scaled text stays glued to the same spot on the artwork. Mobile
+          keeps a fixed height (aspect box would be too short for the text). */}
+      <div className="relative bg-[#186b3a] h-[440px] sm:h-auto sm:aspect-[1751/898] overflow-hidden">
         <img
           src={bannerBg}
           alt=""
           aria-hidden="true"
-          className={`block w-full h-[440px] object-cover object-[62%_center] sm:h-auto transition-opacity duration-700 ease-out ${
+          className={`absolute inset-0 w-full h-full object-cover object-[62%_center] transition-opacity duration-700 ease-out ${
             isImageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
-        {/* Text sits slightly above the optical centre, clear of the wave */}
-        <div className="absolute inset-0 flex items-center justify-center px-6 pb-[13%] sm:px-10">
+        {/* Text sits slightly above the optical centre, clear of the wave.
+            Height is fixed on the wrapper (not the text) so scaled-up text at
+            md/lg never overflows the image and overlaps the section below. */}
+        <div className="relative z-10 h-full flex items-center justify-center px-6 pb-[13%] sm:px-10">
           <div className="w-full max-w-[1000px] text-center px-4 py-8 sm:py-10">
             {/* Ayah */}
             <p
-              className="mc-hero-in mc-hero-down text-white text-[20px] sm:text-[24px] md:text-[30px] lg:text-[36px] xl:text-[42px]"
+              className="mc-hero-in mc-hero-down text-white"
               dir="rtl"
               style={{
                 fontFamily: "'Amiri', 'Noto Naskh Arabic', serif",
+                // ponytail: vw-based clamp instead of breakpoint steps — the
+                // text shrinks continuously with the banner instead of staying
+                // oversized between breakpoints on mid-size screens.
+                fontSize: 'clamp(18px, 3.1vw, 42px)',
                 lineHeight: 1.8,
+                textShadow: '0 2px 10px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.4)',
               }}
             >
               وَأَنَّ الْمَسَاجِدَ لِلَّهِ فَلَا تَدْعُوا مَعَ اللَّهِ أَحَدًا
@@ -151,9 +166,10 @@ const HeroSection = () => {
 
             {/* Translation */}
             <p
-              className="mc-hero-in mc-hero-fade mx-auto mt-3 sm:mt-4 max-w-[640px] italic font-medium leading-relaxed text-[12px] sm:text-[13px] md:text-[13px] lg:text-[14px] xl:text-[15px]"
+              className="mc-hero-in mc-hero-fade mx-auto mt-3 sm:mt-4 max-w-[640px] italic font-medium leading-relaxed"
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontSize: 'clamp(11px, 1.15vw, 15px)',
                 color: 'rgba(255,255,255,0.90)',
                 animationDelay: '150ms',
               }}
@@ -163,20 +179,30 @@ const HeroSection = () => {
 
             {/* Reference */}
             <p
-              className="mc-hero-in mc-hero-fade mt-2 text-white/70 text-[10px] sm:text-[10px] lg:text-[11px] xl:text-[12px]"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", animationDelay: '250ms' }}
+              className="mc-hero-in mc-hero-fade mt-2 text-white/70"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 'clamp(9px, 0.92vw, 12px)', animationDelay: '250ms' }}
             >
               (Surah Al-Jinn : 18)
             </p>
 
             {/* Malayalam title */}
             <h1
-              className="mc-hero-in mc-hero-up mx-auto mt-6 sm:mt-8 max-w-[1000px] font-bold text-[24px] sm:text-[28px] md:text-[34px] lg:text-[38px] xl:text-[42px]"
+              className="mc-hero-in mc-hero-up mx-auto mt-6 sm:mt-8 max-w-[1000px] font-bold"
               style={{
                 fontFamily: "'Noto Sans Malayalam', 'Manjari', sans-serif",
+                // ponytail: 2.2vw = the 42px-at-1920 ratio, so the heading keeps
+                // the desktop footprint on the artwork at every width instead of
+                // ballooning at ~1280 and colliding with the minaret/qubba.
+                fontSize: 'clamp(18px, 2.2vw, 42px)',
                 color: '#F8F3D8',
-                lineHeight: 1.1,
+                // ponytail: Malayalam glyph ink runs ~1.27x the font size, so a
+                // 1.1 line-height made wrapped lines collide on mid-size screens.
+                lineHeight: 1.4,
                 animationDelay: '350ms',
+                // ponytail: pale cream on the sunlit minarets is invisible at
+                // widths where the text sits over the mosque; a soft dark
+                // shadow keeps every glyph readable without dimming the banner.
+                textShadow: '0 2px 12px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.45)',
               }}
             >
               മസ്ജിദുകൾ മികവിന്റെ കേന്ദ്രങ്ങൾ
@@ -184,11 +210,13 @@ const HeroSection = () => {
 
             {/* English heading */}
             <p
-              className="mc-hero-in mc-hero-up mt-4 sm:mt-5 text-white font-medium text-[16px] sm:text-[18px] md:text-[21px] lg:text-[24px] xl:text-[27px]"
+              className="mc-hero-in mc-hero-up mt-4 sm:mt-5 text-white font-medium"
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontSize: 'clamp(13px, 1.4vw, 27px)',
                 letterSpacing: '0.5px',
                 animationDelay: '550ms',
+                textShadow: '0 2px 10px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.4)',
               }}
             >
               Making Mosques Centers of Excellence
@@ -207,7 +235,6 @@ const HeroSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           {applications.map((app, index) => {
-            const Icon = app.icon;
             return (
             <div
               key={index}
@@ -215,10 +242,10 @@ const HeroSection = () => {
             >
               {/* Circular dark-green icon */}
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center mb-5 shadow-md"
+                className="w-14 h-14 rounded-full overflow-hidden mb-4 shadow-md flex items-center justify-center"
                 style={{ background: 'linear-gradient(135deg, #6fae44 0%, #3f7f34 55%, #1e5a30 100%)' }}
               >
-                <Icon className="w-7 h-7 text-white" />
+                <img src={app.icon} alt="" className="w-8 h-8 object-contain" />
               </div>
 
               <h3 className="text-lg font-bold text-gray-900 leading-snug">{app.title}</h3>
@@ -272,8 +299,8 @@ const HeroSection = () => {
 
             {/* Right side - About Us Content */}
             <div className="order-1 lg:order-2 space-y-6">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 relative pb-2">
-                Masjid Council Kerala
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 relative pb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
+                മസ്ജിദ് കൗൺസിൽ കേരള
                 <div className="absolute bottom-0 left-0 w-20 h-1 rounded-full" style={{ backgroundColor: '#2f6b2f' }}></div>
               </h2>
 
@@ -349,18 +376,23 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8 py-7 sm:py-9">
+      <div className="px-4 sm:px-6 py-7 sm:py-9">
         <div
-          className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-lg"
-          style={{ background: 'linear-gradient(135deg, #eef7e8 0%, #ffffff 55%, #e6f2df 100%)' }}
+          // ponytail: capped at the artwork's native 1321px so the strip is
+          // never upscaled — wider than this and the mosques go soft.
+          className="relative w-full max-w-[1280px] mx-auto rounded-3xl overflow-hidden shadow-lg"
+          style={{
+            // ponytail: btm-bg is a wide strip (~5.8:1); `cover` would crop the
+            // mosques off both edges, so pin it full-width at the bottom and let
+            // its own pale-mint top blend into the matching backgroundColor.
+            backgroundColor: '#eef4ec',
+            backgroundImage: `url(${trackBg})`,
+            backgroundSize: '100% auto',
+            backgroundPosition: 'bottom center',
+            backgroundRepeat: 'no-repeat',
+          }}
         >
-          {/* Existing arabesque pattern doubles as this section's artwork */}
-          <div
-            className="absolute inset-0 opacity-[0.22] pointer-events-none"
-            style={{ backgroundImage: `url(${bgPattern})`, backgroundRepeat: 'repeat' }}
-          />
-
-          <div className="relative px-5 py-7 sm:px-10 sm:py-8">
+          <div className="relative px-5 pt-6 pb-8 sm:px-10 sm:pt-7 sm:pb-10">
             <h2 className="text-xl sm:text-2xl font-bold text-green-900 text-center">
               Track Your Application
             </h2>
@@ -444,7 +476,7 @@ const HeroSection = () => {
         <div className="h-3 w-full absolute bottom-0 left-0" style={{ backgroundColor: '#304e26' }}></div>
 
         <div className="max-w-7xl mx-auto px-4 py-6 lg:py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10">
             {/* Brand */}
             <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
               <div className="w-12 h-12 lg:w-20 lg:h-20">
@@ -453,6 +485,25 @@ const HeroSection = () => {
               <p className="text-green-100/90 text-[11px] lg:text-xs leading-relaxed max-w-xs mt-2 lg:mt-3">
                 Working for the development of mosques and the welfare of the Muslim community across Kerala.
               </p>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-2 lg:space-y-3 flex flex-col items-center sm:items-start text-center sm:text-left">
+              <h3 className="text-sm lg:text-base font-semibold text-white">Quick Links</h3>
+              <ul className="space-y-1.5">
+                <li>
+                  <Link to="/" className="text-green-100 text-[13px] hover:text-white transition">Home</Link>
+                </li>
+                <li>
+                  <a href="/#applications-section" className="text-green-100 text-[13px] hover:text-white transition">Applications</a>
+                </li>
+                <li>
+                  <Link to="/about" className="text-green-100 text-[13px] hover:text-white transition">About Us</Link>
+                </li>
+                <li>
+                  <Link to="/privacy-policy" className="text-green-100 text-[13px] hover:text-white transition">Privacy Policy</Link>
+                </li>
+              </ul>
             </div>
 
             {/* Contact Information */}
