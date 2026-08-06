@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Eye, EyeOff, User, Lock, LoaderCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import loginSuper from '../assets/LoginSuper.webp';
 
 // Import Google Fonts

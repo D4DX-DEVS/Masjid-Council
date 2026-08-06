@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Home, Info, ArrowRight, ChevronDown, Smartphone, Lock, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import adminLogin from '../assets/adminLogin.webp';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
