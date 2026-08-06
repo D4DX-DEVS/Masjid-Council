@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import AffiliationForm from './pages/AffiliationForm';
 import MedicalAidForm from './pages/MedicalAidForm';
 import MosqueFundForm from './pages/MosqueFundForm';
@@ -76,6 +77,7 @@ const Layout = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/affiliation" element={<AffiliationForm />} />
         <Route path="/medical-aid" element={<MedicalAidForm />} />
         <Route path="/mosque-fund" element={<MosqueFundForm />} />
