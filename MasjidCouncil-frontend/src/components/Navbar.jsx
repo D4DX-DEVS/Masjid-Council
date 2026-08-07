@@ -1,16 +1,72 @@
 
-import React, { useState } from 'react';
-import { LogIn, Menu, X, FileText, Info, Phone, ChevronRight } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom'; // for navigation
+import React, { useState, useEffect } from 'react';
+import { LogIn, Menu, X, Home as HomeIcon, FileText, Info, Phone, ChevronRight } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom'; // for navigation
 import logo from '../assets/logo.webp';
 
 const navFont = {
   fontFamily: "'Poppins', sans-serif"
 };
 
+// ponytail: id order matches top-to-bottom section order on Home for scroll-spy.
+const SECTION_IDS = ['home-section', 'applications-section', 'about-section', 'contact-section'];
+
 const Navbar = () => {
   const navigate = useNavigate(); // initialize navigation
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('home-section');
+
+  // Shrink header + logo once the page scrolls past the top.
+  useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 12);
+      // ponytail: contact-section is the last element on the page, so it can
+      // never fill the observer's mid-viewport band once scrolling bottoms
+      // out — force it active at the bottom instead of relying on that band.
+      if (window.location.pathname === '/') {
+        const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+        if (atBottom) setActiveSection('contact-section');
+      }
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Highlight the nav item for whichever Home section is in view.
+  useEffect(() => {
+    if (location.pathname !== '/') return undefined;
+    const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter(Boolean);
+    if (!sections.length) return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting);
+        if (visible.length > 0) {
+          setActiveSection(visible[visible.length - 1].target.id);
+        }
+      },
+      { rootMargin: '-40% 0px -55% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [location.pathname]);
+
+  const isActive = (sectionId) => location.pathname === '/' && activeSection === sectionId;
+  const navLinkClass = (active) =>
+    `md:text-base font-medium tracking-wide transition-all duration-300 hover:text-green-600 hover:scale-105 whitespace-nowrap ${
+      active ? 'text-green-600' : 'text-black'
+    }`;
+
+  const handleHomeClick = () => {
+    setIsMobileMenuOpen(false);
+    if (window.location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleLoginClick = () => {
     setIsMobileMenuOpen(false);
@@ -91,31 +147,48 @@ const Navbar = () => {
       {/* Main navbar content - matching hero section alignment */}
       <nav className="bg-white shadow-lg backdrop-blur-sm bg-white/95">
         <div className="px-4 md:px-6">
-          <div className="flex items-center justify-between gap-2 py-2 md:py-2.5">
+          <div
+            className={`flex items-center justify-between gap-2 transition-all duration-300 ${
+              isScrolled ? 'py-1 md:py-1.5' : 'py-2 md:py-3'
+            }`}
+          >
             {/* Logo and Text */}
-            <Link to="/" aria-label="Go to home" className="flex items-center">
-              <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto md:h-11 shrink-0" />
+            <Link to="/" aria-label="Go to home" className="flex items-center ml-12 md:ml-48">
+              <img
+                src={logo}
+                alt="Masjid Council Kerala"
+                className={`w-auto shrink-0 transition-all duration-300 ${
+                  isScrolled ? 'h-9 md:h-10' : 'h-12 md:h-16'
+                }`}
+              />
             </Link>
 
             {/* Center Navigation Buttons - desktop only, pushed toward the right */}
             <div className="hidden md:flex items-center md:space-x-8 min-w-0 md:ml-auto md:mr-3">
               <button
+                onClick={handleHomeClick}
+                className={navLinkClass(isActive('home-section'))}
+                style={navFont}
+              >
+                Home
+              </button>
+              <button
                 onClick={handleFormClick}
-                className="text-black md:text-lg font-medium tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                className={navLinkClass(isActive('applications-section'))}
                 style={navFont}
               >
                 Applications
               </button>
               <button
                 onClick={handleAboutClick}
-                className="text-black md:text-lg font-medium tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                className={navLinkClass(isActive('about-section'))}
                 style={navFont}
               >
                 About
               </button>
               <button
                 onClick={handleContactClick}
-                className="text-black md:text-lg font-medium tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                className={navLinkClass(isActive('contact-section'))}
                 style={navFont}
               >
                 Contact
@@ -162,14 +235,17 @@ const Navbar = () => {
         >
           <div className="px-3 pb-3 pt-1 flex flex-col gap-1" style={navFont}>
             {[
-              { label: 'Applications', icon: FileText, onClick: handleFormClick },
-              { label: 'About', icon: Info, onClick: handleAboutClick },
-              { label: 'Contact', icon: Phone, onClick: handleContactClick },
-            ].map(({ label, icon: Icon, onClick }) => (
+              { label: 'Home', icon: HomeIcon, onClick: handleHomeClick, sectionId: 'home-section' },
+              { label: 'Applications', icon: FileText, onClick: handleFormClick, sectionId: 'applications-section' },
+              { label: 'About', icon: Info, onClick: handleAboutClick, sectionId: 'about-section' },
+              { label: 'Contact', icon: Phone, onClick: handleContactClick, sectionId: 'contact-section' },
+            ].map(({ label, icon: Icon, onClick, sectionId }) => (
               <button
                 key={label}
                 onClick={onClick}
-                className="flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-left text-gray-800 font-semibold hover:bg-green-50 active:bg-green-100 transition-colors duration-200"
+                className={`flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-left font-semibold hover:bg-green-50 active:bg-green-100 transition-colors duration-200 ${
+                  isActive(sectionId) ? 'text-green-600' : 'text-gray-800'
+                }`}
               >
                 <span className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center shrink-0">
                   <Icon className="w-[18px] h-[18px]" />

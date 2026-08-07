@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Phone, Mail, ShieldCheck, X, ArrowRight, Landmark, Building2, Layers, BadgeCheck, PieChart } from 'lucide-react';
-import bannerBg from '../assets/banner3.webp';
+import bannerBg from '../assets/banner3-De89_Ox0.webp';
 import dxLogo from '../assets/dx-logo-sml2.webp';
 import footerLogo from '../assets/mc-logo2.webp';
 import bgPattern from '../assets/bg.webp';
-import aboutUsImage from '../assets/About Us Image.webp';
+import aboutUsImage from '../assets/inside.webp';
 import trackBg from '../assets/btm-bg.webp';
 import affiliationIcon from '../assets/mosque.webp';
 import welfareIcon from '../assets/moududi2.webp';
@@ -125,14 +125,14 @@ const HeroSection = () => {
 
   return (
     <div>
-      {/* Hero — banner3.webp carries the mosque, green wash and the bottom wave.
+      {/* Hero — banner3-De89_Ox0.webp carries the mosque, green wash and the bottom wave.
           Shown at full size (no crop) from sm up; text scales in vw so it keeps
           its position on the banner at every width. */}
       {/* ponytail: from sm up the box uses the banner's own 1751x898 aspect, so
           object-cover becomes an exact fit — no top/bottom crop at any width and
           the vw-scaled text stays glued to the same spot on the artwork. Mobile
           keeps a fixed height (aspect box would be too short for the text). */}
-      <div className="relative bg-[#186b3a] h-[440px] sm:h-auto sm:aspect-[1751/898] overflow-hidden">
+      <div id="home-section" className="relative bg-[#186b3a] h-[440px] sm:h-auto sm:aspect-[1751/898] overflow-hidden">
         <img
           src={bannerBg}
           alt=""
