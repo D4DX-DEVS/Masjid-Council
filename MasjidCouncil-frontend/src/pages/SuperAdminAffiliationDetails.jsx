@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { authHeaders } from '../lib/auth';
 import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
+import { usePdfExport } from '../hooks/usePdfExport';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import StatusChangeModal from '../components/StatusChangeModal';
 
@@ -24,6 +25,7 @@ const SuperAdminAffiliationDetails = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
   const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+  const { contentRef, downloading, handleDownload: handlePdfDownload } = usePdfExport('affiliation');
 
   useEffect(() => {
     // Get affiliation data from navigation state or fetch by ID
@@ -246,7 +248,7 @@ const SuperAdminAffiliationDetails = () => {
           </h2>
           <button 
             onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="inline-flex items-center h-10 px-5 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
           >
             Go Back
           </button>
@@ -264,7 +266,7 @@ const SuperAdminAffiliationDetails = () => {
           </h2>
           <button
             onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
+            className="inline-flex items-center h-10 px-5 mt-4 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
           >
             Go Back
           </button>
@@ -272,6 +274,11 @@ const SuperAdminAffiliationDetails = () => {
       </div>
     );
   }
+
+  const handleDownloadPdfClick = () => handlePdfDownload(
+    affiliation.affiliationNumber || affiliation._id?.slice(-8),
+    () => showAlert('PDF ഡൗൺലോഡ് പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കുക.', 'error')
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: "Noto Sans Malayalam" }}>
@@ -292,11 +299,22 @@ const SuperAdminAffiliationDetails = () => {
               <p className="text-green-100 text-xs sm:text-sm">Mosque Affiliation Application Details</p>
               <p className="text-green-200 text-xs">Affiliation Number: {affiliation.affiliationNumber}</p>
             </div>
-              <div className="ml-auto flex-shrink-0"><ProfileMenu role="superadmin" /></div>
+              <div className="ml-auto flex-shrink-0 flex items-center gap-2">
+                <button
+                  onClick={handleDownloadPdfClick}
+                  disabled={downloading}
+                  aria-label="Download as PDF"
+                  title="Download as PDF"
+                  className="p-2 hover:bg-green-700 rounded-full transition-colors disabled:opacity-50"
+                >
+                  {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+                </button>
+                <ProfileMenu role="superadmin" />
+              </div>
           </div>
         </div>
 
-        <div className="p-4 space-y-3 mt-2">
+        <div className="p-4 space-y-3 mt-2" ref={contentRef}>
           {/* Application Summary */}
           <section className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6">
             <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
@@ -315,8 +333,8 @@ const SuperAdminAffiliationDetails = () => {
                 <label className="text-xs font-medium text-gray-500">അപേക്ഷയുടെ നിലവിലെ അവസ്ഥ</label>
                 <div className="mt-1">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    affiliation.status === 'approved' ? 'bg-green-100 text-green-800' :
-                    affiliation.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    affiliation.status === 'approved' ? 'bg-[#EAF6EF] text-[#1F6B3A]' :
+                    affiliation.status === 'rejected' ? 'bg-red-50 text-red-700' :
                     'bg-yellow-100 text-yellow-800'
                   }`}>
                     {affiliation.status === 'approved' ? 'അനുമതി' :
@@ -620,16 +638,16 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Action Buttons - Only show for pending status */}
           {affiliation.status === 'pending' && (
-            <div className="flex justify-between mt-8">
+            <div className="flex justify-between mt-8 pdf-hide">
               <button 
                 onClick={handleConfirmClick}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md shadow"
+                className="inline-flex items-center gap-2 h-10 px-6 bg-[#1F6B3A] hover:bg-[#2E7D4F] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
               >
                 Approve
               </button>
               <button 
                 onClick={handleRejectClick}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-md shadow"
+                className="inline-flex items-center gap-2 h-10 px-6 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
               >
                 Reject
               </button>
@@ -638,27 +656,30 @@ const SuperAdminAffiliationDetails = () => {
 
           {/* Status Display for non-pending forms */}
           {affiliation.status !== 'pending' && (
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-8 p-6 bg-[#F7F9FB] border border-[#E5E7EB] rounded-2xl">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Application Status</h3>
-                <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                <h3 className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-wider mb-3">Application Status</h3>
+                <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
                   affiliation.status === 'approved' 
-                    ? 'bg-green-100 text-green-800' 
+                    ? 'bg-[#EAF6EF] text-[#1F6B3A]' 
                     : affiliation.status === 'rejected'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-red-50 text-red-700'
+                    : 'bg-gray-100 text-gray-700'
                 }`}>
-                  {affiliation.status === 'approved' ? '✅ Approved' : 
-                   affiliation.status === 'rejected' ? '❌ Rejected' : 
-                   '❓ Unknown Status'}
+                  {affiliation.status === 'approved' ? <CheckCircle className="w-4 h-4" /> :
+                   affiliation.status === 'rejected' ? <XCircle className="w-4 h-4" /> :
+                   <AlertCircle className="w-4 h-4" />}
+                  {affiliation.status === 'approved' ? 'Approved' :
+                   affiliation.status === 'rejected' ? 'Rejected' :
+                   'Unknown Status'}
                 </span>
                 {/* Status Change Button */}
-                <div className="mt-4">
+                <div className="mt-4 pdf-hide">
                   <button
                     onClick={handleStatusChangeClick}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow transition-colors"
+                    className="inline-flex items-center gap-2 h-10 px-5 bg-[#1F6B3A] hover:bg-[#2E7D4F] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
                   >
-                    <Settings className="w-4 h-4 mr-2" />
+                    <Settings className="w-4 h-4" />
                     Change Status
                   </button>
                 </div>
@@ -673,8 +694,8 @@ const SuperAdminAffiliationDetails = () => {
       
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0">
                 <CheckCircle className="h-8 w-8 text-green-600" />
@@ -691,7 +712,7 @@ const SuperAdminAffiliationDetails = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                className="h-10 px-5 text-sm font-semibold text-[#374151] bg-white border border-[#E5E7EB] hover:bg-gray-50 rounded-xl transition-colors"
                 disabled={actionLoading}
               >
                 Cancel
@@ -699,7 +720,7 @@ const SuperAdminAffiliationDetails = () => {
               <button
                 onClick={handleConfirm}
                 disabled={actionLoading}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md flex items-center"
+                className="inline-flex items-center justify-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-[#1F6B3A] hover:bg-[#2E7D4F] rounded-xl shadow-sm transition-colors"
               >
                 {actionLoading ? (
                   <>
@@ -717,8 +738,8 @@ const SuperAdminAffiliationDetails = () => {
 
       {/* Rejection Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0">
                 <XCircle className="h-8 w-8 text-red-600" />
@@ -751,7 +772,7 @@ const SuperAdminAffiliationDetails = () => {
                   setShowRejectModal(false);
                   setRejectionReason('');
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                className="h-10 px-5 text-sm font-semibold text-[#374151] bg-white border border-[#E5E7EB] hover:bg-gray-50 rounded-xl transition-colors"
                 disabled={actionLoading}
               >
                 Cancel
@@ -759,7 +780,7 @@ const SuperAdminAffiliationDetails = () => {
               <button 
                 onClick={handleReject}
                 disabled={actionLoading}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md flex items-center"
+                className="inline-flex items-center justify-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition-colors"
               >
                 {actionLoading ? (
                   <>
@@ -777,8 +798,8 @@ const SuperAdminAffiliationDetails = () => {
 
       {/* Alert Modal */}
       {showAlertModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0">
                 {alertType === 'success' && <CheckCircle className="h-8 w-8 text-green-600" />}
@@ -799,8 +820,8 @@ const SuperAdminAffiliationDetails = () => {
             <div className="flex justify-end">
               <button
                 onClick={closeAlert}
-                className={`px-4 py-2 text-sm font-medium text-white rounded-md ${
-                  alertType === 'success' ? 'bg-green-600 hover:bg-green-700' :
+                className={`inline-flex items-center justify-center h-10 px-5 text-sm font-semibold text-white rounded-xl transition-colors ${
+                  alertType === 'success' ? 'bg-[#1F6B3A] hover:bg-[#2E7D4F]' :
                   alertType === 'error' ? 'bg-red-600 hover:bg-red-700' :
                   'bg-yellow-600 hover:bg-yellow-700'
                 }`}

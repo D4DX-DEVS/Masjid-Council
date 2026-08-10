@@ -5,7 +5,7 @@ const Admin = require('../models/admin');
 const mosqueFund = require('../models/mosqueFund');
 const welfarefund = require('../models/welfarefund');
 const mosqueAffiliation = require('../models/mosqueAffiliation');
-const { authenticateSuperAdmin } = require('../middleware/auth');
+const { authenticateSuperAdmin, authenticateAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -127,10 +127,10 @@ router.post('/admin', authenticateSuperAdmin, async (req, res) => {
         const { username, phoneNumber, password, district, area } = req.body;
 
         // Validate input
-        if (!username || !phoneNumber || !password || !district || !area) {
+        if (!username || !phoneNumber || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Username, phone number, password, district, and area are required'
+                message: 'Username, phone number, and password are required'
             });
         }
 
@@ -330,7 +330,7 @@ const STATUS_MODELS = {
 };
 const ALLOWED_STATUSES = ['pending', 'approved', 'rejected'];
 
-router.put('/:form/:id/status', authenticateSuperAdmin, async (req, res) => {
+router.put('/:form/:id/status', authenticateAdmin, async (req, res) => {
     try {
         const Model = STATUS_MODELS[req.params.form];
         if (!Model) {

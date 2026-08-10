@@ -20,12 +20,10 @@ const adminSchema = new mongoose.Schema({
     },
     district: {
         type: String,
-        required: true,
         trim: true
     },
     area: {
         type: String,
-        required: true,
         trim: true
     }
 }, {

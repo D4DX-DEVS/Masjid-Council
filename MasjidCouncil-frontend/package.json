@@ -16,6 +16,8 @@
     "@radix-ui/react-alert-dialog": "^1.1.23",
     "@radix-ui/react-select": "^2.3.7",
     "@tailwindcss/vite": "^4.1.11",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

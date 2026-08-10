@@ -57,57 +57,61 @@ const StatusChangeModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div
+        className="relative mx-auto my-8 w-full max-w-md rounded-2xl bg-white border border-[#E5E7EB] max-h-[90vh] overflow-y-auto"
+        style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">
+        <div className="flex items-start justify-between p-6 pb-0">
+          <h2 className="text-xl font-semibold text-[#111827]">
             Change {formType} Status
           </h2>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-[#6B7280] hover:text-[#374151] transition-colors"
             disabled={loading}
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Current Status Display */}
-        <div className="p-6 border-b bg-gray-50">
-          <div className="flex items-center space-x-3">
-            <div className="text-sm text-gray-600">Current Status:</div>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-              currentStatus === 'approved' 
-                ? 'bg-green-100 text-green-800' 
-                : currentStatus === 'rejected'
-                ? 'bg-red-100 text-red-800'
-                : 'bg-yellow-100 text-yellow-800'
-            }`}>
-              {currentStatus === 'approved' ? '✅ Approved' : 
-               currentStatus === 'rejected' ? '❌ Rejected' : 
-               '⏳ Pending'}
-            </span>
-          </div>
+        <div className="mx-6 mt-4 mb-2 flex items-center gap-3 rounded-xl bg-[#F7F9FB] border border-[#E5E7EB] px-4 py-3">
+          <span className="text-sm text-[#6B7280]">Current Status:</span>
+          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+            currentStatus === 'approved'
+              ? 'bg-[#EAF6EF] text-[#1F6B3A]'
+              : currentStatus === 'rejected'
+              ? 'bg-red-50 text-red-700'
+              : 'bg-yellow-50 text-yellow-700'
+          }`}>
+            {currentStatus === 'approved' ? <CheckCircle className="w-3.5 h-3.5" /> :
+             currentStatus === 'rejected' ? <AlertCircle className="w-3.5 h-3.5" /> :
+             <Clock className="w-3.5 h-3.5" />}
+            {currentStatus === 'approved' ? 'Approved' :
+             currentStatus === 'rejected' ? 'Rejected' :
+             'Pending'}
+          </span>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6 pt-4">
           {/* Status Selection */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+          <div className="mb-5">
+            <label className="block text-[13px] font-semibold text-[#374151] mb-2">
               Select New Status
             </label>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {statusOptions.map((status) => {
                 const Icon = status.icon;
                 return (
                   <label
                     key={status.value}
-                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
+                    className={`flex items-center p-3 border rounded-xl cursor-pointer transition-all ${
                       selectedStatus === status.value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-[#1F6B3A] bg-[#EAF6EF]'
+                        : 'border-[#E5E7EB] hover:border-gray-300'
                     }`}
                   >
                     <input
@@ -119,7 +123,7 @@ const StatusChangeModal = ({
                       className="sr-only"
                     />
                     <Icon className={`w-5 h-5 mr-3 ${status.color}`} />
-                    <span className="font-medium text-gray-900">{status.label}</span>
+                    <span className="font-medium text-[#111827] text-sm">{status.label}</span>
                   </label>
                 );
               })}
@@ -128,30 +132,30 @@ const StatusChangeModal = ({
 
           {/* Rejection Reason Input */}
           {showRejectionInput && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mb-5">
+              <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">
                 Rejection Reason <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="Please provide a reason for rejection..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all resize-none"
                 rows={3}
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[#6B7280] mt-1.5">
                 This reason will be visible to the applicant
               </p>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex space-x-3">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="h-10 px-5 border border-[#E5E7EB] rounded-xl text-[#374151] hover:bg-gray-50 transition-colors text-sm font-semibold"
               disabled={loading}
             >
               Cancel
@@ -159,11 +163,11 @@ const StatusChangeModal = ({
             <button
               type="submit"
               disabled={loading || (selectedStatus === 'rejected' && !rejectionReason.trim())}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="h-10 px-5 bg-[#1F6B3A] text-white rounded-xl hover:bg-[#2E7D4F] transition-colors text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Updating...
                 </>
               ) : (

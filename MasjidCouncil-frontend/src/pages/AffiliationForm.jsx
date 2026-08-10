@@ -125,7 +125,7 @@ const AffiliationForm = () => {
     "വിവാഹ മോചന രജിസ്റ്റര്‍",
     "സ്റ്റാഫ് പെയ്റോള്‍",
     "ഇൻവാഡ്/ ഔട്ട്‍വാഡ് ഫയൽ",
-    "ഖബര്‍ രജിസ്റ്റ്റ്‍",
+    "ഖബർ രജിസ്റ്റർ",
     "ഡേ ബുക്ക്",
   ];
 
@@ -772,7 +772,7 @@ const AffiliationForm = () => {
           return;
         }
         if (!staff.salary || staff.salary.trim() === "") {
-          showErrorModal(`ദയവായി ജീവനക്കാരുടെ ശമ്പളം നൽകുക (വരി ${i + 1})`);
+          showErrorModal(`ദയവായി ജീവനക്കാരുടെ സാലറി നൽകുക (വരി ${i + 1})`);
           return;
         }
         if (!staff.qualification || staff.qualification.trim() === "") {
@@ -954,7 +954,7 @@ const AffiliationForm = () => {
                     തിരഞ്ഞെടുക്കുക
                   </option>
                   <option
-                    value="മഹല്ലി പള്ളി"
+                    value="മഹല്ല് പള്ളി"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
                     മഹല്ല് പള്ളി
@@ -966,16 +966,16 @@ const AffiliationForm = () => {
                     ജുമുഅത്ത് പള്ളി
                   </option>
                   <option
-                    value="നമസ്ക്‌കാരപള്ളി"
+                    value="നമസ്ക്കാരപള്ളി"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    നമസ്ക്‌കാരപള്ളി
+                    നമസ്ക്കാരപള്ളി
                   </option>
                   <option
-                    value="ട‌ൗൺ പള്ളി"
+                    value="ടൗൺ പള്ളി"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    ട‌ൗൺ പള്ളി
+                    ടൗൺ പള്ളി
                   </option>
                 </SelectField>
               </div>
@@ -1028,6 +1028,8 @@ const AffiliationForm = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
+                  onKeyDown={(e) => e.key === "-" && e.preventDefault()}
                   value={formData.yearStarted}
                   onChange={(e) =>
                     handleInputChange("yearStarted", e.target.value)
@@ -1044,7 +1046,7 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              5. വിലാസ വിവരങ്ങൾ
+              5. വിലാസം
             </h2>
             <div className="space-y-4">
               <div>
@@ -1299,7 +1301,7 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              8. ഖബറിസ്ഥാൻ വിവരങ്ങൾ
+              8. ഖബർസ്ഥാൻ വിവരങ്ങൾ
             </h2>
             <div className="space-y-4">
               <div>
@@ -1307,7 +1309,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  ഖബറിസ്ഥാൻ ഉണ്ടോ? <span className="text-red-500">*</span>
+                  ഖബർസ്ഥാൻ ഉണ്ടോ? <span className="text-red-500">*</span>
                 </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center">
@@ -1366,7 +1368,7 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              9. പള്ളിയുടെ ശേഷി
+              9. പള്ളിയിൽ ഉൾക്കൊള്ളാവുന്ന ആളുകളുടെ എണ്ണം
             </h2>
             <div className="space-y-4">
               <div>
@@ -1395,7 +1397,7 @@ const AffiliationForm = () => {
                 </label>
                 <input
                   type="text"
-                  placeholder="വർഗ അടി / വർഗ മീറ്റർ"
+                  placeholder="അടി / മീറ്റർ"
                   value={formData.category}
                   onChange={(e) =>
                     handleInputChange("category", e.target.value)
@@ -1412,7 +1414,7 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              10. ജുമുഅഅക്ക് പങ്കെടുക്കുന്നവരുടെ ശരാശരി എണ്ണം
+              10. ജുമുഅക്ക് പങ്കെടുക്കുന്നവരുടെ ശരാശരി എണ്ണം
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -1424,6 +1426,7 @@ const AffiliationForm = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.menCount}
                   onChange={(e) =>
                     handleInputChange("menCount", e.target.value)
@@ -1440,6 +1443,7 @@ const AffiliationForm = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.womenCount}
                   onChange={(e) =>
                     handleInputChange("womenCount", e.target.value)
@@ -1456,7 +1460,7 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              11-13. സാമ്പത്തിക വിവരങ്ങൾ
+              11,12,13. സാമ്പത്തിക വിവരങ്ങൾ
             </h2>
             <div className="space-y-4">
               <div>
@@ -1500,6 +1504,7 @@ const AffiliationForm = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.monthlyExpenses}
                   onChange={(e) =>
                     handleInputChange("monthlyExpenses", e.target.value)
@@ -1516,7 +1521,7 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              14-15. ഓഡിറ്റും രേഖകളും
+              14,15. ഓഡിറ്റും രേഖകളും
             </h2>
             <div className="space-y-4">
               <div>
@@ -1610,6 +1615,7 @@ const AffiliationForm = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.totalIncome}
                   onChange={(e) =>
                     handleInputChange("totalIncome", e.target.value)
@@ -1626,6 +1632,7 @@ const AffiliationForm = () => {
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.totalExpense}
                   onChange={(e) =>
                     handleInputChange("totalExpense", e.target.value)
@@ -1686,7 +1693,7 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              31-32. മാനേജിംഗ് കമ്മിറ്റിയും ഭാരവാഹികളും
+              18,19. മാനേജിംഗ് കമ്മിറ്റിയും ഭാരവാഹികളും
             </h2>
             <div className="space-y-4">
               <div>
@@ -1694,7 +1701,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  31. മാനേജിംഗ് കമ്മിറ്റിയുടെ പേര് <span className="text-red-500">*</span>
+                  18. മാനേജിംഗ് കമ്മിറ്റിയുടെ പേര് <span className="text-red-500">*</span>
                 </label>
                 <SelectField
                   value={formData.committeeType}
@@ -1742,7 +1749,7 @@ const AffiliationForm = () => {
                     className="font-medium mb-3"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    പ്രസിഡന്‍റ് / ചെയർമാൻ
+                    19. പ്രസിഡന്‍റ് / ചെയർമാൻ
                   </h3>
                   <div className="space-y-3">
                     <input
@@ -1868,13 +1875,13 @@ const AffiliationForm = () => {
               className="text-xl font-semibold mb-4 text-gray-800"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              34. ജീവനക്കാരുടെ വിവരങ്ങൾ
+              20. ജീവനക്കാരുടെ വിവരങ്ങൾ
             </h2>
             <p
               className="text-sm text-gray-600 mb-4"
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             >
-              ഖത്വീബ് ഉൾപെടെ ജീവനക്കാരെ സംബന്ധിച്ച വിവരങ്ങൾ
+              ഖത്വീബ് ഉൾപ്പെടെയുള്ള ജീവനക്കാരെ സംബന്ധിച്ച വിവരങ്ങൾ
             </p>
 
             <div className="overflow-x-auto">
@@ -1909,12 +1916,6 @@ const AffiliationForm = () => {
                       className="border border-gray-300 p-2 text-left"
                       style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                     >
-                      ശമ്പളം
-                    </th>
-                    <th
-                      className="border border-gray-300 p-2 text-left"
-                      style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
-                    >
                       റിമാർക്സ്
                     </th>
                     <th
@@ -1934,6 +1935,7 @@ const AffiliationForm = () => {
                       <td className="border border-gray-300 p-2">
                         <input
                           type="number"
+                          min="0"
                           value={staff.age}
                           onChange={(e) =>
                             handleStaffChange(index, "age", e.target.value)
@@ -1961,16 +1963,6 @@ const AffiliationForm = () => {
                               "qualification",
                               e.target.value
                             )
-                          }
-                          className="w-full p-1 border border-gray-200 rounded"
-                        />
-                      </td>
-                      <td className="border border-gray-300 p-2">
-                        <input
-                          type="text"
-                          value={staff.salary}
-                          onChange={(e) =>
-                            handleStaffChange(index, "salary", e.target.value)
                           }
                           className="w-full p-1 border border-gray-200 rounded"
                         />
@@ -2008,7 +2000,7 @@ const AffiliationForm = () => {
             >
               <Plus className="w-4 h-4" />
               <span style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                പുതിയ ജീവനക്കാരുടെ ചേർക്കുക
+                മറ്റ് ജീവനക്കാരെ ചേർക്കുക
               </span>
             </button>
 
@@ -2120,7 +2112,7 @@ const AffiliationForm = () => {
               type="button"
               className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
-              റദ്ദാക്കുക
+              Cancel
             </button>
             <button
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -2261,7 +2253,7 @@ const AffiliationForm = () => {
                   className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  റദ്ദാക്കുക
+                  Cancel
                 </button>
                 <button
                   onClick={handleCancelForm}
