@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Inbox, IndianRupee } from 'lucide-react';
+import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 
@@ -16,14 +16,15 @@ const AdminSidebar = ({ items }) => {
       : location.pathname === to && !location.search;
 
   // Desktop uses `label`; the mobile footer bar uses the shorter `short`.
+  // Form items open the live submissions pages; old-collection records are
+  // reachable from the "പഴയ രേഖകൾ" link on each submissions page.
   const navItems = items || [
     { to: '/admin-home', icon: Home, label: 'Dashboard', short: 'Home' },
-    { to: '/affiliation-list-admin', icon: FileText, label: 'Affiliation', short: 'Affiliation' },
-    { to: '/medical-list-admin', icon: Heart, label: 'Welfare Fund', short: 'Welfare' },
-    { to: '/mosque-list-admin', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
-    { to: '/khateeb-list-admin', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
+    { to: '/submissions/affiliation', icon: FileText, label: 'Affiliation', short: 'Affiliation' },
+    { to: '/submissions/welfarefund', icon: Heart, label: 'Welfare Fund', short: 'Welfare' },
+    { to: '/submissions/mosquefund', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
+    { to: '/submissions/khateeb', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
-    { to: '/submissions/welfarefund', icon: Inbox, label: 'Submissions', short: 'Inbox' },
     { to: '/spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
   ];
 
@@ -36,7 +37,7 @@ const AdminSidebar = ({ items }) => {
   return (
     <>
       {/* Sidebar (desktop) */}
-      <div className={`hidden md:flex ${sidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-200 transition-all duration-300 fixed h-full z-50 flex-col`}>
+      <div className={`print-hide hidden md:flex ${sidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-200 transition-all duration-300 fixed h-full z-50 flex-col`}>
         {/* Brand and toggle */}
         <div className={`h-16 flex items-center border-b border-gray-200 ${sidebarOpen ? 'justify-between px-4' : 'justify-center px-0'}`}>
           {sidebarOpen && <img src={logo} alt="Masjid Council Kerala" className="h-9 w-auto flex-shrink-0" />}
@@ -75,10 +76,10 @@ const AdminSidebar = ({ items }) => {
       </div>
 
       {/* Spacer to push content (desktop only) */}
-      <div className={`hidden md:block ${sidebarOpen ? 'w-64' : 'w-20'}`}></div>
+      <div className={`print-hide hidden md:block ${sidebarOpen ? 'w-64' : 'w-20'}`}></div>
 
       {/* Footer menu (mobile) */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-gray-200 flex pb-[env(safe-area-inset-bottom)]">
+      <nav className="print-hide md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-gray-200 flex pb-[env(safe-area-inset-bottom)]">
         {navItems.map((item) => (
           <Link
             key={item.to}

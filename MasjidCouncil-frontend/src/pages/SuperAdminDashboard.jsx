@@ -27,6 +27,8 @@ import PageHeader from '../components/PageHeader';
 import { cachedJson, peekJson } from "../lib/apiCache";
 import ConfirmDialog from '../components/ConfirmDialog';
 import { C, cardShadow, timeAgo, statusBadge, TrendChart, DonutChart, StatusLegend } from '../components/DashboardCharts';
+import ActionNeededCard from '../components/ActionNeededCard';
+import SpendingSummaryCard from '../components/SpendingSummaryCard';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -43,7 +45,7 @@ const PAGE_SIZE = 10;
 const SuperAdminDashboard = () => {
   const superAdminName = readSuperAdminName();
   const [admins, setAdmins] = useState([]);
-  const [loading, setLoading] = useState(() => peekJson(`${API_BASE_URL}/api/mosqueAffiliation/all`) === undefined);
+  const [loading, setLoading] = useState(() => peekJson(`${API_BASE_URL}/api/submissions/stats/summary`) === undefined);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -59,9 +61,9 @@ const SuperAdminDashboard = () => {
     mosqueFund: { total: 0, pending: 0, approved: 0, rejected: 0 },
     khateeb: { total: 0, pending: 0, approved: 0, rejected: 0 }
   });
-  const [statsLoading, setStatsLoading] = useState(() => peekJson(`${API_BASE_URL}/api/mosqueAffiliation/all`) === undefined);
+  const [statsLoading, setStatsLoading] = useState(() => peekJson(`${API_BASE_URL}/api/submissions/stats/summary`) === undefined);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
-  const [allSubmissions, setAllSubmissions] = useState([]);
+  const [monthlyCounts, setMonthlyCounts] = useState(Array(12).fill(0));
   const [recentAdmins, setRecentAdmins] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -101,7 +103,6 @@ const SuperAdminDashboard = () => {
     }
     fetchAdmins();
     fetchStatistics();
-    fetchRecentSubmissions();
   }, [navigate]);
 
   const fetchAdmins = async () => {
@@ -132,53 +133,38 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  // formType → stat key / display key used by this dashboard
+  const TYPE_STAT = { affiliation: 'affiliation', welfarefund: 'medicalAid', mosquefund: 'mosqueFund', khateeb: 'khateeb' };
+  const TYPE_DISPLAY = { affiliation: 'affiliation', welfarefund: 'medical', mosquefund: 'mosque', khateeb: 'khateeb' };
+
   const fetchStatistics = async () => {
     try {
       setStatsLoading(true);
+      const d = await cachedJson(`${API_BASE_URL}/api/submissions/stats/summary`, { headers: authHeaders() });
 
-      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`, { headers: authHeaders() });
-      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`, { headers: authHeaders() });
-      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`, { headers: authHeaders() });
-      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`, { headers: authHeaders() });
-
-      const count = (data) => ({
-        total: data.data?.length || 0,
-        pending: data.data?.filter(item => item.status === 'pending').length || 0,
-        approved: data.data?.filter(item => item.status === 'approved').length || 0,
-        rejected: data.data?.filter(item => item.status === 'rejected').length || 0
+      const empty = () => ({ total: 0, pending: 0, approved: 0, rejected: 0 });
+      const s = { affiliation: empty(), medicalAid: empty(), mosqueFund: empty(), khateeb: empty() };
+      (d.data?.byTypeStatus || []).forEach(({ _id, n }) => {
+        const k = TYPE_STAT[_id.t];
+        if (!k) return;
+        s[k].total += n;
+        if (_id.s === 'approved') s[k].approved += n;
+        else if (_id.s === 'rejected') s[k].rejected += n;
+        else s[k].pending += n; // pending + under_review
       });
+      setStats(s);
 
-      setStats({
-        affiliation: count(affiliationData),
-        medicalAid: count(medicalData),
-        mosqueFund: count(mosqueData),
-        khateeb: count(khateebData)
-      });
+      const counts = Array(12).fill(0);
+      (d.data?.monthly || []).forEach(({ _id, n }) => { counts[_id - 1] = n; });
+      setMonthlyCounts(counts);
+
+      setRecentSubmissions(
+        (d.data?.recent || []).map((item) => ({ ...item, type: TYPE_DISPLAY[item.formType] || 'affiliation' }))
+      );
     } catch (error) {
       console.error('Error fetching statistics:', error);
     } finally {
       setStatsLoading(false);
-    }
-  };
-
-  const fetchRecentSubmissions = async () => {
-    try {
-      const affiliationData = await cachedJson(`${API_BASE_URL}/api/mosqueAffiliation/all`, { headers: authHeaders() });
-      const medicalData = await cachedJson(`${API_BASE_URL}/api/welfarefund/all`, { headers: authHeaders() });
-      const mosqueData = await cachedJson(`${API_BASE_URL}/api/mosqueFund/all`, { headers: authHeaders() });
-      const khateebData = await cachedJson(`${API_BASE_URL}/api/khateebRegistration/all`, { headers: authHeaders() });
-
-      const all = [
-        ...(affiliationData.data || []).map(item => ({ ...item, type: 'affiliation' })),
-        ...(medicalData.data || []).map(item => ({ ...item, type: 'medical' })),
-        ...(mosqueData.data || []).map(item => ({ ...item, type: 'mosque' })),
-        ...(khateebData.data || []).map(item => ({ ...item, type: 'khateeb' }))
-      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-      setAllSubmissions(all);
-      setRecentSubmissions(all.slice(0, 5));
-    } catch (error) {
-      console.error('Error fetching recent submissions:', error);
     }
   };
 
@@ -338,15 +324,6 @@ const SuperAdminDashboard = () => {
   const safePage = Math.min(page, totalPages);
   const pagedAdmins = filteredAdmins.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const monthlyCounts = useMemo(() => {
-    const counts = Array(12).fill(0);
-    const year = new Date().getFullYear();
-    allSubmissions.forEach(s => {
-      const d = new Date(s.createdAt);
-      if (d.getFullYear() === year) counts[d.getMonth()]++;
-    });
-    return counts;
-  }, [allSubmissions]);
 
   const agg = useMemo(() => {
     const keys = ['affiliation', 'medicalAid', 'mosqueFund', 'khateeb'];
@@ -368,10 +345,10 @@ const SuperAdminDashboard = () => {
   };
 
   const kpiCards = [
-    { key: 'affiliation', title: 'Masjid Affiliation', icon: FileText, color: C.green2, bg: C.greenSoft, to: '/superadmin-affiliation-list' },
-    { key: 'medicalAid', title: 'Welfare Fund', icon: Heart, color: C.blue, bg: '#EFF6FF', to: '/superadmin-medical-list' },
-    { key: 'mosqueFund', title: 'Masjid Fund', icon: Building2, color: C.purple, bg: '#F5F3FF', to: '/superadmin-mosque-fund-list' },
-    { key: 'khateeb', title: "Mirqath '26", icon: CalendarDays, color: C.orange, bg: '#FFF7ED', to: '/superadmin-khateeb-list' }
+    { key: 'affiliation', title: 'Masjid Affiliation', icon: FileText, color: C.green2, bg: C.greenSoft, to: '/superadmin-submissions/affiliation' },
+    { key: 'medicalAid', title: 'Welfare Fund', icon: Heart, color: C.blue, bg: '#EFF6FF', to: '/superadmin-submissions/welfarefund' },
+    { key: 'mosqueFund', title: 'Masjid Fund', icon: Building2, color: C.purple, bg: '#F5F3FF', to: '/superadmin-submissions/mosquefund' },
+    { key: 'khateeb', title: "Mirqath '26", icon: CalendarDays, color: C.orange, bg: '#FFF7ED', to: '/superadmin-submissions/khateeb' }
   ];
 
   if (loading) {
@@ -452,6 +429,12 @@ const SuperAdminDashboard = () => {
             ))}
           </div>
 
+          {/* Area-verified submissions waiting for a decision */}
+          <ActionNeededCard role="superadmin" />
+
+          {/* Sanctioned money at a glance — full breakdown lives on the spending report */}
+          <SpendingSummaryCard role="superadmin" />
+
           {/* Analytics — primary focus, asymmetric 8/4 */}
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
             {/* Trend */}
@@ -496,7 +479,7 @@ const SuperAdminDashboard = () => {
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-[#111827] text-sm truncate">
-                            {submission.name || submission.mosqueName || submission.fullName || 'Unknown'}
+                            {submission.applicantName || submission.name || submission.mosqueName || submission.fullName || 'Unknown'}
                           </p>
                           <span className={`inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium capitalize ${statusBadge(submission.status)}`}>
                             {submission.status}

@@ -5,6 +5,13 @@ body {
   font-family: Poppins, "Noto Sans Malayalam", system-ui, sans-serif;
 }
 
+/* Browser print (Ctrl+P / Print button): chrome hidden, application content only.
+   .pdf-hide doubles up so PDF-excluded editors stay out of paper prints too. */
+@media print {
+  body { background: #fff !important; }
+  .print-hide, .pdf-hide { display: none !important; }
+}
+
 /* ponytail: the application forms repeat the same input utility string ~200 times
    across 4 files. Styling them once here beats editing every occurrence. Scoped to
    .mc-form so admin tables and the rest of the app are untouched. */

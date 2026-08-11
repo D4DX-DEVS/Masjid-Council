@@ -5,6 +5,7 @@ import AdminSidebar from '../components/AdminSidebar';
 import SelectField from '../components/SelectField';
 import PageHeader from '../components/PageHeader';
 import { StatCardsSkeleton, SkeletonBar } from '../components/Skeleton';
+import { cachedJson, peekJson } from '../lib/apiCache';
 import { C, cardShadow, statusBadge, TrendChart, DonutChart, StatusLegend } from '../components/DashboardCharts';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -58,8 +59,10 @@ const AreaAdminHome = () => {
   const token = localStorage.getItem('adminToken');
   const user = JSON.parse(localStorage.getItem('adminUser') || '{}');
 
-  const [all, setAll] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const listUrl = `${API_BASE_URL}/api/area/submissions`;
+  const cached = peekJson(listUrl);
+  const [all, setAll] = useState(cached?.data || []);
+  const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('all');
   const [period, setPeriod] = useState('all');
@@ -75,10 +78,7 @@ const AreaAdminHome = () => {
       navigate('/admin-login');
       return;
     }
-    fetch(`${API_BASE_URL}/api/area/submissions`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    cachedJson(listUrl, { headers: { Authorization: `Bearer ${token}` } })
       .then((d) => setAll(d.data || []))
       .catch(() => setError('Failed to load submissions.'))
       .finally(() => setLoading(false));
@@ -291,7 +291,39 @@ const AreaAdminHome = () => {
               നിങ്ങളുടെ ഏരിയയിൽ അപേക്ഷകൾ ഒന്നുമില്ല
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-x-auto" style={cardShadow}>
+            <>
+            {/* Mobile: cards */}
+            <div className="md:hidden space-y-3">
+              {rows.map((s) => (
+                <button
+                  key={s._id}
+                  onClick={() => navigate(`/area-submissions/${s._id}`)}
+                  className="w-full text-left bg-white rounded-2xl border border-[#E5E7EB] p-4"
+                  style={cardShadow}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-gray-800 truncate">{s.applicantName || '—'}</p>
+                    <span className={`px-2 py-1 rounded-full text-[11px] font-semibold capitalize flex-shrink-0 ${statusBadge(s.status)}`}>
+                      {s.status}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                    <span>{FORM_TYPES.find((f) => f.key === s.formType)?.label || s.formType}</span>
+                    <span>·</span>
+                    <span>{new Date(s.createdAt).toLocaleDateString()}</span>
+                    <span>·</span>
+                    {s.areaVerification?.comment ? (
+                      <span className="text-emerald-700 font-semibold">✔ Verified</span>
+                    ) : (
+                      <span className="text-amber-600 font-semibold">വെരിഫൈ ചെയ്യേണ്ടതുണ്ട്</span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Desktop / tablet: table */}
+            <div className="hidden md:block bg-white rounded-2xl border border-[#E5E7EB] overflow-x-auto" style={cardShadow}>
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-50 text-left text-gray-600">
                   <tr>
@@ -331,6 +363,7 @@ const AreaAdminHome = () => {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       </div>
