@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { authHeaders } from '../lib/auth';
+import { invalidate } from '../lib/apiCache';
+import { usePdfExport } from '../hooks/usePdfExport';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
+import StatusChangeModal from '../components/StatusChangeModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -18,6 +21,10 @@ const MosqueFundList = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
   const [actionLoading, setActionLoading] = useState(false);
+  const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
+  const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const { contentRef, downloading, handleDownload: handlePdfDownload } = usePdfExport('mosque-fund');
 
   useEffect(() => {
     // Get the mosque fund ID from location state
@@ -208,6 +215,57 @@ const MosqueFundList = () => {
     }
   };
 
+  const handleStatusChangeClick = () => {
+    setShowStatusChangeModal(true);
+  };
+
+  const handleStatusChange = async (newStatus, rejectionReason) => {
+    setStatusChangeLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowStatusChangeModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/superadmin/mosque-fund/${formData._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          rejectionReason: rejectionReason || null
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        invalidate(); // list caches now hold a stale status
+        showAlert(`Mosque fund status changed to ${newStatus} successfully!`, 'success');
+        setShowStatusChangeModal(false);
+        setFormData({
+          ...formData,
+          status: newStatus,
+          rejectionReason: rejectionReason || null,
+          updatedAt: new Date()
+        });
+      } else {
+        showAlert('Failed to change status: ' + data.message, 'error');
+        setShowStatusChangeModal(false);
+      }
+    } catch (error) {
+      console.error('Status change error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowStatusChangeModal(false);
+    } finally {
+      setStatusChangeLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
@@ -228,7 +286,7 @@ const MosqueFundList = () => {
           </h2>
           <button 
             onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="inline-flex items-center h-10 px-5 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
           >
             Go Back
           </button>
@@ -244,9 +302,9 @@ const MosqueFundList = () => {
           <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
             ഡാറ്റ ലഭ്യമല്ല
           </h2>
-          <button 
+          <button
             onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
+            className="inline-flex items-center h-10 px-5 mt-4 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
           >
             Go Back
           </button>
@@ -254,6 +312,11 @@ const MosqueFundList = () => {
       </div>
     );
   }
+
+  const handleDownloadPdfClick = () => handlePdfDownload(
+    formData._id?.slice(-8),
+    () => showAlert('PDF ഡൗൺലോഡ് പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കുക.', 'error')
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
@@ -272,10 +335,21 @@ const MosqueFundList = () => {
               <p className="text-green-100 text-xs sm:text-sm">Mosque Fund Application Details</p>
               <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
             </div>
+              <div className="ml-auto flex-shrink-0">
+                <button
+                  onClick={handleDownloadPdfClick}
+                  disabled={downloading}
+                  aria-label="Download as PDF"
+                  title="Download as PDF"
+                  className="p-2 hover:bg-green-700 rounded-full transition-colors disabled:opacity-50"
+                >
+                  {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+                </button>
+              </div>
               </div>
             </div>
 
-        <div className="p-4 space-y-3 mt-2">
+        <div className="p-4 space-y-3 mt-2" ref={contentRef}>
           {/* Application Summary */}
           <section className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6">
             <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
@@ -294,8 +368,8 @@ const MosqueFundList = () => {
                 <label className="text-xs font-medium text-gray-500">അപേക്ഷയുടെ നിലവിലെ അവസ്ഥ</label>
                 <div className="mt-1">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    formData.status === 'approved' ? 'bg-green-100 text-green-800' :
-                    formData.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    formData.status === 'approved' ? 'bg-[#EAF6EF] text-[#1F6B3A]' :
+                    formData.status === 'rejected' ? 'bg-red-50 text-red-700' :
                     'bg-yellow-100 text-yellow-800'
                   }`}>
                     {formData.status === 'approved' ? 'അനുമതി' :
@@ -422,23 +496,29 @@ const MosqueFundList = () => {
                 
                 {formData.bankPassbook && formData.bankPassbook.startsWith('http') ? (
                   <div className="flex gap-2">
-                      <a 
+                      <a
                         href={formData.bankPassbook}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        onClick={(e) => {
+                          if (getFileType(formData.bankPassbook) === 'image') {
+                            e.preventDefault();
+                            setPreviewImage(formData.bankPassbook);
+                          }
+                        }}
+                        className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
                       >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                         {getViewButtonText(formData.bankPassbook)}
                       </a>
-                    <button 
+                    <button
                       onClick={() => handleDownload(formData.bankPassbook, `bank-passbook-${formData._id?.slice(-8) || 'document'}.pdf`)}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-white text-[#1F6B3A] border border-[#E5E7EB] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       ഡൗൺലോഡ്
@@ -476,23 +556,29 @@ const MosqueFundList = () => {
                 
                 {formData.fullEstimate && formData.fullEstimate.startsWith('http') ? (
                   <div className="flex gap-2">
-                      <a 
+                      <a
                         href={formData.fullEstimate}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                        onClick={(e) => {
+                          if (getFileType(formData.fullEstimate) === 'image') {
+                            e.preventDefault();
+                            setPreviewImage(formData.fullEstimate);
+                          }
+                        }}
+                        className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
                       >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                         {getViewButtonText(formData.fullEstimate)}
                       </a>
-                    <button 
+                    <button
                       onClick={() => handleDownload(formData.fullEstimate, `plan-estimate-${formData._id?.slice(-8) || 'document'}.pdf`)}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-white text-[#1F6B3A] border border-[#E5E7EB] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       ഡൗൺലോഡ്
@@ -528,38 +614,52 @@ const MosqueFundList = () => {
 
           {/* Action Buttons - Only show for pending status */}
           {formData.status === 'pending' && (
-            <div className="flex justify-between mt-8">
-              <button 
+            <div className="flex justify-between mt-8 pdf-hide">
+              <button
                 onClick={handleConfirmClick}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md shadow"
+                className="inline-flex items-center gap-2 h-10 px-6 bg-[#1F6B3A] hover:bg-[#2E7D4F] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
               >
+                <CheckCircle className="w-4 h-4" />
                 Approve
-  </button>
-              <button 
+              </button>
+              <button
                 onClick={handleRejectClick}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-md shadow"
+                className="inline-flex items-center gap-2 h-10 px-6 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
               >
-    Reject
-  </button>
-</div>
+                <XCircle className="w-4 h-4" />
+                Reject
+              </button>
+            </div>
           )}
 
           {/* Status Display for non-pending forms */}
           {formData.status !== 'pending' && (
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-8 p-6 bg-[#F7F9FB] border border-[#E5E7EB] rounded-2xl">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Application Status</h3>
-                <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                  formData.status === 'approved' 
-                    ? 'bg-green-100 text-green-800' 
+                <h3 className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-wider mb-3">Application Status</h3>
+                <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
+                  formData.status === 'approved'
+                    ? 'bg-[#EAF6EF] text-[#1F6B3A]'
                     : formData.status === 'rejected'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-red-50 text-red-700'
+                    : 'bg-gray-100 text-gray-700'
                 }`}>
-                  {formData.status === 'approved' ? '✅ Approved' : 
-                   formData.status === 'rejected' ? '❌ Rejected' : 
-                   '❓ Unknown Status'}
+                  {formData.status === 'approved' ? <CheckCircle className="w-4 h-4" /> :
+                   formData.status === 'rejected' ? <XCircle className="w-4 h-4" /> :
+                   <AlertCircle className="w-4 h-4" />}
+                  {formData.status === 'approved' ? 'Approved' :
+                   formData.status === 'rejected' ? 'Rejected' :
+                   'Unknown Status'}
                 </span>
+                <div className="mt-4 pdf-hide">
+                  <button
+                    onClick={handleStatusChangeClick}
+                    className="inline-flex items-center gap-2 h-10 px-5 bg-[#1F6B3A] hover:bg-[#2E7D4F] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Change Status
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -570,8 +670,8 @@ const MosqueFundList = () => {
       
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0">
                 <CheckCircle className="h-8 w-8 text-green-600" />
@@ -588,7 +688,7 @@ const MosqueFundList = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                className="h-10 px-5 text-sm font-semibold text-[#374151] bg-white border border-[#E5E7EB] hover:bg-gray-50 rounded-xl transition-colors"
                 disabled={actionLoading}
               >
                 Cancel
@@ -596,7 +696,7 @@ const MosqueFundList = () => {
               <button
                 onClick={handleConfirm}
                 disabled={actionLoading}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md flex items-center"
+                className="inline-flex items-center justify-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-[#1F6B3A] hover:bg-[#2E7D4F] rounded-xl shadow-sm transition-colors"
               >
                 {actionLoading ? (
                   <>
@@ -614,8 +714,8 @@ const MosqueFundList = () => {
 
       {/* Rejection Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0">
                 <XCircle className="h-8 w-8 text-red-600" />
@@ -648,7 +748,7 @@ const MosqueFundList = () => {
                   setShowRejectModal(false);
                   setRejectionReason('');
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                className="h-10 px-5 text-sm font-semibold text-[#374151] bg-white border border-[#E5E7EB] hover:bg-gray-50 rounded-xl transition-colors"
                 disabled={actionLoading}
               >
                 Cancel
@@ -656,7 +756,7 @@ const MosqueFundList = () => {
               <button
                 onClick={handleReject}
                 disabled={actionLoading}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md flex items-center"
+                className="inline-flex items-center justify-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition-colors"
               >
                 {actionLoading ? (
                   <>
@@ -674,8 +774,8 @@ const MosqueFundList = () => {
 
       {/* Alert Modal */}
       {showAlertModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0">
                 {alertType === 'success' && <CheckCircle className="h-8 w-8 text-green-600" />}
@@ -696,8 +796,8 @@ const MosqueFundList = () => {
             <div className="flex justify-end">
               <button
                 onClick={closeAlert}
-                className={`px-4 py-2 text-sm font-medium text-white rounded-md ${
-                  alertType === 'success' ? 'bg-green-600 hover:bg-green-700' :
+                className={`inline-flex items-center justify-center h-10 px-5 text-sm font-semibold text-white rounded-xl transition-colors ${
+                  alertType === 'success' ? 'bg-[#1F6B3A] hover:bg-[#2E7D4F]' :
                   alertType === 'error' ? 'bg-red-600 hover:bg-red-700' :
                   'bg-yellow-600 hover:bg-yellow-700'
                 }`}
@@ -708,6 +808,38 @@ const MosqueFundList = () => {
       </div>
         </div>
       )}
+
+      {/* Image Preview Lightbox */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors"
+            aria-label="Close preview"
+          >
+            <XCircle className="w-6 h-6" />
+          </button>
+          <img
+            src={previewImage}
+            alt="Document preview"
+            className="max-w-full max-h-full rounded-lg shadow-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
+      {/* Status Change Modal */}
+      <StatusChangeModal
+        isOpen={showStatusChangeModal}
+        onClose={() => setShowStatusChangeModal(false)}
+        currentStatus={formData?.status}
+        onStatusChange={handleStatusChange}
+        loading={statusChangeLoading}
+        formType="Mosque Fund"
+      />
     </div>
   );
 };

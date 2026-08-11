@@ -286,12 +286,12 @@ const HeroSection = () => {
           <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left side - About Us Image (bottom-aligned so it lines up with the button) */}
-            <div className="order-2 lg:order-1 lg:self-end">
+            <div className="order-2 lg:order-1 lg:self-center">
               <div className="relative">
                 <img
                   src={aboutUsImage}
                   alt="About Masjid Council Kerala"
-                  className="w-full h-56 sm:h-80 lg:h-[500px] object-cover rounded-xl shadow-2xl"
+                  className="w-full h-56 sm:h-72 lg:h-[380px] object-cover rounded-xl shadow-2xl"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl"></div>
               </div>
@@ -307,15 +307,15 @@ const HeroSection = () => {
               <div className="space-y-4 text-black leading-relaxed"
                    style={{ fontFamily: "Noto Sans Malayalam" }}
               >
-                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
+                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '15px' }}>
                   മസ്ജിദുകളെ മികവിൻ്റെ കേന്ദ്രങ്ങളാക്കുക എന്ന ലക്ഷ്യത്തോടെ 1990-ൽ സ്ഥാപിതമായ സംവിധാനമാണ് മസ്ജിദ് കൗൺസിൽ കേരള.
                 </p>
 
-                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
+                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '15px' }}>
                   മസ്ജിദുകളുടെയും മഹല്ലുകളുടെയും പ്രവർത്തനങ്ങൾക്ക് മേൽനോട്ടം വഹിക്കുകയും ആവശ്യമായ മാർഗ്ഗനിർദ്ദേശങ്ങൾ നൽകുകയും ചെയ്യുക, ഖുത്ബയും ഇമാമത്തും നിർവ്വഹിക്കുവാൻ പ്രാപ്തരായ വ്യക്തികളെ കണ്ടെത്തി പരിശീലനം നൽകുക, നിലവിൽ മസ്ജിദുകളിൽ സേവനം ചെയ്തുവരുന്ന ഖത്വീബുമാരെയും ഇമാമുമാരെയും ശാക്തീകരിക്കുന്നതിനാവശ്യമായ പദ്ധതികൾ നടപ്പിലാക്കുക, മസ്ജിദ്, മഹല്ല് കമ്മിറ്റി ഭാരവാഹികൾക്ക് ആവശ്യമായ പരിശീലന പരിപാടികൾ സംഘടിപ്പിക്കുക തുടങ്ങിയ സുപ്രധാന ഉദ്ദേശ്യ ലക്ഷ്യങ്ങളോടെയാണ് മസ്ജിദ് കൗൺസിൽ കേരള പ്രവർത്തിക്കുന്നത്.
                 </p>
 
-                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '17px' }}>
+                <p className="text-sm sm:text-base" style={{ textAlign: 'justify', overflowWrap: 'break-word', wordBreak: 'break-all', fontSize: '15px' }}>
                   കൂടാതെ ഖത്വീബുമാർക്ക് ഖുത്ബ നിർവ്വഹിക്കുന്നതിന് സഹായകമാകും വിധം വിവിധ വിഷയങ്ങളിൽ സിനോപ്സിസുകൾ തയ്യാറാക്കി നൽകുകയും ചെയ്യുന്നുണ്ട്.
                 </p>
               </div>

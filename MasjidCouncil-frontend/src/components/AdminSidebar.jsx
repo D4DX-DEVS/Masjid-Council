@@ -1,26 +1,30 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database } from 'lucide-react';
+import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Inbox, IndianRupee } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 
 // Logout and the account details live in the page header's profile menu, not here.
-const AdminSidebar = () => {
+const AdminSidebar = ({ items }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+  // Area-admin links carry ?type=…, so compare path+search when the item has one.
+  const isActive = (to) =>
+    to.includes('?')
+      ? location.pathname + location.search === to
+      : location.pathname === to && !location.search;
 
   // Desktop uses `label`; the mobile footer bar uses the shorter `short`.
-  const navItems = [
+  const navItems = items || [
     { to: '/admin-home', icon: Home, label: 'Dashboard', short: 'Home' },
     { to: '/affiliation-list-admin', icon: FileText, label: 'Affiliation', short: 'Affiliation' },
     { to: '/medical-list-admin', icon: Heart, label: 'Welfare Fund', short: 'Welfare' },
     { to: '/mosque-list-admin', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
     { to: '/khateeb-list-admin', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
+    { to: '/submissions/welfarefund', icon: Inbox, label: 'Submissions', short: 'Inbox' },
+    { to: '/spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
   ];
 
   // Collapsed rail centers the icon instead of leaving it left-aligned in an 80px column.

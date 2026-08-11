@@ -47,9 +47,10 @@ const authenticateAdmin = async (req, res, next) => {
         
         // Check if it's a regular admin
         if (decoded.role === 'admin') {
-            // Verify admin still exists and is active
+            // Verify admin still exists and still holds the admin role
+            // (a token outlives a role downgrade to areaadmin by up to 24h)
             const admin = await Admin.findById(decoded.adminId);
-            if (!admin) {
+            if (!admin || (admin.role && admin.role !== 'admin')) {
                 return res.status(401).json({
                     success: false,
                     message: 'Admin account not found'
@@ -115,8 +116,66 @@ const authenticateSuperAdmin = (req, res, next) => {
     }
 };
 
-module.exports = { 
-    authenticateToken, 
-    authenticateAdmin, 
-    authenticateSuperAdmin 
-}; 
+// Area Admin Authentication - only allows area admins; loads their district/area
+const authenticateAreaAdmin = async (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+        return res.status(401).json({
+            success: false,
+            message: 'Access token required'
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        if (decoded.role !== 'areaadmin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Area admin privileges required.'
+            });
+        }
+
+        const admin = await Admin.findById(decoded.adminId);
+        if (!admin || admin.role !== 'areaadmin') {
+            return res.status(401).json({
+                success: false,
+                message: 'Area admin account not found'
+            });
+        }
+
+        if (!admin.district || !admin.area) {
+            return res.status(403).json({
+                success: false,
+                message: 'Area admin account has no district/area assigned'
+            });
+        }
+
+        req.user = {
+            ...decoded,
+            adminData: {
+                _id: admin._id,
+                username: admin.username,
+                phoneNumber: admin.phoneNumber,
+                district: admin.district,
+                area: admin.area
+            }
+        };
+        next();
+
+    } catch (error) {
+        return res.status(403).json({
+            success: false,
+            message: 'Invalid or expired token'
+        });
+    }
+};
+
+module.exports = {
+    authenticateToken,
+    authenticateAdmin,
+    authenticateSuperAdmin,
+    authenticateAreaAdmin
+};

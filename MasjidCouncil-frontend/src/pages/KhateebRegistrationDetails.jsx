@@ -31,7 +31,6 @@ const Field = ({ label, value }) => (
   </div>
 );
 
-// ponytail: shared by admin (read-only) and super admin (approve/reject)
 const KhateebRegistrationDetails = ({ role = 'admin' }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -43,8 +42,8 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [message, setMessage] = useState('');
 
-  const canDecide = role === 'superadmin';
-  const Sidebar = canDecide ? SuperAdminSidebar : AdminSidebar;
+  const canDecide = true; // admin and super admin can both approve/reject
+  const Sidebar = role === 'superadmin' ? SuperAdminSidebar : AdminSidebar;
 
   useEffect(() => {
     const id = location.state?.registration?._id;
@@ -256,7 +255,7 @@ const KhateebRegistrationDetails = ({ role = 'admin' }) => {
             />
             <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
               <button onClick={() => setShowRejectModal(false)} className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
-                റദ്ദാക്കുക
+                Cancel
               </button>
               <button
                 onClick={() => rejectionReason.trim() && updateStatus('rejected', rejectionReason.trim())}

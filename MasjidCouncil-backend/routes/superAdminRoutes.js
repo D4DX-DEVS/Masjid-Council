@@ -5,7 +5,7 @@ const Admin = require('../models/admin');
 const mosqueFund = require('../models/mosqueFund');
 const welfarefund = require('../models/welfarefund');
 const mosqueAffiliation = require('../models/mosqueAffiliation');
-const { authenticateSuperAdmin } = require('../middleware/auth');
+const { authenticateSuperAdmin, authenticateAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -91,8 +91,9 @@ router.post('/admin/login', async (req, res) => {
             });
         }
 
+        const role = admin.role || 'admin';
         const token = jwt.sign(
-            { adminId: admin._id, role: 'admin' },
+            { adminId: admin._id, role },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
@@ -107,7 +108,7 @@ router.post('/admin/login', async (req, res) => {
                 phoneNumber: admin.phoneNumber,
                 district: admin.district,
                 area: admin.area,
-                role: 'admin'
+                role
             }
         });
 
@@ -124,13 +125,27 @@ router.post('/admin/login', async (req, res) => {
 router.post('/admin', authenticateSuperAdmin, async (req, res) => {
     try {
 
-        const { username, phoneNumber, password, district, area } = req.body;
+        const { username, phoneNumber, password, district, area, role } = req.body;
 
         // Validate input
-        if (!username || !phoneNumber || !password || !district || !area) {
+        if (!username || !phoneNumber || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Username, phone number, password, district, and area are required'
+                message: 'Username, phone number, and password are required'
+            });
+        }
+
+        if (role && !['admin', 'areaadmin'].includes(role)) {
+            return res.status(400).json({
+                success: false,
+                message: "role must be 'admin' or 'areaadmin'"
+            });
+        }
+
+        if (role === 'areaadmin' && (!district || !area)) {
+            return res.status(400).json({
+                success: false,
+                message: 'district and area are required for area admins'
             });
         }
 
@@ -151,7 +166,8 @@ router.post('/admin', authenticateSuperAdmin, async (req, res) => {
             phoneNumber,
             password,
             district,
-            area
+            area,
+            role: role || 'admin'
         });
 
         await newAdmin.save();
@@ -163,6 +179,7 @@ router.post('/admin', authenticateSuperAdmin, async (req, res) => {
             phoneNumber: newAdmin.phoneNumber,
             district: newAdmin.district,
             area: newAdmin.area,
+            role: newAdmin.role,
             createdAt: newAdmin.createdAt,
             updatedAt: newAdmin.updatedAt
         };
@@ -236,7 +253,14 @@ router.get('/admin/:id', authenticateSuperAdmin, async (req, res) => {
 // Update Admin (Protected Route)
 router.put('/admin/:id', authenticateSuperAdmin, async (req, res) => {
     try {
-        const { username, phoneNumber, password, district, area } = req.body;
+        const { username, phoneNumber, password, district, area, role } = req.body;
+
+        if (role && !['admin', 'areaadmin'].includes(role)) {
+            return res.status(400).json({
+                success: false,
+                message: "role must be 'admin' or 'areaadmin'"
+            });
+        }
 
         const admin = await Admin.findById(req.params.id);
         if (!admin) {
@@ -266,7 +290,15 @@ router.put('/admin/:id', authenticateSuperAdmin, async (req, res) => {
         if (phoneNumber) admin.phoneNumber = phoneNumber;
         if (district) admin.district = district;
         if (area) admin.area = area;
+        if (role) admin.role = role;
         if (password) admin.password = password; // re-hashed by the pre-save hook
+
+        if (admin.role === 'areaadmin' && (!admin.district || !admin.area)) {
+            return res.status(400).json({
+                success: false,
+                message: 'district and area are required for area admins'
+            });
+        }
 
         await admin.save();
 
@@ -279,6 +311,7 @@ router.put('/admin/:id', authenticateSuperAdmin, async (req, res) => {
                 phoneNumber: admin.phoneNumber,
                 district: admin.district,
                 area: admin.area,
+                role: admin.role,
                 createdAt: admin.createdAt,
                 updatedAt: admin.updatedAt
             }
@@ -330,7 +363,7 @@ const STATUS_MODELS = {
 };
 const ALLOWED_STATUSES = ['pending', 'approved', 'rejected'];
 
-router.put('/:form/:id/status', authenticateSuperAdmin, async (req, res) => {
+router.put('/:form/:id/status', authenticateAdmin, async (req, res) => {
     try {
         const Model = STATUS_MODELS[req.params.form];
         if (!Model) {

@@ -21,10 +21,10 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
+import SelectField from '../components/SelectField';
 import { StatCardsSkeleton } from '../components/Skeleton';
 import PageHeader from '../components/PageHeader';
 import { cachedJson, peekJson } from "../lib/apiCache";
-import SelectField from '../components/SelectField';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { C, cardShadow, timeAgo, statusBadge, TrendChart, DonutChart, StatusLegend } from '../components/DashboardCharts';
 
@@ -68,13 +68,30 @@ const SuperAdminDashboard = () => {
     username: '',
     phoneNumber: '',
     password: '',
+    role: 'admin',
     district: '',
     area: ''
   });
-
   const [districts, setDistricts] = useState([]);
-  const [filteredAreas, setFilteredAreas] = useState([]);
-  const [loadingDropdowns, setLoadingDropdowns] = useState(false);
+  const [areas, setAreas] = useState([]);
+
+  // District/area options for area-admin accounts.
+  // master-data responds { districts: [{id, title}] } / { areas: [{id, title}] }
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/master-data/districts`)
+      .then((r) => r.json())
+      .then((d) => setDistricts(d.districts || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const district = districts.find((d) => d.title === formData.district);
+    if (!district) { setAreas([]); return; }
+    fetch(`${API_BASE_URL}/api/master-data/areas/${district.id}`)
+      .then((r) => r.json())
+      .then((d) => setAreas(d.areas || []))
+      .catch(() => {});
+  }, [formData.district, districts]);
 
   useEffect(() => {
     const token = localStorage.getItem('superAdminToken');
@@ -165,70 +182,10 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const fetchDistricts = async () => {
-    setLoadingDropdowns(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/master-data/districts`);
-      const result = await response.json();
-
-      const list = result.success && Array.isArray(result.districts)
-        ? result.districts
-        : getFallbackDistricts();
-      setDistricts(list);
-      return list; // callers need it before state settles
-    } catch (error) {
-      setDistricts(getFallbackDistricts());
-      return getFallbackDistricts();
-    } finally {
-      setLoadingDropdowns(false);
-    }
-  };
-
-  const fetchAreasForDistrict = async (districtId) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/master-data/areas/${districtId}`);
-      const result = await response.json();
-
-      if (result.success && result.areas && Array.isArray(result.areas)) {
-        setFilteredAreas(result.areas);
-        return result.areas;
-      } else {
-        const fallbackAreas = getFallbackAreas();
-        setFilteredAreas(fallbackAreas);
-        return fallbackAreas;
-      }
-    } catch (error) {
-      const fallbackAreas = getFallbackAreas();
-      setFilteredAreas(fallbackAreas);
-      return fallbackAreas;
-    }
-  };
-
-  const getFallbackDistricts = () => []; // ponytail: master data is the source of truth — no invented rows
-
-  const getFallbackAreas = () => []; // ponytail: master data is the source of truth — no invented rows
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'district') {
-      setFormData({
-        ...formData,
-        district: value,
-        area: ''
-      });
-
-      const selectedDistrict = districts.find(d =>
-        (d.title || d.name) === value
-      );
-
-      if (selectedDistrict && selectedDistrict.id) {
-        fetchAreasForDistrict(selectedDistrict.id);
-      } else {
-        const fallbackAreas = getFallbackAreas();
-        setFilteredAreas(fallbackAreas);
-      }
-    } else if (name === 'phoneNumber') {
+    if (name === 'phoneNumber') {
       const phoneNumber = value.replace(/\D/g, '');
       const firstFourDigits = phoneNumber.substring(0, 4);
       const autoPassword = firstFourDigits.length === 4 ? `MCK${firstFourDigits}` : '';
@@ -255,6 +212,10 @@ const SuperAdminDashboard = () => {
     const digits = (formData.phoneNumber || '').replace(/\D/g, '');
     if (digits.length !== 10) {
       setError('Enter a valid 10-digit mobile number');
+      return;
+    }
+    if (formData.role === 'areaadmin' && (!formData.district || !formData.area)) {
+      setError('District and area are required for area admins');
       return;
     }
     submitData.phoneNumber = digits;
@@ -287,6 +248,7 @@ const SuperAdminDashboard = () => {
           username: '',
           phoneNumber: '',
           password: '',
+          role: 'admin',
           district: '',
           area: ''
         });
@@ -301,28 +263,18 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const handleEdit = async (admin) => {
+  const handleEdit = (admin) => {
     setError('');
     setEditingAdmin(admin);
     setFormData({
       username: admin.username,
       phoneNumber: admin.phoneNumber,
       password: '',
-      district: admin.district,
-      area: admin.area
+      role: admin.role || 'admin',
+      district: admin.district || '',
+      area: admin.area || ''
     });
     setShowModal(true);
-
-    const list = await fetchDistricts(); // use returned list — `districts` state is stale this tick
-    const selectedDistrict = admin.district
-      ? list.find(d => (d.title || d.name) === admin.district)
-      : null;
-
-    if (selectedDistrict?.id) {
-      fetchAreasForDistrict(selectedDistrict.id);
-    } else {
-      setFilteredAreas(getFallbackAreas());
-    }
   };
 
   const handleDelete = async (adminId) => {
@@ -356,18 +308,17 @@ const SuperAdminDashboard = () => {
       username: '',
       phoneNumber: '',
       password: '',
+      role: 'admin',
       district: '',
       area: ''
     });
     setShowModal(true);
-    fetchDistricts();
-    setFilteredAreas([]);
   };
 
   const exportAdminsCsv = () => {
     const rows = [
-      ['Username', 'Phone Number', 'District', 'Area', 'Created'],
-      ...filteredAdmins.map(a => [a.username, a.phoneNumber, a.district, a.area, new Date(a.createdAt).toLocaleDateString('en-GB')])
+      ['Username', 'Phone Number', 'Created'],
+      ...filteredAdmins.map(a => [a.username, a.phoneNumber, new Date(a.createdAt).toLocaleDateString('en-GB')])
     ];
     const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -380,9 +331,7 @@ const SuperAdminDashboard = () => {
 
   const filteredAdmins = admins.filter(admin =>
     admin.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    admin.phoneNumber.includes(searchTerm) ||
-    admin.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    admin.area.toLowerCase().includes(searchTerm.toLowerCase())
+    admin.phoneNumber.includes(searchTerm)
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredAdmins.length / PAGE_SIZE));
@@ -578,7 +527,7 @@ const SuperAdminDashboard = () => {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-[#111827] text-sm truncate">{admin.username}</p>
-                        <p className="text-xs text-[#6B7280] truncate">{admin.district}{admin.area ? ` · ${admin.area}` : ''}</p>
+                        <p className="text-xs text-[#6B7280] truncate">{admin.phoneNumber}</p>
                       </div>
                       <span className="text-xs text-[#6B7280] flex-shrink-0">
                         {new Date(admin.createdAt).toLocaleDateString('en-GB')}
@@ -636,7 +585,7 @@ const SuperAdminDashboard = () => {
               <table className="min-w-full">
                 <thead className="sticky top-0 bg-[#F7F9FB]">
                   <tr>
-                    {['Username', 'Phone Number', 'District', 'Area', 'Created', 'Actions'].map(h => (
+                    {['Username', 'Phone Number', 'Created', 'Actions'].map(h => (
                       <th key={h} className="px-6 py-3.5 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
@@ -646,8 +595,6 @@ const SuperAdminDashboard = () => {
                     <tr key={admin._id} className={`transition-colors hover:bg-[#EAF6EF]/40 ${i % 2 ? 'bg-[#F7F9FB]/50' : 'bg-white'}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#111827]">{admin.username}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.phoneNumber}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.district}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.area}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
                         {new Date(admin.createdAt).toLocaleDateString('en-GB')}
                       </td>
@@ -682,9 +629,6 @@ const SuperAdminDashboard = () => {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-[#111827] truncate">{admin.username}</p>
                     <p className="text-xs text-[#6B7280] truncate">{admin.phoneNumber}</p>
-                    <p className="text-xs text-[#6B7280] truncate">
-                      {admin.district}{admin.area ? ` · ${admin.area}` : ''}
-                    </p>
                   </div>
                   <div className="flex gap-1.5 flex-shrink-0">
                     <button
@@ -802,44 +746,46 @@ const SuperAdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">District</label>
-                <SelectField
-                  name="district"
-                  value={formData.district}
-                  onChange={handleInputChange}
-                  required
-                  disabled={loadingDropdowns}
-                >
-                  <option value="">{loadingDropdowns ? "Loading..." : "Select District"}</option>
-                  {Array.isArray(districts) && districts.map((district) => (
-                    <option key={district.id || district._id} value={district.title || district.name}>
-                      {district.title || district.name}
-                    </option>
-                  ))}
+                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Role</label>
+                <SelectField name="role" value={formData.role} onChange={handleInputChange}>
+                  <option value="admin">Admin</option>
+                  <option value="areaadmin">Area Admin</option>
                 </SelectField>
               </div>
 
-              <div>
-                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">
-                  Area {!formData.district && <span className="text-[#6B7280] font-normal">(Select district first)</span>}
-                </label>
-                <SelectField
-                  name="area"
-                  value={formData.area}
-                  onChange={handleInputChange}
-                  required
-                  disabled={loadingDropdowns || !formData.district}
-                >
-                  <option value="">
-                    {!formData.district ? 'Select district first' : 'Select Area'}
-                  </option>
-                  {Array.isArray(filteredAreas) && filteredAreas.map((area) => (
-                    <option key={area.id || area._id} value={area.title || area.name}>
-                      {area.title || area.name}
-                    </option>
-                  ))}
-                </SelectField>
-              </div>
+              {formData.role === 'areaadmin' && (
+                <>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">District</label>
+                    <SelectField
+                      name="district"
+                      value={formData.district}
+                      onChange={(e) => setFormData({ ...formData, district: e.target.value, area: '' })}
+                      placeholder="Select district"
+                      required
+                    >
+                      {districts.map((d) => (
+                        <option key={d.id} value={d.title}>{d.title}</option>
+                      ))}
+                    </SelectField>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Area</label>
+                    <SelectField
+                      name="area"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      placeholder="Select area"
+                      disabled={!formData.district}
+                      required
+                    >
+                      {areas.map((a) => (
+                        <option key={a.id} value={a.title}>{a.title}</option>
+                      ))}
+                    </SelectField>
+                  </div>
+                </>
+              )}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button

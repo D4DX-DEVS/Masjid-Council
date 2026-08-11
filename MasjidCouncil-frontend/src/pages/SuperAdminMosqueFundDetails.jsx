@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { authHeaders } from '../lib/auth';
 import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
+import { usePdfExport } from '../hooks/usePdfExport';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import StatusChangeModal from '../components/StatusChangeModal';
 
@@ -24,6 +25,8 @@ const SuperAdminMosqueFundDetails = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
   const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const { contentRef, downloading, handleDownload: handlePdfDownload } = usePdfExport('mosque-fund');
 
   useEffect(() => {
     // Get the mosque fund ID from location state
@@ -246,7 +249,7 @@ const SuperAdminMosqueFundDetails = () => {
           </h2>
           <button 
             onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="inline-flex items-center h-10 px-5 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
           >
             Go Back
           </button>
@@ -264,7 +267,7 @@ const SuperAdminMosqueFundDetails = () => {
           </h2>
           <button 
             onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
+            className="inline-flex items-center h-10 px-5 mt-4 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
           >
             Go Back
           </button>
@@ -276,9 +279,10 @@ const SuperAdminMosqueFundDetails = () => {
   // Use actual formData instead of dummy data
   const displayData = formData || {};
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handleDownloadPdfClick = () => handlePdfDownload(
+    displayData._id?.slice(-8),
+    () => showAlert('PDF ഡൗൺലോഡ് പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കുക.', 'error')
+  );
 
   const handleDownload = async (url, filename) => {
     try {
@@ -331,12 +335,12 @@ const SuperAdminMosqueFundDetails = () => {
   const getStatusBadge = (status) => {
     const styles = {
       'പരിഗണനയിൽ': 'bg-yellow-100 text-yellow-800',
-      'അനുമതി': 'bg-green-100 text-green-800',
-      'നിരസിച്ചു': 'bg-red-100 text-red-800'
+      'അനുമതി': 'bg-[#EAF6EF] text-[#1F6B3A]',
+      'നിരസിച്ചു': 'bg-red-50 text-red-700'
     };
     
     return (
-      <span className={`px-3 py-1 rounded-full text-sm font-medium ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`px-3 py-1 rounded-full text-sm font-medium ${styles[status] || 'bg-gray-100 text-gray-700'}`}>
         {status}
       </span>
     );
@@ -361,11 +365,22 @@ const SuperAdminMosqueFundDetails = () => {
                 <p className="text-green-100 text-xs sm:text-sm">മസ്ജിദ് ഫണ്ട് അപേക്ഷ വിവരങ്ങൾ</p>
                 <p className="text-green-200 text-xs">അപേക്ഷ ഐഡി: {formData._id?.slice(-8) || 'N/A'}</p>
             </div>
-              <div className="ml-auto flex-shrink-0"><ProfileMenu role="superadmin" /></div>
+              <div className="ml-auto flex-shrink-0 flex items-center gap-2">
+                <button
+                  onClick={handleDownloadPdfClick}
+                  disabled={downloading}
+                  aria-label="Download as PDF"
+                  title="Download as PDF"
+                  className="p-2 hover:bg-green-700 rounded-full transition-colors disabled:opacity-50"
+                >
+                  {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+                </button>
+                <ProfileMenu role="superadmin" />
+              </div>
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6" ref={contentRef}>
           {/* Application Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">അപേക്ഷ സംഗ്രഹം</h2>
@@ -512,11 +527,17 @@ const SuperAdminMosqueFundDetails = () => {
                 
                 {displayData.bankPassbook && displayData.bankPassbook.startsWith('http') ? (
                   <div className="flex gap-2">
-                      <a 
+                      <a
                         href={displayData.bankPassbook}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        onClick={(e) => {
+                          if (getFileType(displayData.bankPassbook) === 'image') {
+                            e.preventDefault();
+                            setPreviewImage(displayData.bankPassbook);
+                          }
+                        }}
+                        className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -526,7 +547,7 @@ const SuperAdminMosqueFundDetails = () => {
                       </a>
                       <button 
                         onClick={() => handleDownload(displayData.bankPassbook, `bank-passbook-${displayData._id?.slice(-8) || 'document'}.pdf`)}
-                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                        className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-white text-[#1F6B3A] border border-[#E5E7EB] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -566,11 +587,17 @@ const SuperAdminMosqueFundDetails = () => {
                 
                 {displayData.fullEstimate && displayData.fullEstimate.startsWith('http') ? (
                   <div className="flex gap-2">
-                      <a 
+                      <a
                         href={displayData.fullEstimate}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                        onClick={(e) => {
+                          if (getFileType(displayData.fullEstimate) === 'image') {
+                            e.preventDefault();
+                            setPreviewImage(displayData.fullEstimate);
+                          }
+                        }}
+                        className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-white text-[#1F6B3A] border border-[#E5E7EB] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -580,7 +607,7 @@ const SuperAdminMosqueFundDetails = () => {
                       </a>
                       <button 
                         onClick={() => handleDownload(displayData.fullEstimate, `plan-estimate-${displayData._id?.slice(-8) || 'document'}.pdf`)}
-                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -603,7 +630,7 @@ const SuperAdminMosqueFundDetails = () => {
           </div>
 
           {/* Super Admin Actions */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 pdf-hide">
             <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">അപേക്ഷ പ്രവേശനം</h2>
             
             {/* Show buttons only if status is pending */}
@@ -611,14 +638,14 @@ const SuperAdminMosqueFundDetails = () => {
               <div className="flex gap-3">
               <button 
                 onClick={handleApprove}
-                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#1F6B3A] hover:bg-[#2E7D4F] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
                 >
                   <CheckCircle className="w-4 h-4" />
                   അനുമതി
                 </button>
                 <button 
                   onClick={handleRejectClick}
-                  className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
                 >
                   <XCircle className="w-4 h-4" />
                   നിരസിക്കുക
@@ -647,9 +674,9 @@ const SuperAdminMosqueFundDetails = () => {
                 <div className="mt-4">
                   <button
                     onClick={handleStatusChangeClick}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow transition-colors"
+                    className="inline-flex items-center gap-2 h-10 px-5 bg-[#1F6B3A] hover:bg-[#2E7D4F] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
                   >
-                    <Settings className="w-4 h-4 mr-2" />
+                    <Settings className="w-4 h-4" />
                     Change Status
                   </button>
                 </div>
@@ -662,8 +689,8 @@ const SuperAdminMosqueFundDetails = () => {
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <CheckCircle className="w-8 h-8 text-green-600 mr-3" />
               <h3 className="text-lg font-semibold text-gray-900">Confirm Approval</h3>
@@ -674,14 +701,14 @@ const SuperAdminMosqueFundDetails = () => {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="h-10 px-5 text-sm font-semibold text-[#374151] bg-white border border-[#E5E7EB] hover:bg-gray-50 rounded-xl transition-colors"
                 disabled={actionLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirm}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 h-10 px-5 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors disabled:opacity-50"
                 disabled={actionLoading}
               >
                 {actionLoading ? (
@@ -700,8 +727,8 @@ const SuperAdminMosqueFundDetails = () => {
 
       {/* Rejection Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               <XCircle className="w-8 h-8 text-red-600 mr-3" />
               <h3 className="text-lg font-semibold text-gray-900">Confirm Rejection</h3>
@@ -728,14 +755,14 @@ const SuperAdminMosqueFundDetails = () => {
                   setShowRejectModal(false);
                   setRejectionReason('');
                 }}
-                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="h-10 px-5 text-sm font-semibold text-[#374151] bg-white border border-[#E5E7EB] hover:bg-gray-50 rounded-xl transition-colors"
                 disabled={actionLoading}
               >
                 Cancel
               </button>
               <button 
                 onClick={handleReject}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 h-10 px-5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 shadow-sm transition-colors disabled:opacity-50"
                 disabled={actionLoading}
               >
                 {actionLoading ? (
@@ -754,8 +781,8 @@ const SuperAdminMosqueFundDetails = () => {
 
       {/* Alert Modal */}
       {showAlertModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 max-w-md w-full mx-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,.15)' }}>
             <div className="flex items-center mb-4">
               {alertType === 'success' && <CheckCircle className="w-8 h-8 text-green-600 mr-3" />}
               {alertType === 'error' && <XCircle className="w-8 h-8 text-red-600 mr-3" />}
@@ -770,12 +797,34 @@ const SuperAdminMosqueFundDetails = () => {
             <div className="flex justify-end">
               <button
                 onClick={closeAlert}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center justify-center h-10 px-5 bg-[#1F6B3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2E7D4F] shadow-sm transition-colors"
               >
                 OK
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Image Preview Lightbox */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors"
+            aria-label="Close preview"
+          >
+            <XCircle className="w-6 h-6" />
+          </button>
+          <img
+            src={previewImage}
+            alt="Document preview"
+            className="max-w-full max-h-full rounded-lg shadow-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
 

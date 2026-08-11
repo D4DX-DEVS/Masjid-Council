@@ -764,27 +764,30 @@ const MosqueFundForm = () => {
         {/* Info Card */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-blue-700 mb-2"style={{ fontFamily: "Noto Sans Malayalam" }}>
-            നിർദേശങ്ങൾ വായിക്കുക
+            നിർദേശങ്ങൾ
           </h2>
         </div>
 
         {/* Guidelines */}
         <div className="bg-gray-50 p-4 rounded-lg mb-4">
           <ul className="list-disc space-y-2 text-gray-800 text-xs sm:text-sm ml-4 sm:ml-6" style={{ fontFamily: "Noto Sans Malayalam" }}>
-            <li>MCK യിൽ അഫിലിയേറ്റ് ചെയ്‌ത മസ്‌ജിദുകൾക്ക് വേണ്ടിയുള്ള സംവിധാനമാണിത്. അഫിലിയേറ്റ് ചെയ്യാത്ത പള്ളികളുടെ അപേക്ഷ പരിഗണിക്കുകയില്ല.</li>
-            <li>എല്ലാ മാസവും ആദ്യത്തെ വെള്ളിയാഴ്‌ച ജുമുഅക്ക് ശേഷം മസ്‌ജിദ് ഫണ്ട് സമാഹരിക്കുകയും കേന്ദ്രത്തിലടക്കുകയും ചെയ്യുന്ന പള്ളികൾക്കാണ് സഹായത്തിന് അർഹതയുള്ളത്.</li>
-            <li>പള്ളികളുമായി ബന്ധപ്പെട്ട അറ്റകുറ്റപ്പണികൾക്ക് വേണ്ടിയാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്. പുതിയ പള്ളി നിർമ്മാണത്തിനോ പള്ളിയുമായി ചേർന്ന് നിൽകുന്ന മറ്റു സംവിധാനങ്ങൾക്കോ (മദ്രസ, ലൈബ്രറി) സഹായം ലഭ്യമല്ല.</li>
-            <li>മസ്‌ജിദ് പ്രസിഡന്‍റ് / സെക്രട്ടറിയാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്.</li>
-            <li>സഹായം ആവശ്യമായ ഇനത്തിന്‍റെ പ്ലാൻ, എസ്റ്റിമേറ്റ് എന്നിവ അപേക്ഷയോടൊപ്പം സമർപ്പിക്കേണ്ടതാണ്.</li>
-            <li>ഒരു തവണ സഹായം അനുവദിക്കപ്പെട്ട മസ്‌ജിദുകൾക്ക് പിന്നീട് നാല് വർഷത്തിന് ശേഷം മാത്രമേ അപേക്ഷ സമർപ്പിക്കാൻ അർഹതയുള്ളൂ.</li>
-            <li>സഹായം ആവശ്യമായ മസ്‌ജിദിൻ്റെ ബാങ്ക് പാസ് ബുക്കിൻ്റെ കോപ്പി (അക്കൗണ്ട് നമ്പർ, അക്കൗണ്ട് ഹോൾഡറുടെ പേര് ഉള്ള ഭാഗം) അപേക്ഷയോടൊപ്പം ചേർക്കണം.</li>
-            <li>അക്കൗണ്ട് മസ്‌ജിദ്/മാനേജിംഗ് കമ്മറ്റി/ട്രസ്റ്റിൻ്റെ പേരിലുള്ളതായിരിക്കണം.</li>
-            <li>സഹായം സ്വീകരിച്ചതിൻ്റെ റസിപ്റ്റ് മസ്‌ജിദ് കൗൺസിൽ കേരളക്ക് നൽകേണ്ടതാണ്.</li>
+            <li>MCK-യിൽ അഫിലിയേറ്റ് ചെയ്തിട്ടുള്ള മസ്ജിദുകൾക്ക് മാത്രമാണ് ഈ സഹായത്തിന് അപേക്ഷിക്കാനുള്ള അർഹത. അഫിലിയേറ്റ് ചെയ്യാത്ത മസ്ജിദുകളുടെ അപേക്ഷ പരിഗണിക്കുന്നതല്ല.</li>
+            <li>
+എല്ലാ മാസവും ആദ്യ വെള്ളിയാഴ്ച ജുമുഅ നമസ്കാരത്തിന് ശേഷം മസ്ജിദ് ഫണ്ട് സമാഹരിച്ച് കേന്ദ്രത്തിൽ അടയ്ക്കുന്ന മസ്ജിദുകൾക്കാണ് സഹായത്തിന് അർഹത.</li>
+            <li>മസ്ജിദുമായി ബന്ധപ്പെട്ട അറ്റകുറ്റപ്പണികൾക്കും നവീകരണ പ്രവർത്തനങ്ങൾക്കും മാത്രമാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്. പുതിയ മസ്ജിദ് നിർമ്മാണത്തിനോ മസ്ജിദിനോടനുബന്ധിച്ചുള്ള മറ്റ് സംവിധാനങ്ങളായ മദ്രസ, ലൈബ്രറി തുടങ്ങിയവയ്ക്കോ സഹായം അനുവദിക്കുന്നതല്ല.</li>
+            <li>മസ്ജിദ് പ്രസിഡന്റ് / സെക്രട്ടറി മുഖേനയാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്.
+</li>
+            <li>മസ്ജിദ് പ്രസിഡന്റ് / സെക്രട്ടറി മുഖേനയാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്.</li>
+            <li>ഒരിക്കൽ സഹായം ലഭിച്ച മസ്ജിദിന് തുടർന്ന് നാല് വർഷം പൂർത്തിയായതിന് ശേഷം മാത്രമേ വീണ്ടും സഹായത്തിനായി അപേക്ഷിക്കാൻ അർഹതയുണ്ടാകൂ.</li>
+            <li>അപേക്ഷയോടൊപ്പം സഹായം ആവശ്യമായ മസ്ജിദിന്റെ ബാങ്ക് പാസ്‌ബുക്കിന്റെ പകർപ്പ് സമർപ്പിക്കണം. അക്കൗണ്ട് നമ്പറും അക്കൗണ്ട് ഉടമയുടെ പേരും വ്യക്തമാകുന്ന പേജായിരിക്കണം.
+</li>
+            <li>ബാങ്ക് അക്കൗണ്ട് മസ്ജിദ് / മാനേജിംഗ് കമ്മിറ്റി / ട്രസ്റ്റ് എന്നിവയുടെ പേരിലുള്ളതായിരിക്കണം.</li>
+            <li>സഹായത്തുക ലഭിച്ചതിന് ശേഷം അതിന്റെ രസീത് മസ്ജിദ് കൗൺസിൽ കേരളയ്ക്ക് സമർപ്പിക്കേണ്ടതാണ്.</li>
           </ul>
         </div>
 
         <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4 text-sm text-gray-900">
-          <strong style={{ fontFamily: "Noto Sans Malayalam" }}>NB:</strong> അപേക്ഷയോടൊപ്പമുള്ള മാർഗനിർദ്ദേശങ്ങളിൽ സൂചിപ്പിച്ച രേഖകൾ അപേക്ഷയോടൊപ്പം സമർപ്പിക്കേണ്ടതാണ്.
+          <strong style={{ fontFamily: "Noto Sans Malayalam" }}>NB:</strong>അപേക്ഷയോടൊപ്പമുള്ള മാർഗനിർദ്ദേശങ്ങളിൽ വ്യക്തമാക്കിയിട്ടുള്ള ആവശ്യമായ എല്ലാ രേഖകളും നിർബന്ധമായും അപേക്ഷയോടൊപ്പം സമർപ്പിക്കേണ്ടതാണ്.
         </div>
 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-4">
@@ -1003,7 +1006,7 @@ const MosqueFundForm = () => {
             </div>
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-              ജമാഅത്തെ ഇസ്‌ലാമി പ്രാദേശിക ഘടകം
+              പ്രാദേശിക ഘടകം
               </label>
               <SelectField
                 name="jamathIslami"
@@ -1028,7 +1031,7 @@ const MosqueFundForm = () => {
 
         {/* Help Status Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>മുമ്പ് സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1073,7 +1076,7 @@ const MosqueFundForm = () => {
 
         {/* Current Help Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>നലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>നിലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1115,6 +1118,7 @@ const MosqueFundForm = () => {
                 <input
                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   type="number"
+                  min="0"
                   name="expectedExpense"
                   value={formData.expectedExpense}
                   onChange={handleInputChange}
@@ -1131,6 +1135,7 @@ const MosqueFundForm = () => {
                 <input
                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   type="number"
+                  min="0"
                   name="ownContribution"
                   value={formData.ownContribution}
                   onChange={handleInputChange}
@@ -1143,7 +1148,7 @@ const MosqueFundForm = () => {
 
         {/* Welfare Fund Details */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>കോൺടാക്റ്റ് വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>ബന്ധപ്പെടാനുള്ള വിവരം</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1338,7 +1343,7 @@ const MosqueFundForm = () => {
                 required
               />
               <span className="text-sm text-gray-700" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                ഞാൻ മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള എല്ലാ നിർദേശങ്ങളും വായിച്ച് മനസ്സിലാക്കിയുണ്ട്.
+                ഞാൻ മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള എല്ലാ നിർദേശങ്ങളും വായിച്ച് മനസ്സിലാക്കിയിട്ടുണ്ട്.
               </span>
             </label>
             <label className="flex items-start space-x-3">
@@ -1365,7 +1370,7 @@ const MosqueFundForm = () => {
             onClick={() => setShowForm(false)}
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200"
           >
-            റദ്ദാക്കുക
+            Cancel
           </button>
           <button
            style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -1499,7 +1504,7 @@ const MosqueFundForm = () => {
                   className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  റദ്ദാക്കുക
+                  Cancel
                 </button>
                 <button
                   onClick={handleCancelForm}

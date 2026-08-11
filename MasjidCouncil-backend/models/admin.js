@@ -20,13 +20,17 @@ const adminSchema = new mongoose.Schema({
     },
     district: {
         type: String,
-        required: true,
         trim: true
     },
     area: {
         type: String,
-        required: true,
         trim: true
+    },
+    // 'areaadmin' sees only own-area submissions and can add a verification comment
+    role: {
+        type: String,
+        enum: ['admin', 'areaadmin'],
+        default: 'admin'
     }
 }, {
     timestamps: true

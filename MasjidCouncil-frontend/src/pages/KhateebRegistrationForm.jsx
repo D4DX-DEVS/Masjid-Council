@@ -374,7 +374,7 @@ const KhateebRegistrationForm = () => {
             onClick={() => setShowCancelModal(true)}
             className="w-full sm:w-auto px-6 py-2.5 sm:px-8 sm:py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
           >
-            റദ്ദാക്കുക
+            Cancel
           </button>
           <button
             type="button"
@@ -401,7 +401,7 @@ const KhateebRegistrationForm = () => {
             </p>
             <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
               <button onClick={() => setShowCancelModal(false)} className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
-                റദ്ദാക്കുക
+                Cancel
               </button>
               <button onClick={() => navigate('/')} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md">
                 ഉപേക്ഷിക്കുക
