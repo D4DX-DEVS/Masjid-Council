@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database } from 'lucide-react';
+import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Wrench, Inbox, IndianRupee } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 
@@ -22,6 +22,9 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
     { to: '/superadmin-mosque-fund-list', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
     { to: '/superadmin-khateeb-list', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
+    { to: '/superadmin-submissions/welfarefund', icon: Inbox, label: 'Submissions', short: 'Inbox' },
+    { to: '/superadmin-form-builder', icon: Wrench, label: 'Form Builder', short: 'Forms' },
+    { to: '/superadmin-spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
   ];
 
   return (

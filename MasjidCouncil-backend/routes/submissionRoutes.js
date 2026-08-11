@@ -8,6 +8,43 @@ const router = express.Router();
 
 const ALLOWED_STATUSES = ["pending", "under_review", "approved", "rejected"];
 
+// Spending report — declared before /:formType so "stats" is never read as a form type.
+// Sums approved amounts per form type; optional ?year=&month= filter on the approval date.
+router.get("/stats/spending", authenticateAdmin, async (req, res) => {
+  try {
+    const year = Number(req.query.year) || null;
+    const month = Number(req.query.month) || null; // 1-12
+
+    const match = { status: "approved" };
+    if (year) {
+      const from = new Date(year, month ? month - 1 : 0, 1);
+      const to = month ? new Date(year, month, 1) : new Date(year + 1, 0, 1);
+      // old approvals (before approvedAt existed) fall back to updatedAt
+      match.$or = [
+        { approvedAt: { $gte: from, $lt: to } },
+        { approvedAt: null, updatedAt: { $gte: from, $lt: to } },
+      ];
+    }
+
+    const rows = await Submission.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: "$formType",
+          approvedCount: { $sum: 1 },
+          totalApproved: { $sum: { $ifNull: ["$approvedAmount", 0] } },
+          totalRequested: { $sum: { $ifNull: ["$requestedAmount", 0] } },
+        },
+      },
+    ]);
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Spending stats error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 // Public submit
 router.post("/:formType", async (req, res) => {
   try {
@@ -25,10 +62,8 @@ router.post("/:formType", async (req, res) => {
       return res.status(400).json({ success: false, message: "formData is required" });
     }
 
-    const { errors, district, area, applicantName, phone } = validateSubmission(
-      config.toObject(),
-      formData
-    );
+    const { errors, district, area, applicantName, phone, requestedAmount, ownContribution } =
+      validateSubmission(config.toObject(), formData);
     if (errors.length > 0) {
       return res.status(400).json({ success: false, message: "Validation failed", errors });
     }
@@ -41,6 +76,8 @@ router.post("/:formType", async (req, res) => {
       area,
       applicantName,
       phone,
+      requestedAmount,
+      ownContribution,
     });
 
     res.status(201).json({
@@ -101,7 +138,7 @@ router.get("/:formType/:id", authenticateAdmin, async (req, res) => {
 // Status change — admin / super admin
 router.patch("/:formType/:id/status", authenticateAdmin, async (req, res) => {
   try {
-    const { status, rejectionReason } = req.body;
+    const { status, rejectionReason, approvedAmount } = req.body;
     if (!ALLOWED_STATUSES.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -115,12 +152,31 @@ router.patch("/:formType/:id/status", authenticateAdmin, async (req, res) => {
       });
     }
 
+    const update = {
+      status,
+      rejectionReason: status === "rejected" ? rejectionReason.trim() : null,
+    };
+
+    if (status === "approved") {
+      const amount = Number(approvedAmount);
+      update.approvedAmount = approvedAmount !== undefined && approvedAmount !== "" && !Number.isNaN(amount)
+        ? amount
+        : null;
+      update.approvedAt = new Date();
+      update.approvedByName =
+        req.user.role === "superadmin"
+          ? req.user.username || "Super Admin"
+          : (req.user.adminData && req.user.adminData.username) || "Admin";
+    } else {
+      // leaving approved state clears the grant so the report never counts it
+      update.approvedAmount = null;
+      update.approvedAt = null;
+      update.approvedByName = null;
+    }
+
     const submission = await Submission.findOneAndUpdate(
       { _id: req.params.id, formType: req.params.formType },
-      {
-        status,
-        rejectionReason: status === "rejected" ? rejectionReason.trim() : null,
-      },
+      update,
       { new: true }
     );
     if (!submission) {

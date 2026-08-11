@@ -171,12 +171,16 @@ const validateSubmission = (config, formData) => {
     return value === undefined || value === null ? "" : String(value).trim();
   };
 
+  const toAmount = (raw) => (raw !== "" && !Number.isNaN(Number(raw)) ? Number(raw) : null);
+
   return {
     errors,
     district: pick(mapping.districtFieldId),
     area: pick(mapping.areaFieldId),
     applicantName: pick(mapping.nameFieldId),
     phone: pick(mapping.phoneFieldId),
+    requestedAmount: toAmount(pick(mapping.amountFieldId)),
+    ownContribution: toAmount(pick(mapping.ownAmountFieldId)),
   };
 };
 

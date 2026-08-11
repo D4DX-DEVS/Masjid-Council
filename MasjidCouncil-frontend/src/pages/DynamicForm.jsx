@@ -48,11 +48,12 @@ const DynamicForm = ({ formType: formTypeProp }) => {
     load();
   }, [formType]);
 
-  // Master-data districts for the roleMapping district field
+  // Master-data districts for the roleMapping district field.
+  // master-data responds { districts: [{id, title}] } / { areas: [{id, title}] }
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/master-data/districts`)
       .then((r) => r.json())
-      .then((d) => setDistricts(d.data || []))
+      .then((d) => setDistricts(d.districts || []))
       .catch(() => {});
   }, []);
 
@@ -68,9 +69,9 @@ const DynamicForm = ({ formType: formTypeProp }) => {
     }
     const district = districts.find((d) => d.title === selectedDistrict);
     if (!district) return;
-    fetch(`${API_BASE_URL}/api/master-data/areas/${district._id}`)
+    fetch(`${API_BASE_URL}/api/master-data/areas/${district.id}`)
       .then((r) => r.json())
-      .then((d) => setAreas(d.data || []))
+      .then((d) => setAreas(d.areas || []))
       .catch(() => {});
   }, [selectedDistrict, districts]);
 
@@ -226,7 +227,7 @@ const DynamicForm = ({ formType: formTypeProp }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-8">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
         <h1 className="text-xl font-bold text-emerald-800 mb-1">{config.title}</h1>
         {pages.length > 1 && (
           <p className="text-sm text-gray-500 mb-4">
@@ -235,23 +236,25 @@ const DynamicForm = ({ formType: formTypeProp }) => {
         )}
         {page.description && <p className="text-sm text-gray-600 mb-4">{page.description}</p>}
 
-        <div className="space-y-5">
+        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-5">
           {(page.fields || [])
             .filter((f) => f.enabled)
             .map((rawField) => {
               const { visible, required } = evaluateConditional(rawField, formData);
               if (!visible) return null;
               const field = withLocationOptions(rawField);
+              const fullWidth = ['textarea', 'row', 'title', 'group', 'html'].includes(field.type);
               return (
-                <DynamicField
-                  key={field.id}
-                  field={field}
-                  required={required}
-                  value={formData[`field_${field.id}`]}
-                  onChange={(v) => setValue(field, v)}
-                  uploading={uploadingField === field.id}
-                  onFileSelect={(file) => handleFile(field, file)}
-                />
+                <div key={field.id} className={fullWidth ? 'sm:col-span-2' : ''}>
+                  <DynamicField
+                    field={field}
+                    required={required}
+                    value={formData[`field_${field.id}`]}
+                    onChange={(v) => setValue(field, v)}
+                    uploading={uploadingField === field.id}
+                    onFileSelect={(file) => handleFile(field, file)}
+                  />
+                </div>
               );
             })}
         </div>

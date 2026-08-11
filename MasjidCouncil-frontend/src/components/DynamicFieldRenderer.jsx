@@ -1,5 +1,6 @@
 // Renders one dynamic-form field from a FormConfiguration field definition.
 // Shared by the public DynamicForm, the FormBuilder preview, and detail pages.
+import SelectField from './SelectField';
 
 export const STRUCTURAL_TYPES = ['title', 'group', 'html', 'page'];
 
@@ -45,6 +46,10 @@ export const evaluateConditional = (field, formData) => {
 
 const inputClass =
   'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-800 bg-white';
+
+// number fields: no spinner arrows (scrolling over them used to change the answer silently)
+const noSpinner =
+  '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
 
 const buildTable = (field, value) => {
   const cols = field.columns || (field.columnTitles || []).length || 2;
@@ -103,12 +108,16 @@ const DynamicField = ({ field, value, onChange, required, uploading, onFileSelec
       return (
         <div>
           {label}
-          <select className={inputClass} value={value || ''} onChange={(e) => onChange(e.target.value)}>
-            <option value="">{field.placeholder || 'തിരഞ്ഞെടുക്കുക'}</option>
+          <SelectField
+            name={`field_${field.id}`}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder || 'തിരഞ്ഞെടുക്കുക'}
+          >
             {(field.options || []).map((opt) => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
-          </select>
+          </SelectField>
           {help}
         </div>
       );
@@ -263,14 +272,30 @@ const DynamicField = ({ field, value, onChange, required, uploading, onFileSelec
     default: {
       // text, number, phone, email, date, datetime, time, url, password
       const typeMap = { phone: 'tel', datetime: 'datetime-local' };
+      const rules = field.validation || {};
+      const isNumber = field.type === 'number';
+      // These forms only ask for counts, amounts and years — never a negative.
+      const min = rules.min ?? (isNumber ? 0 : undefined);
       return (
         <div>
           {label}
           <input
             type={typeMap[field.type] || field.type}
-            className={inputClass}
+            className={isNumber ? `${inputClass} ${noSpinner}` : inputClass}
             placeholder={field.placeholder || ''}
             value={value || ''}
+            min={min}
+            max={rules.max}
+            maxLength={rules.maxLength}
+            onWheel={isNumber ? (e) => e.currentTarget.blur() : undefined}
+            onKeyDown={
+              isNumber
+                ? (e) => {
+                    // block the minus/exponent keys so "-14" can never be typed
+                    if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
+                  }
+                : undefined
+            }
             onChange={(e) => onChange(e.target.value)}
           />
           {help}

@@ -54,7 +54,10 @@ const SelectField = ({ name, value, onChange, required, disabled, placeholder, c
         className="w-full flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-[0.7rem] text-left text-gray-900 outline-none transition-all hover:border-gray-300 focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15 disabled:bg-gray-50 disabled:text-gray-400 data-[placeholder]:text-gray-400"
         aria-label={name}
       >
-        <Select.Value placeholder={promptText} />
+        {/* min-w-0 + truncate keeps a long label on one line instead of growing the trigger */}
+        <span className="min-w-0 flex-1 truncate whitespace-nowrap">
+          <Select.Value placeholder={promptText} />
+        </span>
         <Select.Icon>
           <ChevronDown className="h-4 w-4 text-gray-500 shrink-0" />
         </Select.Icon>

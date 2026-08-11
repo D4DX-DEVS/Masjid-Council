@@ -25,6 +25,14 @@ const submissionSchema = new mongoose.Schema(
     },
     rejectionReason: { type: String, default: null },
 
+    // Budget: what the applicant asked for (denormalized via roleMapping.amountFieldId)
+    // and what the admin granted at approval time. Feeds the spending report.
+    requestedAmount: { type: Number, default: null },
+    ownContribution: { type: Number, default: null },
+    approvedAmount: { type: Number, default: null },
+    approvedAt: { type: Date, default: null },
+    approvedByName: { type: String, default: null },
+
     // Area admin's physical-verification recommendation
     areaVerification: {
       comment: { type: String, default: null },

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
+import SelectField from '../components/SelectField';
 import { StatCardsSkeleton } from '../components/Skeleton';
 import PageHeader from '../components/PageHeader';
 import { cachedJson, peekJson } from "../lib/apiCache";
@@ -66,8 +67,31 @@ const SuperAdminDashboard = () => {
   const [formData, setFormData] = useState({
     username: '',
     phoneNumber: '',
-    password: ''
+    password: '',
+    role: 'admin',
+    district: '',
+    area: ''
   });
+  const [districts, setDistricts] = useState([]);
+  const [areas, setAreas] = useState([]);
+
+  // District/area options for area-admin accounts.
+  // master-data responds { districts: [{id, title}] } / { areas: [{id, title}] }
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/master-data/districts`)
+      .then((r) => r.json())
+      .then((d) => setDistricts(d.districts || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const district = districts.find((d) => d.title === formData.district);
+    if (!district) { setAreas([]); return; }
+    fetch(`${API_BASE_URL}/api/master-data/areas/${district.id}`)
+      .then((r) => r.json())
+      .then((d) => setAreas(d.areas || []))
+      .catch(() => {});
+  }, [formData.district, districts]);
 
   useEffect(() => {
     const token = localStorage.getItem('superAdminToken');
@@ -190,6 +214,10 @@ const SuperAdminDashboard = () => {
       setError('Enter a valid 10-digit mobile number');
       return;
     }
+    if (formData.role === 'areaadmin' && (!formData.district || !formData.area)) {
+      setError('District and area are required for area admins');
+      return;
+    }
     submitData.phoneNumber = digits;
     if (!editingAdmin) {
       submitData.password = `MCK${digits.substring(0, 4)}`;
@@ -219,7 +247,10 @@ const SuperAdminDashboard = () => {
         setFormData({
           username: '',
           phoneNumber: '',
-          password: ''
+          password: '',
+          role: 'admin',
+          district: '',
+          area: ''
         });
         setEditingAdmin(null);
         fetchAdmins();
@@ -238,7 +269,10 @@ const SuperAdminDashboard = () => {
     setFormData({
       username: admin.username,
       phoneNumber: admin.phoneNumber,
-      password: ''
+      password: '',
+      role: admin.role || 'admin',
+      district: admin.district || '',
+      area: admin.area || ''
     });
     setShowModal(true);
   };
@@ -273,7 +307,10 @@ const SuperAdminDashboard = () => {
     setFormData({
       username: '',
       phoneNumber: '',
-      password: ''
+      password: '',
+      role: 'admin',
+      district: '',
+      area: ''
     });
     setShowModal(true);
   };
@@ -707,6 +744,48 @@ const SuperAdminDashboard = () => {
                   required
                 />
               </div>
+
+              <div>
+                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Role</label>
+                <SelectField name="role" value={formData.role} onChange={handleInputChange}>
+                  <option value="admin">Admin</option>
+                  <option value="areaadmin">Area Admin</option>
+                </SelectField>
+              </div>
+
+              {formData.role === 'areaadmin' && (
+                <>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">District</label>
+                    <SelectField
+                      name="district"
+                      value={formData.district}
+                      onChange={(e) => setFormData({ ...formData, district: e.target.value, area: '' })}
+                      placeholder="Select district"
+                      required
+                    >
+                      {districts.map((d) => (
+                        <option key={d.id} value={d.title}>{d.title}</option>
+                      ))}
+                    </SelectField>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Area</label>
+                    <SelectField
+                      name="area"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      placeholder="Select area"
+                      disabled={!formData.district}
+                      required
+                    >
+                      {areas.map((a) => (
+                        <option key={a.id} value={a.title}>{a.title}</option>
+                      ))}
+                    </SelectField>
+                  </div>
+                </>
+              )}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button

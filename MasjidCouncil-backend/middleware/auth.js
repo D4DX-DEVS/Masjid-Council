@@ -47,9 +47,10 @@ const authenticateAdmin = async (req, res, next) => {
         
         // Check if it's a regular admin
         if (decoded.role === 'admin') {
-            // Verify admin still exists and is active
+            // Verify admin still exists and still holds the admin role
+            // (a token outlives a role downgrade to areaadmin by up to 24h)
             const admin = await Admin.findById(decoded.adminId);
-            if (!admin) {
+            if (!admin || (admin.role && admin.role !== 'admin')) {
                 return res.status(401).json({
                     success: false,
                     message: 'Admin account not found'

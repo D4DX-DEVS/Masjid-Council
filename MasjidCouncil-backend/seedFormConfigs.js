@@ -22,7 +22,7 @@ const welfarefundConfig = {
     { id: 5, text: "MCK യിൽ അഫിലിയേറ്റ് ചെയ്ത മസ്ജിദുകളിൽ തുടർച്ചയായി 5 വർഷം സർവീസ് ഉണ്ടായിരിക്കണം.", order: 5 },
     { id: 6, text: "ജീവനക്കാരന്റെ ആധാർ കോപ്പി, ബാങ്ക് പാസ് ബുക്കിന്റെ കോപ്പി എന്നിവ അപേക്ഷയോടൊപ്പം ചേർക്കണം.", order: 6 },
   ],
-  roleMapping: { districtFieldId: 11, areaFieldId: 12, phoneFieldId: 5, nameFieldId: 13 },
+  roleMapping: { districtFieldId: 11, areaFieldId: 12, phoneFieldId: 5, nameFieldId: 13, amountFieldId: 18, ownAmountFieldId: 19 },
   pages: [
     {
       id: 1,
@@ -137,7 +137,7 @@ const mosquefundConfig = {
     { id: 8, text: "അക്കൗണ്ട് മസ്ജിദ് / മാനേജിംഗ് കമ്മിറ്റി / ട്രസ്റ്റിന്റെ പേരിലുള്ളതായിരിക്കണം.", order: 8 },
     { id: 9, text: "സഹായം സ്വീകരിച്ചതിന്റെ റസീപ്റ്റ് മസ്ജിദ് കൗൺസിൽ കേരളക്ക് നൽകേണ്ടതാണ്.", order: 9 },
   ],
-  roleMapping: { districtFieldId: 9, areaFieldId: 10, phoneFieldId: 17, nameFieldId: 1 },
+  roleMapping: { districtFieldId: 9, areaFieldId: 10, phoneFieldId: 17, nameFieldId: 1, amountFieldId: 21, ownAmountFieldId: 22 },
   pages: [
     {
       id: 1,
@@ -186,87 +186,7 @@ const mosquefundConfig = {
   ],
 };
 
-const affiliationConfig = {
-  formType: "affiliation",
-  title: "മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ",
-  description: "Masjid Council Kerala — Mosque affiliation application",
-  enabled: true,
-  isPublished: true,
-  publishedAt: new Date(),
-  instructions: [],
-  roleMapping: { districtFieldId: 6, areaFieldId: 11, phoneFieldId: 8, nameFieldId: 1 },
-  pages: [
-    {
-      id: 1,
-      title: "മസ്ജിദിന്റെ വിവരങ്ങൾ",
-      order: 1,
-      fields: [
-        { id: 1, label: "മസ്ജിദിന്റെ പേര്", type: "text", required: true, enabled: true },
-        { id: 2, label: "മസ്ജിദ് തരം", type: "select", required: true, enabled: true, options: ["ജുമുഅത്ത് പള്ളി", "നമസ്ക്‌കാരപള്ളി"] },
-        { id: 3, label: "മഹല്ല് തരം", type: "text", required: true, enabled: true },
-        { id: 4, label: "സ്ഥാപിത വർഷം", type: "number", required: true, enabled: true },
-        { id: 5, label: "വിലാസം", type: "textarea", required: true, enabled: true },
-        { id: 6, label: "ജില്ല", type: "select", required: true, enabled: true, options: [] },
-        { id: 7, label: "പിൻകോഡ്", type: "number", required: true, enabled: true },
-        { id: 8, label: "ഫോൺ", type: "phone", required: true, enabled: true },
-        { id: 9, label: "ഇമെയിൽ", type: "email", required: false, enabled: true },
-        { id: 10, label: "ജമാഅത്ത് ഏരിയ", type: "title", required: false, enabled: true },
-        { id: 11, label: "ഏരിയ", type: "select", required: true, enabled: true, options: [] },
-      ],
-    },
-    {
-      id: 2,
-      title: "സൗകര്യങ്ങളും ശേഷിയും",
-      order: 2,
-      fields: [
-        { id: 12, label: "സൗകര്യങ്ങൾ", type: "checkbox", required: false, enabled: true, options: ["വുദു ഖാന", "ടോയ്‌ലറ്റ്", "മദ്രസ", "ലൈബ്രറി", "പാർക്കിംഗ്"] },
-        { id: 13, label: "ഖബർസ്ഥാൻ ഉണ്ടോ", type: "yesno", required: false, enabled: true },
-        { id: 14, label: "ഖബർസ്ഥാൻ വിവരം", type: "text", required: false, enabled: true, conditionalLogic: { field: 13, operator: "equals", value: "yes", action: "show" } },
-        { id: 15, label: "മസ്ജിദ് ശേഷി (പേർ)", type: "number", required: true, enabled: true },
-        { id: 16, label: "മസ്ജിദ് വിസ്തീർണ്ണം", type: "text", required: true, enabled: true },
-        { id: 17, label: "വെള്ളിയാഴ്ച പുരുഷ ഹാജർ", type: "number", required: true, enabled: true },
-        { id: 18, label: "വെള്ളിയാഴ്ച സ്ത്രീ ഹാജർ", type: "number", required: true, enabled: true },
-      ],
-    },
-    {
-      id: 3,
-      title: "സാമ്പത്തികം & കമ്മിറ്റി",
-      order: 3,
-      fields: [
-        { id: 19, label: "ആസ്തികൾ", type: "textarea", required: false, enabled: true },
-        { id: 20, label: "വരുമാന സ്രോതസ്സ്", type: "text", required: false, enabled: true },
-        { id: 21, label: "പ്രതിമാസ ചെലവ്", type: "number", required: false, enabled: true },
-        { id: 22, label: "കഴിഞ്ഞ വർഷത്തെ വരുമാനം", type: "number", required: false, enabled: true },
-        { id: 23, label: "കഴിഞ്ഞ വർഷത്തെ ചെലവ്", type: "number", required: false, enabled: true },
-        { id: 24, label: "ഓഡിറ്റ് ഉണ്ടോ", type: "yesno", required: false, enabled: true },
-        {
-          id: 25,
-          label: "കമ്മിറ്റി ഭാരവാഹികൾ",
-          type: "row",
-          required: false,
-          enabled: true,
-          columns: 3,
-          columnTitles: ["പേര്", "സ്ഥാനം", "ഫോൺ"],
-          rows: 3,
-          firstColumnHeader: "ക്രമ നമ്പർ",
-          allowAddRows: true,
-        },
-        {
-          id: 26,
-          label: "ജീവനക്കാർ",
-          type: "row",
-          required: false,
-          enabled: true,
-          columns: 4,
-          columnTitles: ["തസ്തിക", "വയസ്സ്", "വേതനം", "യോഗ്യത"],
-          rows: 3,
-          firstColumnHeader: "ക്രമ നമ്പർ",
-          allowAddRows: true,
-        },
-      ],
-    },
-  ],
-};
+const affiliationConfig = require("./formConfigs/affiliation");
 
 const khateebConfig = {
   formType: "khateeb",
@@ -305,12 +225,25 @@ const seed = async () => {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log("Connected to MongoDB");
 
+  // node seedFormConfigs.js --force affiliation   → overwrite that form's pages/fields
+  const forceIndex = process.argv.indexOf("--force");
+  const forced = forceIndex === -1 ? [] : process.argv.slice(forceIndex + 1);
+
   for (const config of CONFIGS) {
     const existing = await FormConfiguration.findOne({ formType: config.formType });
-    if (existing) {
+
+    if (existing && !forced.includes(config.formType)) {
       console.log(`skip ${config.formType} — config already exists (v${existing.version})`);
       continue;
     }
+
+    if (existing) {
+      Object.assign(existing, config, { version: existing.version + 1 });
+      await existing.save();
+      console.log(`replaced ${config.formType} (now v${existing.version})`);
+      continue;
+    }
+
     await FormConfiguration.create(config);
     console.log(`seeded ${config.formType}`);
   }

@@ -130,6 +130,11 @@ const formConfigurationSchema = new mongoose.Schema(
       areaFieldId: { type: Number, default: null },
       phoneFieldId: { type: Number, default: null },
       nameFieldId: { type: Number, default: null },
+      // field holding the requested amount (e.g. പ്രതീക്ഷിക്കുന്ന ചെലവ്) for the spending report
+      amountFieldId: { type: Number, default: null },
+      // field holding the applicant's own contribution (സ്വന്തമായി ശേഖരിക്കാവുന്ന തുക);
+      // approve dialog suggests requested − own as the sanction amount
+      ownAmountFieldId: { type: Number, default: null },
     },
   },
   { timestamps: true }

@@ -4,9 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
 import PrivacyPolicy from './pages/PrivacyPolicy';
-import AffiliationForm from './pages/AffiliationForm';
-import MedicalAidForm from './pages/MedicalAidForm';
-import MosqueFundForm from './pages/MosqueFundForm';
+// Old hardcoded form pages retired — public routes now use DynamicForm.
 import AdminLogin from './pages/AdminLogin';
 import SuperAdminLogin from './pages/SuperAdminLogin';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -23,10 +21,16 @@ import SuperAdminMosqueFundList from './pages/SuperAdminMosqueFundList';
 import SuperAdminAffiliationDetails from './pages/SuperAdminAffiliationDetails';
 import SuperAdminMedicalAidDetails from './pages/SuperAdminMedicalAidDetails';
 import SuperAdminMosqueFundDetails from './pages/SuperAdminMosqueFundDetails';
-import KhateebRegistrationForm from './pages/KhateebRegistrationForm';
 import KhateebRegistrationList from './pages/KhateebRegistrationList';
 import KhateebRegistrationDetails from './pages/KhateebRegistrationDetails';
 import MasterDataSetup from './pages/MasterDataSetup';
+import DynamicForm from './pages/DynamicForm';
+import FormBuilder from './pages/FormBuilder';
+import SubmissionList from './pages/SubmissionList';
+import SubmissionDetails from './pages/SubmissionDetails';
+import AreaAdminHome from './pages/AreaAdminHome';
+import AreaAdminSubmissionDetails from './pages/AreaAdminSubmissionDetails';
+import SpendingReport from './pages/SpendingReport';
 
 
 // Helper component to wrap Routes and conditional navbar
@@ -65,9 +69,20 @@ const Layout = () => {
     '/khateeb-registration'
   ];
 
-  const isAdminRoute = adminRoutes.includes(location.pathname);
-  const isSuperAdminRoute = superAdminRoutes.includes(location.pathname);
-  const isFormRoute = formRoutes.includes(location.pathname);
+  // Parameterized dashboard/form routes hide the navbar too
+  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/spending-report'];
+  const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report'];
+  const formPrefixes = ['/apply'];
+
+  const isAdminRoute =
+    adminRoutes.includes(location.pathname) ||
+    adminPrefixes.some((p) => location.pathname.startsWith(p));
+  const isSuperAdminRoute =
+    superAdminRoutes.includes(location.pathname) ||
+    superAdminPrefixes.some((p) => location.pathname.startsWith(p));
+  const isFormRoute =
+    formRoutes.includes(location.pathname) ||
+    formPrefixes.some((p) => location.pathname.startsWith(p));
   const isAdminLogin = location.pathname === '/admin-login';
   const isSuperAdminLogin = location.pathname === '/superadmin-login';
 
@@ -78,9 +93,10 @@ const Layout = () => {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/affiliation" element={<AffiliationForm />} />
-        <Route path="/medical-aid" element={<MedicalAidForm />} />
-        <Route path="/mosque-fund" element={<MosqueFundForm />} />
+        {/* Public forms now render from admin-configured FormConfigurations */}
+        <Route path="/affiliation" element={<DynamicForm formType="affiliation" />} />
+        <Route path="/medical-aid" element={<DynamicForm formType="welfarefund" />} />
+        <Route path="/mosque-fund" element={<DynamicForm formType="mosquefund" />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/superadmin-login" element={<SuperAdminLogin />} />
         <Route path="/superadmin-dashboard" element={<SuperAdminDashboard />} />
@@ -98,11 +114,27 @@ const Layout = () => {
         <Route path="/superadmin-medical-details" element={<SuperAdminMedicalAidDetails />} />
         <Route path="/superadmin-mosque-fund-details" element={<SuperAdminMosqueFundDetails />} />
         <Route path="/master-data" element={<MasterDataSetup />} />
-        <Route path="/khateeb-registration" element={<KhateebRegistrationForm />} />
+        <Route path="/khateeb-registration" element={<DynamicForm formType="khateeb" />} />
         <Route path="/khateeb-list-admin" element={<KhateebRegistrationList role="admin" />} />
         <Route path="/khateeb-details-admin" element={<KhateebRegistrationDetails role="admin" />} />
         <Route path="/superadmin-khateeb-list" element={<KhateebRegistrationList role="superadmin" />} />
         <Route path="/superadmin-khateeb-details" element={<KhateebRegistrationDetails role="superadmin" />} />
+
+        {/* Dynamic forms */}
+        <Route path="/apply/:formType" element={<DynamicForm />} />
+        <Route path="/superadmin-form-builder" element={<FormBuilder />} />
+        <Route path="/submissions/:formType" element={<SubmissionList role="admin" />} />
+        <Route path="/submissions/:formType/:id" element={<SubmissionDetails role="admin" />} />
+        <Route path="/superadmin-submissions/:formType" element={<SubmissionList role="superadmin" />} />
+        <Route path="/superadmin-submissions/:formType/:id" element={<SubmissionDetails role="superadmin" />} />
+
+        {/* Area admin */}
+        <Route path="/area-home" element={<AreaAdminHome />} />
+        <Route path="/area-submissions/:id" element={<AreaAdminSubmissionDetails />} />
+
+        {/* Spending report */}
+        <Route path="/spending-report" element={<SpendingReport role="admin" />} />
+        <Route path="/superadmin-spending-report" element={<SpendingReport role="superadmin" />} />
       </Routes>
     </>
   );

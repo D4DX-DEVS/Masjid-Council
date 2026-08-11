@@ -46,8 +46,8 @@ const AdminLogin = () => {
         localStorage.setItem('adminToken', data.token);
         localStorage.setItem('adminUser', JSON.stringify(data.user));
         
-        // Navigate to admin dashboard
-        navigate('/admin-home');
+        // Area admins get their own scoped dashboard
+        navigate(data.user.role === 'areaadmin' ? '/area-home' : '/admin-home');
       } else {
         setError(data.message || 'Login failed');
       }
