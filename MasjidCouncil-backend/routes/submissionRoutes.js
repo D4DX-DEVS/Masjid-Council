@@ -8,22 +8,47 @@ const router = express.Router();
 
 const ALLOWED_STATUSES = ["pending", "under_review", "approved", "rejected"];
 
+// Same style as the legacy MAF numbers: prefix + timestamp + 3 random digits.
+const REF_PREFIX = { welfarefund: "WF", mosquefund: "MF", affiliation: "AF", khateeb: "KH" };
+const makeReference = (formType) =>
+  `${REF_PREFIX[formType] || formType.slice(0, 2).toUpperCase()}${Date.now()}${Math.floor(Math.random() * 900) + 100}`;
+
+// district / area are stored as free text with inconsistent casing — match them exactly but case-blind.
+const exactCI = (value) =>
+  new RegExp(`^${String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+
+const parseDate = (value) => {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
 // Spending report — declared before /:formType so "stats" is never read as a form type.
-// Sums approved amounts per form type; optional ?year=&month= filter on the approval date.
+// Sums approved amounts per form type. Filters (all optional): ?from=&to= date range on the
+// approval date, ?year=&month= shorthand for the same, ?district=&area= location.
 router.get("/stats/spending", authenticateAdmin, async (req, res) => {
   try {
     const year = Number(req.query.year) || null;
     const month = Number(req.query.month) || null; // 1-12
 
     const match = { status: "approved" };
-    if (year) {
-      const from = new Date(year, month ? month - 1 : 0, 1);
-      const to = month ? new Date(year, month, 1) : new Date(year + 1, 0, 1);
+    if (req.query.district) match.district = exactCI(req.query.district);
+    if (req.query.area) match.area = exactCI(req.query.area);
+
+    let from = parseDate(req.query.from);
+    let to = parseDate(req.query.to);
+    if (to) to = new Date(to.getTime() + 24 * 60 * 60 * 1000); // 'to' day itself is included
+    if (!from && !to && year) {
+      from = new Date(year, month ? month - 1 : 0, 1);
+      to = month ? new Date(year, month, 1) : new Date(year + 1, 0, 1);
+    }
+
+    if (from || to) {
+      const range = {};
+      if (from) range.$gte = from;
+      if (to) range.$lt = to;
       // old approvals (before approvedAt existed) fall back to updatedAt
-      match.$or = [
-        { approvedAt: { $gte: from, $lt: to } },
-        { approvedAt: null, updatedAt: { $gte: from, $lt: to } },
-      ];
+      match.$or = [{ approvedAt: range }, { approvedAt: null, updatedAt: range }];
     }
 
     const rows = await Submission.aggregate([
@@ -34,6 +59,8 @@ router.get("/stats/spending", authenticateAdmin, async (req, res) => {
           approvedCount: { $sum: 1 },
           totalApproved: { $sum: { $ifNull: ["$approvedAmount", 0] } },
           totalRequested: { $sum: { $ifNull: ["$requestedAmount", 0] } },
+          totalPaid: { $sum: { $ifNull: ["$paidAmount", 0] } },
+          paidCount: { $sum: { $cond: [{ $gt: ["$paidAmount", 0] }, 1, 0] } },
         },
       },
     ]);
@@ -41,6 +68,53 @@ router.get("/stats/spending", authenticateAdmin, async (req, res) => {
     res.json({ success: true, data: rows });
   } catch (error) {
     console.error("Spending stats error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Dashboard summary over the live submission system: per-form status counts,
+// this year's monthly trend, and the latest submissions. Declared before /:formType.
+router.get("/stats/summary", authenticateAdmin, async (req, res) => {
+  try {
+    const year = new Date().getFullYear();
+    const [byTypeStatus, monthly, recent] = await Promise.all([
+      Submission.aggregate([
+        { $group: { _id: { t: "$formType", s: "$status" }, n: { $sum: 1 } } },
+      ]),
+      Submission.aggregate([
+        { $match: { createdAt: { $gte: new Date(year, 0, 1) } } },
+        { $group: { _id: { $month: "$createdAt" }, n: { $sum: 1 } } },
+      ]),
+      Submission.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select("formType applicantName status createdAt"),
+    ]);
+    res.json({ success: true, data: { byTypeStatus, monthly, recent } });
+  } catch (error) {
+    console.error("Summary stats error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Area-verified submissions still waiting for an admin decision — feeds the
+// dashboards' "action needed" card. Declared before /:formType like /stats/spending.
+router.get("/stats/action-needed", authenticateAdmin, async (req, res) => {
+  try {
+    const match = {
+      "areaVerification.comment": { $ne: null },
+      status: { $in: ["pending", "under_review"] },
+    };
+    const [counts, recent] = await Promise.all([
+      Submission.aggregate([{ $match: match }, { $group: { _id: "$formType", count: { $sum: 1 } } }]),
+      Submission.find(match)
+        .sort({ "areaVerification.verifiedAt": -1 })
+        .limit(5)
+        .select("formType applicantName district area status areaVerification.verifiedAt areaVerification.verifiedByName"),
+    ]);
+    res.json({ success: true, data: { counts, recent } });
+  } catch (error) {
+    console.error("Action-needed stats error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
@@ -72,6 +146,7 @@ router.post("/:formType", async (req, res) => {
       formType: config.formType,
       formVersion: config.version,
       formData,
+      referenceNumber: makeReference(config.formType),
       district,
       area,
       applicantName,
@@ -83,7 +158,7 @@ router.post("/:formType", async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Application submitted successfully",
-      data: { id: submission._id },
+      data: { id: submission._id, referenceNumber: submission.referenceNumber },
     });
   } catch (error) {
     console.error("Submit error:", error);
@@ -103,13 +178,36 @@ router.get("/:formType", authenticateAdmin, async (req, res) => {
       query.$or = [
         { applicantName: { $regex: search, $options: "i" } },
         { phone: { $regex: search, $options: "i" } },
+        { referenceNumber: { $regex: search, $options: "i" } },
       ];
     }
 
-    const submissions = await Submission.find(query)
-      .sort({ createdAt: -1 })
-      .select("-formData");
-    res.json({ success: true, data: submissions });
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+
+    // Counts ignore the status filter so the summary tiles stay put while filtering.
+    const { status: _ignored, ...countQuery } = query;
+
+    const [total, submissions, statusRows] = await Promise.all([
+      Submission.countDocuments(query),
+      Submission.find(query)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .select("-formData"),
+      Submission.aggregate([{ $match: countQuery }, { $group: { _id: "$status", n: { $sum: 1 } } }]),
+    ]);
+
+    const counts = statusRows.reduce(
+      (acc, r) => ({ ...acc, [r._id]: r.n, all: acc.all + r.n }),
+      { all: 0 }
+    );
+
+    res.json({
+      success: true,
+      data: submissions,
+      meta: { total, page, limit, pages: Math.max(1, Math.ceil(total / limit)), counts },
+    });
   } catch (error) {
     console.error("List submissions error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -190,6 +288,48 @@ router.patch("/:formType/:id/status", authenticateAdmin, async (req, res) => {
 });
 
 // Office-use comment — admin / super admin
+// Record what was actually paid out. Bookkeeping only — no gateway, the office types the number.
+// Send paidAmount: null (or "") to undo the entry.
+router.patch("/:formType/:id/paid", authenticateAdmin, async (req, res) => {
+  try {
+    const raw = req.body.paidAmount;
+    const clearing = raw === null || raw === "" || raw === undefined;
+    const paidAmount = clearing ? null : Number(raw);
+    if (!clearing && (!Number.isFinite(paidAmount) || paidAmount < 0)) {
+      return res.status(400).json({ success: false, message: "paidAmount must be a positive number" });
+    }
+
+    const byName =
+      req.user.role === "superadmin"
+        ? req.user.username || "Super Admin"
+        : (req.user.adminData && req.user.adminData.username) || "Admin";
+
+    const paidAt = clearing ? null : parseDate(req.body.paidAt) || new Date();
+
+    const submission = await Submission.findOneAndUpdate(
+      { _id: req.params.id, formType: req.params.formType },
+      {
+        paidAmount,
+        paidAt,
+        paidByName: clearing ? null : byName,
+        paidNote: clearing ? null : (req.body.paidNote || "").trim() || null,
+      },
+      { new: true }
+    );
+    if (!submission) {
+      return res.status(404).json({ success: false, message: "Submission not found" });
+    }
+    res.json({
+      success: true,
+      message: clearing ? "Payment entry cleared" : "Paid amount saved",
+      data: submission,
+    });
+  } catch (error) {
+    console.error("Paid amount error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 router.patch("/:formType/:id/office-comment", authenticateAdmin, async (req, res) => {
   try {
     const comment = (req.body.comment || "").trim();

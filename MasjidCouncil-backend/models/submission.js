@@ -10,6 +10,10 @@ const submissionSchema = new mongoose.Schema(
 
     formData: { type: mongoose.Schema.Types.Mixed, required: true },
 
+    // Public tracking reference shown to the applicant at submit time (e.g. WF1758696285090354).
+    // Sparse: submissions created before this field exist without one.
+    referenceNumber: { type: String, default: null, unique: true, sparse: true },
+
     // Denormalized from formData via the config's roleMapping at submit time,
     // so area admins can be scoped with a plain query.
     district: { type: String, default: "", index: true },
@@ -32,6 +36,13 @@ const submissionSchema = new mongoose.Schema(
     approvedAmount: { type: Number, default: null },
     approvedAt: { type: Date, default: null },
     approvedByName: { type: String, default: null },
+
+    // What was actually handed over, typed in by the office. No payment gateway is
+    // involved — this is bookkeeping so sanctioned vs paid can be compared.
+    paidAmount: { type: Number, default: null },
+    paidAt: { type: Date, default: null },
+    paidByName: { type: String, default: null },
+    paidNote: { type: String, default: null },
 
     // Area admin's physical-verification recommendation
     areaVerification: {

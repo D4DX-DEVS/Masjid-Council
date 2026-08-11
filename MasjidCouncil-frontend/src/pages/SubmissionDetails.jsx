@@ -5,6 +5,7 @@ import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import PageHeader from '../components/PageHeader';
 import { usePdfExport } from '../hooks/usePdfExport';
+import { invalidate } from '../lib/apiCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -64,7 +65,7 @@ export const SubmissionData = ({ config, submission }) => (
             {(page.fields || [])
               .filter((f) => !STRUCTURAL_TYPES.includes(f.type))
               .map((field) => (
-                <div key={field.id} className={field.type === 'row' || field.type === 'textarea' ? 'sm:col-span-2' : ''}>
+                <div key={field.id} className={field.type === 'row' || field.type === 'textarea' ? 'sm:col-span-2 min-w-0' : 'min-w-0'}>
                   <dt className="text-xs text-gray-500">{field.label}</dt>
                   <dd className="text-sm text-gray-800 font-medium">
                     <FieldValue field={field} value={submission.formData?.[`field_${field.id}`]} />
@@ -98,7 +99,12 @@ const SubmissionDetails = ({ role }) => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [showReject, setShowReject] = useState(false);
   const [showApprove, setShowApprove] = useState(false);
+  const [editingOffice, setEditingOffice] = useState(false);
   const [approvedAmount, setApprovedAmount] = useState('');
+  const [paidAmount, setPaidAmount] = useState('');
+  const [paidDate, setPaidDate] = useState('');
+  const [paidNote, setPaidNote] = useState('');
+  const [savingPaid, setSavingPaid] = useState(false);
   const [message, setMessage] = useState('');
   const { contentRef, downloading, handleDownload } = usePdfExport(`submission-${formType}`);
 
@@ -116,6 +122,7 @@ const SubmissionDetails = ({ role }) => {
           setSubmission(d.data);
           setConfig(d.config);
           setOfficeComment(d.data.officeComment?.comment || '');
+          fillPaid(d.data);
         }
       })
       .finally(() => setLoading(false));
@@ -134,12 +141,45 @@ const SubmissionDetails = ({ role }) => {
     });
     const data = await res.json();
     if (data.success) {
+      invalidate(); // list caches now hold a stale status
       setSubmission(data.data);
       setShowReject(false);
       setShowApprove(false);
       setMessage(data.message);
     } else {
       setMessage(data.message || 'Failed');
+    }
+  };
+
+  // Local YYYY-MM-DD — toISOString() would shift the day for IST users.
+  const isoDay = (value) => {
+    const d = value ? new Date(value) : new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const fillPaid = (s) => {
+    setPaidAmount(s.paidAmount != null ? String(s.paidAmount) : '');
+    setPaidDate(isoDay(s.paidAt));
+    setPaidNote(s.paidNote || '');
+  };
+
+  // clear=true wipes the entry; otherwise the typed number is stored as-is.
+  const savePaid = async (clear = false) => {
+    setSavingPaid(true);
+    const res = await fetch(`${API_BASE_URL}/api/submissions/${formType}/${id}/paid`, {
+      method: 'PATCH',
+      headers: authHeaders,
+      body: JSON.stringify(
+        clear ? { paidAmount: null } : { paidAmount, paidAt: paidDate, paidNote }
+      ),
+    });
+    const data = await res.json();
+    setSavingPaid(false);
+    setMessage(data.message || (data.success ? 'Saved' : 'Failed'));
+    if (data.success) {
+      invalidate(); // spending report + dashboard totals now hold a stale number
+      setSubmission(data.data);
+      fillPaid(data.data);
     }
   };
 
@@ -151,7 +191,11 @@ const SubmissionDetails = ({ role }) => {
     });
     const data = await res.json();
     setMessage(data.success ? 'Office comment saved' : data.message || 'Failed');
-    if (data.success) setSubmission(data.data);
+    if (data.success) {
+      invalidate();
+      setSubmission(data.data);
+      setEditingOffice(false);
+    }
   };
 
   const shell = (content) => (
@@ -169,20 +213,28 @@ const SubmissionDetails = ({ role }) => {
 
   return shell(
     <>
-      <div className="max-w-4xl">
-        <div className="flex items-center justify-between mb-2">
+      <div className="max-w-4xl mx-auto">
+        <div className="print-hide flex flex-wrap items-center justify-between gap-2 mb-2">
           <button onClick={() => navigate(listPath)} className="text-sm text-gray-500 hover:text-gray-800">← List</button>
-          <button
-            onClick={() => handleDownload(submission._id?.slice(-6), () => setMessage('PDF export failed'))}
-            disabled={downloading}
-            className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
-          >
-            {downloading ? 'Preparing…' : '⬇ Download PDF'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50"
+            >
+              🖨 Print
+            </button>
+            <button
+              onClick={() => handleDownload(submission._id?.slice(-6), () => setMessage('PDF export failed'))}
+              disabled={downloading}
+              className="px-4 py-2 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 disabled:opacity-50"
+            >
+              {downloading ? 'Preparing…' : '⬇ Download PDF'}
+            </button>
+          </div>
         </div>
 
         <div ref={contentRef}>
-        <div className="bg-white rounded-xl shadow p-6 mb-4">
+        <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
               <h1 className="text-lg font-bold text-gray-800">{submission.applicantName || config?.title}</h1>
@@ -229,6 +281,74 @@ const SubmissionDetails = ({ role }) => {
             </div>
           )}
 
+          {/* Paid entry — bookkeeping only, no payout happens here */}
+          {submission.status === 'approved' && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                <h3 className="text-sm font-bold text-gray-800">നൽകിയ തുക — Paid</h3>
+                {submission.paidAmount != null && (
+                  <span className="text-xs text-gray-500">
+                    ബാക്കി {`₹ ${Math.max(0, (submission.approvedAmount || 0) - submission.paidAmount).toLocaleString('en-IN')}`}
+                  </span>
+                )}
+              </div>
+
+              {submission.paidAmount != null && (
+                <p className="text-sm mb-3">
+                  <span className="text-xl font-bold text-emerald-700">
+                    ₹ {submission.paidAmount.toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-xs text-gray-500 block">
+                    {submission.paidByName}
+                    {submission.paidAt && ` — ${new Date(submission.paidAt).toLocaleDateString()}`}
+                    {submission.paidNote && ` • ${submission.paidNote}`}
+                  </span>
+                </p>
+              )}
+
+              <div className="print-hide grid sm:grid-cols-3 gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  value={paidAmount}
+                  onChange={(e) => setPaidAmount(e.target.value)}
+                  placeholder="തുക (₹)"
+                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
+                />
+                <input
+                  type="date"
+                  value={paidDate}
+                  onChange={(e) => setPaidDate(e.target.value)}
+                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
+                />
+                <input
+                  value={paidNote}
+                  onChange={(e) => setPaidNote(e.target.value)}
+                  placeholder="ചെക്ക് / റഫറൻസ്"
+                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
+                />
+              </div>
+              <div className="print-hide flex flex-wrap gap-2 mt-2">
+                <button
+                  onClick={() => savePaid()}
+                  disabled={savingPaid || paidAmount === ''}
+                  className="px-4 py-2 bg-[#1F6B3A] text-white rounded-xl text-sm font-semibold hover:bg-[#175530] disabled:opacity-40"
+                >
+                  {savingPaid ? 'സേവ് ചെയ്യുന്നു…' : 'സേവ് ചെയ്യുക'}
+                </button>
+                {submission.paidAmount != null && (
+                  <button
+                    onClick={() => savePaid(true)}
+                    disabled={savingPaid}
+                    className="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 disabled:opacity-40"
+                  >
+                    ക്ലിയർ
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {submission.status === 'rejected' && submission.rejectionReason && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
               <b>നിരസിച്ചതിന്റെ കാരണം:</b> {submission.rejectionReason}
@@ -237,7 +357,7 @@ const SubmissionDetails = ({ role }) => {
         </div>
 
         {/* Area president's verification */}
-        <div className="bg-white rounded-xl shadow p-6 mb-4">
+        <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-4">
           <h2 className="font-bold text-gray-800 mb-2">ജമാഅത്തെ ഇസ്ലാമി ഏരിയാ പ്രസിഡന്റിന്റെ ശുപാർശ</h2>
           {submission.areaVerification?.comment ? (
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
@@ -253,7 +373,7 @@ const SubmissionDetails = ({ role }) => {
         </div>
 
         {/* Office use — admins/super admin only; saved text prints, the editor does not */}
-        <div className="bg-white rounded-xl shadow p-6 mb-4">
+        <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-4">
           <h2 className="font-bold text-gray-800 mb-2">ഓഫീസ് ഉപയോഗത്തിന്</h2>
           {submission.officeComment?.comment ? (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-3">
@@ -266,30 +386,48 @@ const SubmissionDetails = ({ role }) => {
           ) : (
             <p className="text-sm text-gray-400 mb-3 pdf-hide">ഓഫീസ് കുറിപ്പ് ഇതുവരെ ചേർത്തിട്ടില്ല.</p>
           )}
-          <div className="pdf-hide">
-            <textarea
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-              rows={3}
-              placeholder="ഓഫീസ് കുറിപ്പ് (ഓപ്ഷണൽ) — ഉദാ: യോഗ തീരുമാനം"
-              value={officeComment}
-              onChange={(e) => setOfficeComment(e.target.value)}
-            />
-            <button onClick={saveOfficeComment} disabled={!officeComment.trim()}
-              className="mt-2 px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-semibold hover:bg-gray-900 disabled:opacity-50">
-              കുറിപ്പ് സേവ് ചെയ്യുക
+          {submission.officeComment?.comment && !editingOffice ? (
+            /* Saved — one-time note; editor opens only on demand */
+            <button
+              onClick={() => { setOfficeComment(submission.officeComment.comment); setEditingOffice(true); }}
+              className="pdf-hide px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50"
+            >
+              കുറിപ്പ് എഡിറ്റ് ചെയ്യുക
             </button>
-          </div>
+          ) : (
+            <div className="pdf-hide">
+              <textarea
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+                rows={3}
+                placeholder="ഓഫീസ് കുറിപ്പ് (ഓപ്ഷണൽ) — ഉദാ: യോഗ തീരുമാനം"
+                value={officeComment}
+                onChange={(e) => setOfficeComment(e.target.value)}
+              />
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button onClick={saveOfficeComment} disabled={!officeComment.trim()}
+                  className="px-4 py-2 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 disabled:opacity-50">
+                  {editingOffice ? 'കുറിപ്പ് പുതുക്കുക' : 'കുറിപ്പ് സേവ് ചെയ്യുക'}
+                </button>
+                {editingOffice && (
+                  <button onClick={() => setEditingOffice(false)}
+                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50">
+                    റദ്ദാക്കുക
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         </div>{/* end printable contentRef */}
 
         {/* Status actions */}
-        <div className="bg-white rounded-xl shadow p-6">
+        <div className="print-hide bg-white rounded-xl shadow p-4 sm:p-6">
           <h2 className="font-bold text-gray-800 mb-3">സ്റ്റാറ്റസ് മാറ്റുക</h2>
           {message && <p className="text-sm text-emerald-700 mb-2">{message}</p>}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
             <button onClick={() => changeStatus('under_review')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
-              Under review
+              className="w-full sm:w-auto px-5 py-2.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-sm font-semibold hover:bg-blue-100 transition-colors">
+              Under review — പരിശോധനയിൽ
             </button>
             <button
               onClick={() => {
@@ -301,12 +439,12 @@ const SubmissionDetails = ({ role }) => {
                 setApprovedAmount(suggested != null ? String(suggested) : '');
                 setShowApprove(true);
               }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">
-              Approve
+              className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition-colors">
+              ✓ Approve — അംഗീകരിക്കുക
             </button>
             <button onClick={() => setShowReject(true)}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700">
-              Reject
+              className="w-full sm:w-auto px-5 py-2.5 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors">
+              ✕ Reject — നിരസിക്കുക
             </button>
           </div>
           {showApprove && (

@@ -101,7 +101,7 @@ export const ProfileMenu = ({ role }) => {
 // `actions` holds the search + filter controls; on mobile it drops to its own row.
 // `shortTitle` keeps long names (e.g. "Welcome back, masjidC-superadmin") readable on phones.
 const PageHeader = ({ title, shortTitle, subtitle, count, titleStyle, role = 'admin', actions }) => (
-  <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+  <header className="print-hide sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
     <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-8 h-14 sm:h-16">
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <img src={logo} alt="Masjid Council Kerala" className="md:hidden h-8 w-auto flex-shrink-0" />

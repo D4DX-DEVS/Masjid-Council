@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Wrench, Inbox, IndianRupee } from 'lucide-react';
+import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Wrench, IndianRupee } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 
@@ -15,14 +15,15 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
   };
 
   // Desktop uses `label`; the mobile footer bar uses the shorter `short`.
+  // Form items open the live submissions pages; old-collection records are
+  // reachable from the "പഴയ രേഖകൾ" link on each submissions page.
   const navItems = [
     { to: '/superadmin-dashboard', icon: Home, label: 'Dashboard', short: 'Home' },
-    { to: '/superadmin-affiliation-list', icon: FileText, label: 'Affiliation', short: 'Affiliation' },
-    { to: '/superadmin-medical-list', icon: Heart, label: 'Welfare Fund', short: 'Welfare' },
-    { to: '/superadmin-mosque-fund-list', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
-    { to: '/superadmin-khateeb-list', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
+    { to: '/superadmin-submissions/affiliation', icon: FileText, label: 'Affiliation', short: 'Affiliation' },
+    { to: '/superadmin-submissions/welfarefund', icon: Heart, label: 'Welfare Fund', short: 'Welfare' },
+    { to: '/superadmin-submissions/mosquefund', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
+    { to: '/superadmin-submissions/khateeb', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
-    { to: '/superadmin-submissions/welfarefund', icon: Inbox, label: 'Submissions', short: 'Inbox' },
     { to: '/superadmin-form-builder', icon: Wrench, label: 'Form Builder', short: 'Forms' },
     { to: '/superadmin-spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
   ];
@@ -30,7 +31,7 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
   return (
     <>
       {/* Sidebar (desktop) */}
-      <div className={`hidden md:flex ${sidebarOpen ? 'w-[280px]' : 'w-[90px]'} bg-white border-r border-[#E5E7EB] transition-all duration-300 fixed h-full z-50 flex-col`} style={{ boxShadow: '0 6px 24px rgba(0,0,0,.04)' }}>
+      <div className={`print-hide hidden md:flex ${sidebarOpen ? 'w-[280px]' : 'w-[90px]'} bg-white border-r border-[#E5E7EB] transition-all duration-300 fixed h-full z-50 flex-col`} style={{ boxShadow: '0 6px 24px rgba(0,0,0,.04)' }}>
         {/* Brand and toggle */}
         <div className={`h-16 flex items-center border-b border-gray-100 ${sidebarOpen ? 'justify-between px-5' : 'justify-center px-0'}`}>
           {sidebarOpen && <img src={logo} alt="Masjid Council Kerala" className="h-9 w-auto flex-shrink-0" />}
@@ -98,10 +99,10 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
       </div>
 
       {/* Spacer to push content (desktop only) */}
-      <div className={`hidden md:block ${sidebarOpen ? 'w-[280px]' : 'w-[90px]'} flex-shrink-0`}></div>
+      <div className={`print-hide hidden md:block ${sidebarOpen ? 'w-[280px]' : 'w-[90px]'} flex-shrink-0`}></div>
 
       {/* Footer menu (mobile) */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-gray-200 flex pb-[env(safe-area-inset-bottom)]">
+      <nav className="print-hide md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-gray-200 flex pb-[env(safe-area-inset-bottom)]">
         {navItems.map((item) => (
           <button
             key={item.to}

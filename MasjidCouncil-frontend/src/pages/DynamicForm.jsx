@@ -24,6 +24,7 @@ const DynamicForm = ({ formType: formTypeProp }) => {
   const [uploadingField, setUploadingField] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [referenceNumber, setReferenceNumber] = useState(null);
 
   const [districts, setDistricts] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -160,6 +161,7 @@ const DynamicForm = ({ formType: formTypeProp }) => {
       });
       const data = await res.json();
       if (data.success) {
+        setReferenceNumber(data.data?.referenceNumber || null);
         setSubmitted(true);
         window.scrollTo(0, 0);
       } else {
@@ -192,7 +194,16 @@ const DynamicForm = ({ formType: formTypeProp }) => {
         <div className="bg-white rounded-2xl shadow p-8 max-w-md">
           <div className="text-5xl mb-4">✅</div>
           <h1 className="text-2xl font-bold text-emerald-800 mb-2">അപേക്ഷ സമർപ്പിച്ചു</h1>
-          <p className="text-gray-600 mb-6">നിങ്ങളുടെ അപേക്ഷ വിജയകരമായി സമർപ്പിച്ചിരിക്കുന്നു.</p>
+          <p className="text-gray-600 mb-4">നിങ്ങളുടെ അപേക്ഷ വിജയകരമായി സമർപ്പിച്ചിരിക്കുന്നു.</p>
+          {referenceNumber && (
+            <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <p className="text-xs text-gray-600 mb-1">അപേക്ഷാ റഫറൻസ് നമ്പർ</p>
+              <p className="text-lg font-bold tracking-wide text-emerald-800 select-all">{referenceNumber}</p>
+              <p className="mt-2 text-xs text-gray-600">
+                ഈ നമ്പർ സൂക്ഷിച്ചു വെക്കുക. ഹോം പേജിലെ “Track Your Application” വിഭാഗത്തിൽ ഈ നമ്പർ അല്ലെങ്കിൽ ഫോണിൽ നൽകിയ മൊബൈൽ നമ്പർ ഉപയോഗിച്ച് അപേക്ഷയുടെ നില അറിയാം.
+              </p>
+            </div>
+          )}
           <Link to="/" className="inline-block px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700">
             ഹോം പേജിലേക്ക്
           </Link>
