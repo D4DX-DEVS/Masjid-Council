@@ -71,6 +71,12 @@ connectDB();
 // Shared upload endpoint - mounted under both funds so each form keeps its own path.
 app.use("/api/mosqueFund", uploadRoutes);
 app.use("/api/welfarefund", uploadRoutes);
+// Dynamic forms: upload mount must come before submissionRoutes so
+// POST /api/submissions/upload-files is not captured by POST /:formType.
+app.use("/api/submissions", uploadRoutes);
+app.use("/api/form-config", require("./routes/formConfigRoutes"));
+app.use("/api/submissions", require("./routes/submissionRoutes"));
+app.use("/api/area", require("./routes/areaRoutes"));
 
 app.use("/api/mosqueAffiliation", mosqueAffiliationRoutes);
 app.use("/api/welfarefund", welfarefundRoutes);
