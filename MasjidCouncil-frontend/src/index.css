@@ -10,7 +10,12 @@ body {
 @media print {
   body { background: #fff !important; }
   .print-hide, .pdf-hide { display: none !important; }
+  .print-only { display: block !important; }
 }
+
+/* Letterhead lives in the page but only shows on paper / in the exported PDF
+   (the PDF hook reveals it via onclone). */
+.print-only { display: none; }
 
 /* ponytail: the application forms repeat the same input utility string ~200 times
    across 4 files. Styling them once here beats editing every occurrence. Scoped to

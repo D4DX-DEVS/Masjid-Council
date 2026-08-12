@@ -20,6 +20,9 @@ const submissionSchema = new mongoose.Schema(
     area: { type: String, default: "", index: true },
     applicantName: { type: String, default: "" },
     phone: { type: String, default: "" },
+    // Digits-only Aadhaar, denormalized via roleMapping.aadhaarFieldId; drives the
+    // one-application-per-Aadhaar rule on submit.
+    aadhaarNumber: { type: String, default: "", index: true },
 
     status: {
       type: String,

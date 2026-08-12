@@ -7,6 +7,7 @@ import PageHeader from '../components/PageHeader';
 import SelectField from '../components/SelectField';
 import DateField from '../components/DateField';
 import { usePdfExport } from '../hooks/usePdfExport';
+import PrintLetterhead from '../components/PrintLetterhead';
 import { invalidate } from '../lib/apiCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -256,6 +257,11 @@ const SubmissionDetails = ({ role }) => {
         </div>
 
         <div ref={contentRef}>
+        <PrintLetterhead
+          title={config?.title}
+          referenceNumber={submission.referenceNumber}
+          date={new Date(submission.createdAt).toLocaleDateString('en-GB')}
+        />
         <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>

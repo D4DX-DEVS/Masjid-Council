@@ -165,10 +165,39 @@ router.post("/:formType", async (req, res) => {
       return res.status(400).json({ success: false, message: "formData is required" });
     }
 
-    const { errors, district, area, applicantName, phone, requestedAmount, ownContribution } =
+    const { errors, district, area, applicantName, phone, requestedAmount, ownContribution, aadhaarNumber } =
       validateSubmission(config.toObject(), formData);
     if (errors.length > 0) {
       return res.status(400).json({ success: false, message: "Validation failed", errors });
+    }
+
+    // One application per Aadhaar: an active (pending / under review) application
+    // blocks a new one; an approved application blocks re-applying for 4 years;
+    // a rejected application frees the Aadhaar immediately.
+    if (aadhaarNumber) {
+      const lockYears = Number(config.roleMapping && config.roleMapping.aadhaarLockYears);
+      const years = Number.isFinite(lockYears) && lockYears >= 0 ? lockYears : 4;
+      const cutoff = new Date();
+      cutoff.setFullYear(cutoff.getFullYear() - years);
+      const existing = await Submission.findOne({
+        formType: config.formType,
+        aadhaarNumber,
+        $or: [
+          { status: { $in: ["pending", "under_review"] } },
+          {
+            status: "approved",
+            // old approvals have no approvedAt; fall back to createdAt
+            $or: [{ approvedAt: { $gte: cutoff } }, { approvedAt: null, createdAt: { $gte: cutoff } }],
+          },
+        ],
+      }).select("status referenceNumber");
+      if (existing) {
+        const message =
+          existing.status === "approved"
+            ? `An application with this Aadhaar number was already approved. A new application is allowed only after ${years} year${years === 1 ? "" : "s"}.`
+            : `An application with this Aadhaar number is already under process${existing.referenceNumber ? ` (ref: ${existing.referenceNumber})` : ""}.`;
+        return res.status(409).json({ success: false, message });
+      }
     }
 
     const submission = await Submission.create({
@@ -182,6 +211,7 @@ router.post("/:formType", async (req, res) => {
       phone,
       requestedAmount,
       ownContribution,
+      aadhaarNumber,
     });
 
     res.status(201).json({

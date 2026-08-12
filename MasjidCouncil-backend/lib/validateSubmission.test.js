@@ -87,6 +87,45 @@ test("number validation min/max", () => {
   assert.ok(errors.some((e) => e.includes("Age")));
 });
 
+test("aadhaar: valid 12 digits (with spaces) is normalized", () => {
+  const cfg = { ...config, roleMapping: { ...config.roleMapping, aadhaarFieldId: 2 } };
+  const result = validateSubmission(cfg, {
+    field_1: "Someone",
+    field_2: "1234 5678 9012",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.strictEqual(result.errors.length, 0);
+  assert.strictEqual(result.aadhaarNumber, "123456789012");
+});
+
+test("aadhaar: missing or non-12-digit value is an error when mapped", () => {
+  const cfg = { ...config, roleMapping: { ...config.roleMapping, aadhaarFieldId: 2 } };
+  for (const bad of [undefined, "1234", "abcd5678901f"]) {
+    const result = validateSubmission(cfg, {
+      field_1: "Someone",
+      field_2: bad,
+      field_3: "Kozhikode",
+      field_4: "Area A",
+      field_6: "no",
+    });
+    assert.ok(result.errors.some((e) => e.includes("Aadhaar")));
+    assert.strictEqual(result.aadhaarNumber, "");
+  }
+});
+
+test("aadhaar: unmapped forms are untouched", () => {
+  const result = validateSubmission(config, {
+    field_1: "Someone",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.strictEqual(result.aadhaarNumber, "");
+  assert.strictEqual(result.errors.length, 0);
+});
+
 test("option value must be one of the configured options", () => {
   const { errors } = validateSubmission(config, {
     field_1: "Someone",
