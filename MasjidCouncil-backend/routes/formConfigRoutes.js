@@ -1,5 +1,7 @@
 const express = require("express");
 const FormConfiguration = require("../models/formConfiguration");
+// Form configuration is super-admin-only. State admins work with submissions,
+// never with the field definitions. Only the public GET /:formType is unguarded.
 const { authenticateSuperAdmin } = require("../middleware/auth");
 
 const router = express.Router();

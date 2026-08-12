@@ -764,7 +764,8 @@ const SuperAdminDashboard = () => {
               <div>
                 <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Role</label>
                 <SelectField name="role" value={formData.role} onChange={handleInputChange}>
-                  <option value="admin">Admin</option>
+                  {/* Two roles only: state-wide admin and area admin. No district tier. */}
+                  <option value="admin">State Admin</option>
                   <option value="areaadmin">Area Admin</option>
                 </SelectField>
               </div>

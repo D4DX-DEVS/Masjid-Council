@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const Admin = require("./models/admin");
+const MasterLocation = require("./models/masterLocation");
 
 const DEFAULT_CSV = path.join(__dirname, "..", "MasjidCouncil-frontend", "areas-2026-08-12.csv");
 
@@ -43,6 +44,24 @@ const relaxPhoneIndex = async () => {
   await Admin.syncIndexes();
 };
 
+// Submissions carry the master-data district spelling ("ALAPUZHA"), the roster CSV
+// carries the human one ("ALAPPUZHA"). Area admins are scoped on district AND area,
+// so a spelling gap hides every application in that district. Master data wins.
+const masterDistrictByArea = async () => {
+  const districts = await MasterLocation.find({ type: "district" }).select("title").lean();
+  const titleById = new Map(districts.map((d) => [String(d._id), d.title]));
+
+  const map = new Map();
+  for (const area of await MasterLocation.find({ type: "area" }).select("title parent").lean()) {
+    const key = area.title.trim().toUpperCase();
+    const district = titleById.get(String(area.parent));
+    if (!district) continue;
+    // Ambiguous area name (same title under two districts) — leave the CSV alone.
+    map.set(key, map.has(key) && map.get(key) !== district ? null : district);
+  }
+  return map;
+};
+
 const seed = async () => {
   const file = process.argv[2] || DEFAULT_CSV;
   if (!fs.existsSync(file)) {
@@ -64,10 +83,19 @@ const seed = async () => {
 
   await relaxPhoneIndex();
 
+  const districtByArea = await masterDistrictByArea();
+
   let created = 0;
   let updated = 0;
+  let realigned = 0;
 
   for (const row of roster) {
+    const master = districtByArea.get(row.area.toUpperCase());
+    if (master && master.toUpperCase() !== row.district.toUpperCase()) {
+      console.log(`${row.username}: district "${row.district}" -> "${master}" (master data)`);
+      row.district = master;
+      realigned++;
+    }
     // .save() (not updateOne) so the pre-save hook hashes the password.
     const admin = (await Admin.findOne({ username: row.username })) || new Admin();
     const isNew = admin.isNew;
@@ -84,7 +112,7 @@ const seed = async () => {
     else updated++;
   }
 
-  console.log(`Done — ${created} created, ${updated} updated`);
+  console.log(`Done — ${created} created, ${updated} updated, ${realigned} districts realigned to master data`);
   await mongoose.disconnect();
 };
 
