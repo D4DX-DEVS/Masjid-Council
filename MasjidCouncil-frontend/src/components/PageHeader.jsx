@@ -18,7 +18,7 @@ const readAccount = (role) => {
     return {
       cfg,
       name: user?.username || cfg.fallback,
-      detail: user?.district || (role === 'superadmin' ? 'Full Access' : 'District Admin')
+      detail: user?.district || (role === 'superadmin' ? 'Full Access' : 'State Admin')
     };
   } catch {
     return { cfg, name: cfg.fallback, detail: '' };

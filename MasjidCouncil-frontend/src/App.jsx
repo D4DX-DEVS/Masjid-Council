@@ -63,7 +63,7 @@ const Layout = () => {
   ];
 
   // Parameterized dashboard routes hide the navbar too
-  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/spending-report', '/admin-form-builder'];
+  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/spending-report'];
   const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report'];
 
   const isAdminRoute =
@@ -112,7 +112,6 @@ const Layout = () => {
         {/* Dynamic forms */}
         <Route path="/apply/:formType" element={<DynamicForm />} />
         <Route path="/superadmin-form-builder" element={<FormBuilder role="superadmin" />} />
-        <Route path="/admin-form-builder" element={<FormBuilder role="admin" />} />
         <Route path="/submissions/:formType" element={<SubmissionList role="admin" />} />
         <Route path="/submissions/:formType/:id" element={<SubmissionDetails role="admin" />} />
         <Route path="/superadmin-submissions/:formType" element={<SubmissionList role="superadmin" />} />
