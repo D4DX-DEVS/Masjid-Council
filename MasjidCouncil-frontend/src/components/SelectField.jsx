@@ -69,20 +69,23 @@ const SelectField = ({ name, value, onChange, required, disabled, placeholder, c
           sideOffset={6}
           className="z-[200] max-h-72 w-[var(--radix-select-trigger-width)] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl"
         >
-          <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-gray-100 bg-white px-2.5 py-2">
-            <Search className="h-4 w-4 shrink-0 text-gray-400" />
-            <input
-              ref={searchRef}
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key !== 'Escape') e.stopPropagation();
-              }}
-              placeholder="Search..."
-              className="w-full text-sm text-gray-900 outline-none placeholder:text-gray-400"
-            />
-          </div>
+          {/* ponytail: short lists (payment mode, yes/no) fit on screen - search is noise there. */}
+          {items.length > 8 && (
+            <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-gray-100 bg-white px-2.5 py-2">
+              <Search className="h-4 w-4 shrink-0 text-gray-400" />
+              <input
+                ref={searchRef}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Escape') e.stopPropagation();
+                }}
+                placeholder="Search..."
+                className="w-full text-sm text-gray-900 outline-none placeholder:text-gray-400"
+              />
+            </div>
+          )}
           <Select.Viewport className="p-1.5">
             {filteredItems.length === 0 ? (
               <div className="px-3 py-2.5 text-sm text-gray-400">No results</div>

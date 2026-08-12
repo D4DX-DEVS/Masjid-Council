@@ -1,6 +1,7 @@
 // Renders one dynamic-form field from a FormConfiguration field definition.
 // Shared by the public DynamicForm, the FormBuilder preview, and detail pages.
 import SelectField from './SelectField';
+import DateField from './DateField';
 
 export const STRUCTURAL_TYPES = ['title', 'group', 'html', 'page'];
 
@@ -269,8 +270,25 @@ const DynamicField = ({ field, value, onChange, required, uploading, onFileSelec
       );
     }
 
+    case 'date':
+      return (
+        <div>
+          {label}
+          <DateField
+            name={`field_${field.id}`}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            min={field.validation?.min}
+            max={field.validation?.max}
+            placeholder={field.placeholder || 'തീയതി'}
+            className="px-3.5 py-[0.7rem]"
+          />
+          {help}
+        </div>
+      );
+
     default: {
-      // text, number, phone, email, date, datetime, time, url, password
+      // text, number, phone, email, datetime, time, url, password
       const typeMap = { phone: 'tel', datetime: 'datetime-local' };
       const rules = field.validation || {};
       const isNumber = field.type === 'number';

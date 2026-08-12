@@ -5,6 +5,7 @@ import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import PageHeader from '../components/PageHeader';
 import SelectField from '../components/SelectField';
+import DateField from '../components/DateField';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -254,24 +255,24 @@ const SpendingReport = ({ role }) => {
                 <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                   <CalendarRange className="w-3.5 h-3.5" /> മുതൽ (From)
                 </label>
-                <input
-                  type="date"
+                <DateField
+                  name="from"
                   value={from}
                   max={to || undefined}
                   onChange={(e) => setFrom(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3.5 py-[0.7rem] text-sm bg-white text-gray-900 outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15 transition-all"
+                  className="px-3.5 py-[0.7rem]"
                 />
               </div>
               <div>
                 <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                   <CalendarRange className="w-3.5 h-3.5" /> വരെ (To)
                 </label>
-                <input
-                  type="date"
+                <DateField
+                  name="to"
                   value={to}
                   min={from || undefined}
                   onChange={(e) => setTo(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3.5 py-[0.7rem] text-sm bg-white text-gray-900 outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15 transition-all"
+                  className="px-3.5 py-[0.7rem]"
                 />
               </div>
               <div>
