@@ -66,6 +66,25 @@ const VerifyPill = ({ verified }) =>
     </span>
   );
 
+// Approved amount, with the paid state underneath - the list is where admins
+// look first to see what a decided application actually cost.
+const AmountCell = ({ approved, paid }) => {
+  if (approved == null) return <span className="text-gray-300">—</span>;
+  const fullyPaid = paid != null && paid >= approved;
+  return (
+    <span className="inline-block">
+      <span className="font-semibold text-gray-900">₹ {approved.toLocaleString('en-IN')}</span>
+      <span className={`block text-[11px] ${paid == null ? 'text-amber-600' : fullyPaid ? 'text-emerald-600' : 'text-amber-600'}`}>
+        {paid == null
+          ? 'നൽകിയിട്ടില്ല'
+          : fullyPaid
+            ? `നൽകി ₹ ${paid.toLocaleString('en-IN')}`
+            : `നൽകി ₹ ${paid.toLocaleString('en-IN')} · ബാക്കി ₹ ${(approved - paid).toLocaleString('en-IN')}`}
+      </span>
+    </span>
+  );
+};
+
 // Generic submissions list for dynamic forms. role: 'admin' | 'superadmin'
 const SubmissionList = ({ role }) => {
   const { formType } = useParams();
@@ -237,6 +256,7 @@ const SubmissionList = ({ role }) => {
                         <th className="px-5 py-3.5 font-semibold">ജില്ല</th>
                         <th className="px-5 py-3.5 font-semibold">ഏരിയ</th>
                         <th className="px-5 py-3.5 font-semibold">ഏരിയ വെരിഫിക്കേഷൻ</th>
+                        <th className="px-5 py-3.5 font-semibold">തുക</th>
                         <th className="px-5 py-3.5 font-semibold">സ്റ്റാറ്റസ്</th>
                         <th className="px-5 py-3.5 font-semibold">തീയതി</th>
                         <th className="w-10" />
@@ -263,6 +283,9 @@ const SubmissionList = ({ role }) => {
                           <td className="px-5 py-3.5 text-gray-600 capitalize">{s.district || '—'}</td>
                           <td className="px-5 py-3.5 text-gray-600 capitalize">{(s.area || '—').toLowerCase()}</td>
                           <td className="px-5 py-3.5"><VerifyPill verified={!!s.areaVerification?.comment} /></td>
+                          <td className="px-5 py-3.5 whitespace-nowrap tabular-nums">
+                            <AmountCell approved={s.approvedAmount} paid={s.paidAmount} />
+                          </td>
                           <td className="px-5 py-3.5"><StatusPill status={s.status} /></td>
                           <td className="px-5 py-3.5 text-gray-500 whitespace-nowrap tabular-nums">{shortDate(s.createdAt)}</td>
                           <td className="pr-4">
@@ -298,6 +321,7 @@ const SubmissionList = ({ role }) => {
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
                       <StatusPill status={s.status} />
                       <VerifyPill verified={!!s.areaVerification?.comment} />
+                      <AmountCell approved={s.approvedAmount} paid={s.paidAmount} />
                       <span className="ml-auto text-xs text-gray-400 tabular-nums">{shortDate(s.createdAt)}</span>
                     </div>
                   </button>

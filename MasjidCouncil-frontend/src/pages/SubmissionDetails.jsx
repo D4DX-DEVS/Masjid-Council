@@ -4,6 +4,8 @@ import { STRUCTURAL_TYPES, isEmptyValue } from '../components/DynamicFieldRender
 import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import PageHeader from '../components/PageHeader';
+import SelectField from '../components/SelectField';
+import DateField from '../components/DateField';
 import { usePdfExport } from '../hooks/usePdfExport';
 import { invalidate } from '../lib/apiCache';
 
@@ -86,6 +88,13 @@ const PAID_METHOD_LABELS = {
   upi: 'UPI',
 };
 
+const STATUS_LABELS = {
+  pending: 'പെൻഡിംഗ് — Pending',
+  under_review: 'പരിശോധനയിൽ — Under review',
+  approved: 'അംഗീകരിച്ചു — Approved',
+  rejected: 'നിരസിച്ചു — Rejected',
+};
+
 const STATUS_STYLES = {
   pending: 'bg-yellow-100 text-yellow-800',
   under_review: 'bg-blue-100 text-blue-800',
@@ -114,6 +123,8 @@ const SubmissionDetails = ({ role }) => {
   const [paidNote, setPaidNote] = useState('');
   const [paidMethod, setPaidMethod] = useState('');
   const [savingPaid, setSavingPaid] = useState(false);
+  const [editingPaid, setEditingPaid] = useState(false);
+  const [paidMessage, setPaidMessage] = useState('');
   const [message, setMessage] = useState('');
   const { contentRef, downloading, handleDownload } = usePdfExport(`submission-${formType}`);
 
@@ -185,11 +196,12 @@ const SubmissionDetails = ({ role }) => {
     });
     const data = await res.json();
     setSavingPaid(false);
-    setMessage(data.message || (data.success ? 'Saved' : 'Failed'));
+    setPaidMessage(data.message || (data.success ? 'Saved' : 'Failed'));
     if (data.success) {
       invalidate(); // spending report + dashboard totals now hold a stale number
       setSubmission(data.data);
       fillPaid(data.data);
+      setEditingPaid(false); // saved entry goes read-only until "edit" is pressed
     }
   };
 
@@ -317,6 +329,27 @@ const SubmissionDetails = ({ role }) => {
                 </p>
               )}
 
+              {paidMessage && <p className="print-hide text-sm text-emerald-700 mb-2">{paidMessage}</p>}
+
+              {/* Saved entry is read-only — editing is a deliberate click, like the office note. */}
+              {submission.paidAmount != null && !editingPaid ? (
+                <div className="print-hide flex flex-wrap gap-2">
+                  <button
+                    onClick={() => { setPaidMessage(''); setEditingPaid(true); }}
+                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50"
+                  >
+                    തുക എഡിറ്റ് ചെയ്യുക
+                  </button>
+                  <button
+                    onClick={() => savePaid(true)}
+                    disabled={savingPaid}
+                    className="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 disabled:opacity-40"
+                  >
+                    ക്ലിയർ
+                  </button>
+                </div>
+              ) : (
+              <>
               <div className="print-hide grid sm:grid-cols-4 gap-2">
                 <input
                   type="number"
@@ -326,22 +359,21 @@ const SubmissionDetails = ({ role }) => {
                   placeholder="തുക (₹)"
                   className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
                 />
-                <input
-                  type="date"
+                <DateField
+                  name="paidAt"
                   value={paidDate}
                   onChange={(e) => setPaidDate(e.target.value)}
-                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
                 />
-                <select
+                <SelectField
+                  name="paidMethod"
                   value={paidMethod}
                   onChange={(e) => setPaidMethod(e.target.value)}
-                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
                 >
                   <option value="">രീതി തിരഞ്ഞെടുക്കുക</option>
                   {Object.entries(PAID_METHOD_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
-                </select>
+                </SelectField>
                 <input
                   value={paidNote}
                   onChange={(e) => setPaidNote(e.target.value)}
@@ -359,14 +391,16 @@ const SubmissionDetails = ({ role }) => {
                 </button>
                 {submission.paidAmount != null && (
                   <button
-                    onClick={() => savePaid(true)}
+                    onClick={() => { fillPaid(submission); setEditingPaid(false); }}
                     disabled={savingPaid}
                     className="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 disabled:opacity-40"
                   >
-                    ക്ലിയർ
+                    റദ്ദാക്കുക
                   </button>
                 )}
               </div>
+              </>
+              )}
             </div>
           )}
 
@@ -443,13 +477,23 @@ const SubmissionDetails = ({ role }) => {
 
         {/* Status actions */}
         <div className="print-hide bg-white rounded-xl shadow p-4 sm:p-6">
-          <h2 className="font-bold text-gray-800 mb-3">സ്റ്റാറ്റസ് മാറ്റുക</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="font-bold text-gray-800">സ്റ്റാറ്റസ് മാറ്റുക</h2>
+            <span className="text-xs text-gray-500">
+              ഇപ്പോഴത്തെ സ്റ്റാറ്റസ്:{' '}
+              <b className={submission.status === 'approved' ? 'text-emerald-700' : submission.status === 'rejected' ? 'text-red-600' : 'text-gray-700'}>
+                {STATUS_LABELS[submission.status] || submission.status}
+              </b>
+            </span>
+          </div>
           {message && <p className="text-sm text-emerald-700 mb-2">{message}</p>}
           <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
-            <button onClick={() => changeStatus('under_review')}
-              className="w-full sm:w-auto px-5 py-2.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-sm font-semibold hover:bg-blue-100 transition-colors">
-              Under review — പരിശോധനയിൽ
-            </button>
+            {submission.status !== 'under_review' && (
+              <button onClick={() => changeStatus('under_review')}
+                className="w-full sm:w-auto px-5 py-2.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-sm font-semibold hover:bg-blue-100 transition-colors">
+                Under review — പരിശോധനയിൽ
+              </button>
+            )}
             <button
               onClick={() => {
                 // suggest requested − own contribution; admin can edit or clear it
@@ -460,13 +504,21 @@ const SubmissionDetails = ({ role }) => {
                 setApprovedAmount(suggested != null ? String(suggested) : '');
                 setShowApprove(true);
               }}
-              className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition-colors">
-              ✓ Approve — അംഗീകരിക്കുക
+              className={
+                submission.status === 'approved'
+                  ? 'w-full sm:w-auto px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors'
+                  : 'w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 shadow-sm transition-colors'
+              }>
+              {submission.status === 'approved'
+                ? 'അനുവദിച്ച തുക മാറ്റുക'
+                : '✓ Approve — അംഗീകരിക്കുക'}
             </button>
-            <button onClick={() => setShowReject(true)}
-              className="w-full sm:w-auto px-5 py-2.5 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors">
-              ✕ Reject — നിരസിക്കുക
-            </button>
+            {submission.status !== 'rejected' && (
+              <button onClick={() => setShowReject(true)}
+                className="w-full sm:w-auto px-5 py-2.5 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors">
+                ✕ Reject — നിരസിക്കുക
+              </button>
+            )}
           </div>
           {showApprove && (
             <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-4">
