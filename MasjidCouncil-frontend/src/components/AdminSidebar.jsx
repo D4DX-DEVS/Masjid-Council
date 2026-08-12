@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee } from 'lucide-react';
+import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Wrench, IndianRupee } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 
@@ -25,6 +25,7 @@ const AdminSidebar = ({ items }) => {
     { to: '/submissions/mosquefund', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
     { to: '/submissions/khateeb', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
+    { to: '/admin-form-builder', icon: Wrench, label: 'Form Builder', short: 'Forms' },
     { to: '/spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
   ];
 

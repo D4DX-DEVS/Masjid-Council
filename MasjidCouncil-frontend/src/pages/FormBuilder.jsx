@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DynamicField, { evaluateConditional } from '../components/DynamicFieldRenderer';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
+import AdminSidebar from '../components/AdminSidebar';
 import PageHeader from '../components/PageHeader';
 import SelectField from '../components/SelectField';
 
@@ -26,15 +27,35 @@ const FORM_TYPE_LABELS = {
 
 const emptyPage = (id) => ({ id, title: `Page ${id}`, description: '', order: id, fields: [] });
 
+// Labels and instructions are long Malayalam sentences — a single-line input hides the
+// tail. Textarea that grows with its content, so the whole label is always readable.
+// ponytail: sizing in a ref callback, no effect/observer — it runs on every render anyway.
+const GrowText = ({ className = '', ...rest }) => (
+  <textarea
+    rows={1}
+    ref={(el) => {
+      if (!el) return;
+      el.style.height = 'auto';
+      el.style.height = `${el.scrollHeight}px`;
+    }}
+    // Wrapping is the point; a newline inside a label is not. Enter stays a no-op.
+    onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+    className={`resize-none overflow-hidden ${className}`}
+    {...rest}
+  />
+);
+
 const editorInput =
   'mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all';
 // number inputs: hide spinners; scroll must never change the value
 const numberInput = `${editorInput} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`;
 
-// Super admin visual builder for dynamic form configurations.
-const FormBuilder = () => {
+// Visual builder for dynamic form configurations. Same builder for both consoles —
+// state admins get it too, only the token/sidebar/login differ.
+const FormBuilder = ({ role = 'superadmin' }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('superAdminToken');
+  const isAdmin = role === 'admin';
+  const token = localStorage.getItem(isAdmin ? 'adminToken' : 'superAdminToken');
 
   const [formType, setFormType] = useState('');
   const [summaries, setSummaries] = useState([]);
@@ -49,7 +70,7 @@ const FormBuilder = () => {
   const authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   useEffect(() => {
-    if (!token) { navigate('/superadmin-login'); return; }
+    if (!token) { navigate(isAdmin ? '/admin-login' : '/superadmin-login'); return; }
     fetch(`${API_BASE_URL}/api/form-config`, { headers: authHeaders })
       .then((r) => r.json())
       .then((d) => setSummaries(d.data || []))
@@ -190,9 +211,9 @@ const FormBuilder = () => {
 
   const shell = (content) => (
     <div className="min-h-screen bg-[#F7F9FB] flex">
-      <SuperAdminSidebar />
+      {isAdmin ? <AdminSidebar /> : <SuperAdminSidebar />}
       <div className="flex-1 min-w-0">
-        <PageHeader role="superadmin" title="Form Builder" shortTitle="Forms" subtitle="Configure the application forms" />
+        <PageHeader role={role} title="Form Builder" shortTitle="Forms" subtitle="Configure the application forms" />
         <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto">{content}</div>
       </div>
     </div>
@@ -234,12 +255,12 @@ const FormBuilder = () => {
       <div className="grid sm:grid-cols-2 gap-3">
         <label className="block">
           <span className="text-gray-600">Placeholder</span>
-          <input className={editorInput} value={field.placeholder || ''}
+          <GrowText className={editorInput} value={field.placeholder || ''}
             onChange={(e) => updateField(field.id, { placeholder: e.target.value })} />
         </label>
         <label className="block">
           <span className="text-gray-600">Help text</span>
-          <input className={editorInput} value={field.helpText || ''}
+          <GrowText className={editorInput} value={field.helpText || ''}
             onChange={(e) => updateField(field.id, { helpText: e.target.value })} />
         </label>
       </div>
@@ -434,10 +455,10 @@ const FormBuilder = () => {
           </div>
 
           <div className="grid sm:grid-cols-2 gap-3 mb-4">
-            <input className="border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all" placeholder="Page title" value={page.title}
+            <GrowText className="border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all" placeholder="Page title" value={page.title}
               onChange={(e) => updatePage(pageIndex, { title: e.target.value })} />
             <div className="flex gap-2">
-              <input className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all" placeholder="Page description" value={page.description || ''}
+              <GrowText className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all" placeholder="Page description" value={page.description || ''}
                 onChange={(e) => updatePage(pageIndex, { description: e.target.value })} />
               {config.pages.length > 1 && (
                 <button onClick={() => removePage(pageIndex)} className="px-3 py-2 text-sm text-red-600 border border-red-200 rounded-xl hover:bg-red-50">Delete page</button>
@@ -451,7 +472,7 @@ const FormBuilder = () => {
               <div key={field.id} className={`border border-gray-200 rounded-xl p-3 ${field.enabled ? '' : 'opacity-50 bg-gray-50'}`}>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs text-gray-400 w-8">#{field.id}</span>
-                  <input className="flex-1 min-w-[10rem] border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all font-medium" value={field.label}
+                  <GrowText className="flex-1 min-w-[10rem] border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all font-medium" value={field.label}
                     onChange={(e) => updateField(field.id, { label: e.target.value })} />
                   <div className="w-36">
                     <SelectField name={`type-${field.id}`} value={field.type}
@@ -528,7 +549,7 @@ const FormBuilder = () => {
         <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 grid gap-4 max-w-2xl">
           <label className="block">
             <span className="text-gray-600 text-sm">Form title</span>
-            <input className={editorInput} value={config.title}
+            <GrowText className={editorInput} value={config.title}
               onChange={(e) => updateConfig({ title: e.target.value })} />
           </label>
           <label className="block">
@@ -558,7 +579,7 @@ const FormBuilder = () => {
             <div className="space-y-2">
               {(config.instructions || []).map((ins, i) => (
                 <div key={ins.id} className="flex gap-2">
-                  <input className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all" value={ins.text}
+                  <GrowText className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all" value={ins.text}
                     onChange={(e) =>
                       updateConfig({
                         instructions: config.instructions.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)),
