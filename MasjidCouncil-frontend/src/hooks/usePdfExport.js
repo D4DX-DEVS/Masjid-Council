@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+// html2canvas-pro: fork with oklch()/color-mix() support — Tailwind v4 palette
+// colors crash original html2canvas ("unsupported color function oklch").
+import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 
 // ponytail: image-snapshot PDF (html2canvas) — sidesteps embedding a Malayalam font
@@ -18,6 +20,10 @@ export function usePdfExport(filenamePrefix) {
         useCORS: true,
         backgroundColor: '#ffffff',
         ignoreElements: (el) => el.classList?.contains('pdf-hide'),
+        // letterhead is print-only on screen; reveal it in the capture clone
+        onclone: (doc) => {
+          doc.querySelectorAll('.print-only').forEach((el) => { el.style.display = 'block'; });
+        },
       });
 
       const pdf = new jsPDF('p', 'mm', 'a4');

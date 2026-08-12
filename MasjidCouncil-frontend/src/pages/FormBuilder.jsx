@@ -571,6 +571,24 @@ const FormBuilder = ({ role = 'superadmin' }) => {
               {roleMappingSelect('nameFieldId', 'Applicant name field')}
               {roleMappingSelect('amountFieldId', 'Requested amount field (for spending report)')}
               {roleMappingSelect('ownAmountFieldId', 'Own contribution field (സ്വന്തമായി ശേഖരിക്കാവുന്ന തുക)')}
+              {roleMappingSelect('aadhaarFieldId', 'Aadhaar field (blocks duplicate applications)')}
+              <label className="block">
+                <span className="text-gray-600">Aadhaar lock period after approval (years, 0 = no lock)</span>
+                <input
+                  type="number"
+                  min="0"
+                  className="mt-1 w-full border rounded-lg px-3 py-2"
+                  value={config.roleMapping?.aadhaarLockYears ?? 4}
+                  onChange={(e) =>
+                    updateConfig({
+                      roleMapping: {
+                        ...config.roleMapping,
+                        aadhaarLockYears: e.target.value === '' ? 4 : Math.max(0, Number(e.target.value)),
+                      },
+                    })
+                  }
+                />
+              </label>
             </div>
           </div>
 

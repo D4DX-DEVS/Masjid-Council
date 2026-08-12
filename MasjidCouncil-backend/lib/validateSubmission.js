@@ -173,6 +173,17 @@ const validateSubmission = (config, formData) => {
 
   const toAmount = (raw) => (raw !== "" && !Number.isNaN(Number(raw)) ? Number(raw) : null);
 
+  // Aadhaar: mapped form types must always carry a valid 12-digit number, even if
+  // the field's own required flag was left off in the builder.
+  let aadhaarNumber = "";
+  if (mapping.aadhaarFieldId !== undefined && mapping.aadhaarFieldId !== null) {
+    aadhaarNumber = pick(mapping.aadhaarFieldId).replace(/[\s-]/g, "");
+    if (!/^\d{12}$/.test(aadhaarNumber)) {
+      errors.push("Aadhaar number must be exactly 12 digits");
+      aadhaarNumber = "";
+    }
+  }
+
   return {
     errors,
     district: pick(mapping.districtFieldId),
@@ -181,6 +192,7 @@ const validateSubmission = (config, formData) => {
     phone: pick(mapping.phoneFieldId),
     requestedAmount: toAmount(pick(mapping.amountFieldId)),
     ownContribution: toAmount(pick(mapping.ownAmountFieldId)),
+    aadhaarNumber,
   };
 };
 

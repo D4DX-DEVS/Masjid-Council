@@ -135,6 +135,11 @@ const formConfigurationSchema = new mongoose.Schema(
       // field holding the applicant's own contribution (സ്വന്തമായി ശേഖരിക്കാവുന്ന തുക);
       // approve dialog suggests requested − own as the sanction amount
       ownAmountFieldId: { type: Number, default: null },
+      // field holding the applicant's Aadhaar number; when mapped, one application
+      // per Aadhaar is enforced (approved blocks re-apply for 4 years, rejected frees it)
+      aadhaarFieldId: { type: Number, default: null },
+      // how long an approved application locks the Aadhaar from re-applying
+      aadhaarLockYears: { type: Number, default: 4, min: 0 },
     },
   },
   { timestamps: true }
