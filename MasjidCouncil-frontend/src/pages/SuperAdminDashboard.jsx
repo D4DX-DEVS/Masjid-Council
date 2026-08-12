@@ -171,7 +171,8 @@ const SuperAdminDashboard = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'phoneNumber') {
+    // Area admins get a typed password instead — only mobile-based admins auto-derive one.
+    if (name === 'phoneNumber' && formData.role !== 'areaadmin') {
       const phoneNumber = value.replace(/\D/g, '');
       const firstFourDigits = phoneNumber.substring(0, 4);
       const autoPassword = firstFourDigits.length === 4 ? `MCK${firstFourDigits}` : '';
@@ -195,18 +196,29 @@ const SuperAdminDashboard = () => {
     setSuccess('');
 
     let submitData = { ...formData };
+    const isAreaAdmin = formData.role === 'areaadmin';
     const digits = (formData.phoneNumber || '').replace(/\D/g, '');
-    if (digits.length !== 10) {
+
+    if (!isAreaAdmin && digits.length !== 10) {
       setError('Enter a valid 10-digit mobile number');
       return;
     }
-    if (formData.role === 'areaadmin' && (!formData.district || !formData.area)) {
+    if (isAreaAdmin && (!formData.district || !formData.area)) {
       setError('District and area are required for area admins');
       return;
     }
-    submitData.phoneNumber = digits;
-    if (!editingAdmin) {
-      submitData.password = `MCK${digits.substring(0, 4)}`;
+    if (isAreaAdmin && !editingAdmin && !formData.password.trim()) {
+      setError('Password is required for area admins');
+      return;
+    }
+
+    if (isAreaAdmin) {
+      delete submitData.phoneNumber;
+    } else {
+      submitData.phoneNumber = digits;
+      if (!editingAdmin) {
+        submitData.password = `MCK${digits.substring(0, 4)}`;
+      }
     }
 
     try {
@@ -317,7 +329,8 @@ const SuperAdminDashboard = () => {
 
   const filteredAdmins = admins.filter(admin =>
     admin.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    admin.phoneNumber.includes(searchTerm)
+    (admin.phoneNumber || '').includes(searchTerm) ||
+    (admin.area || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredAdmins.length / PAGE_SIZE));
@@ -715,18 +728,38 @@ const SuperAdminDashboard = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Phone Number</label>
-                <input
-                  type="text"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all"
-                  placeholder="Enter 10-digit mobile number"
-                  required
-                />
-              </div>
+              {/* Area admins are issued username + password only — the roster carries no mobile. */}
+              {formData.role !== 'areaadmin' && (
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Phone Number</label>
+                  <input
+                    type="text"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all"
+                    placeholder="Enter 10-digit mobile number"
+                    required
+                  />
+                </div>
+              )}
+
+              {formData.role === 'areaadmin' && (
+                <div>
+                  <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">
+                    Password {editingAdmin && <span className="text-[#6B7280] font-normal">(leave blank to keep current)</span>}
+                  </label>
+                  <input
+                    type="text"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all"
+                    placeholder="Password for this area admin"
+                    required={!editingAdmin}
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Role</label>

@@ -2,8 +2,6 @@ require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const path = require("path");
-const multer = require("multer");
 
 const mosqueAffiliationRoutes = require("./routes/mosqueAffiliationRoutes");
 const welfarefundRoutes = require("./routes/welfarefundRoutes");
@@ -15,40 +13,29 @@ const uploadRoutes = require("./routes/uploadRoutes");
 
 const app = express();
 
-app.use(cors());
+// CORS_ORIGINS="https://masjidcouncil.example,https://admin.masjidcouncil.example"
+// Unset means "any origin", which is only acceptable in development.
+const allowedOrigins = (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+if (allowedOrigins.length === 0) {
+    console.warn("CORS_ORIGINS is not set — accepting requests from any origin. Set it in production.");
+}
+
+// Vite dev servers are allowed outside production so setting the production
+// allowlist does not break local work.
+const isLocalhost = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+const allowLocalhost = process.env.NODE_ENV !== "production";
+
+app.use(cors({
+    origin: allowedOrigins.length === 0
+        ? true
+        : (origin, cb) =>
+            cb(null, !origin || allowedOrigins.includes(origin) || (allowLocalhost && isLocalhost(origin))),
+}));
 app.use(express.json());
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads/');
-    },
-    filename: function (req, file, cb) {
-        // Generate unique filename with timestamp
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + '.pdf');
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    // Check if file is PDF
-    if (file.mimetype === 'application/pdf') {
-        cb(null, true);
-    } else {
-        cb(new Error('Only PDF files are allowed!'), false);
-    }
-};
-
-const upload = multer({ 
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    }
-});
-
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB connection with retry logic
 const connectDB = async () => {

@@ -43,6 +43,7 @@ const submissionSchema = new mongoose.Schema(
     paidAt: { type: Date, default: null },
     paidByName: { type: String, default: null },
     paidNote: { type: String, default: null },
+    paidMethod: { type: String, enum: ["bank", "cheque", "cash", "upi", null], default: null },
 
     // Area admin's physical-verification recommendation
     areaVerification: {
