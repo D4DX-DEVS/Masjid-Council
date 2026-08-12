@@ -8,8 +8,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  // Admins sign in with their mobile number, area admins with their roster username.
   const [formData, setFormData] = useState({
-    phoneNumber: '',
+    loginId: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
@@ -111,17 +112,18 @@ const AdminLogin = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Mobile Number <span className="text-gray-400">(മൊബൈൽ നമ്പർ)</span>
+                Username / Mobile <span className="text-gray-400">(യൂസർനെയിം / മൊബൈൽ)</span>
               </label>
               <div className="relative">
                 <Smartphone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
+                  name="loginId"
+                  value={formData.loginId}
                   onChange={handleChange}
+                  autoComplete="username"
                   className="w-full rounded-xl border border-gray-200 bg-white/80 pl-10 pr-3 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/30 transition-all"
-                  placeholder="Enter 10-digit mobile number"
+                  placeholder="Username or mobile number"
                   required
                 />
               </div>
@@ -151,9 +153,6 @@ const AdminLogin = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Default password: MCK + first 4 digits of mobile number
-              </p>
             </div>
 
             <button
@@ -211,16 +210,16 @@ const AdminLogin = () => {
             <div className="space-y-3 px-3">
               {[
                 {
-                  en: 'Use your registered 10-digit mobile number',
-                  ml: 'നിങ്ങളുടെ രജിസ്റ്റർ ചെയ്ത 10 അക്ക മൊബൈൽ നമ്പർ ഉപയോഗിക്കുക',
+                  en: 'Area admins: use the username issued for your area',
+                  ml: 'ഏരിയ അഡ്മിൻ: നിങ്ങളുടെ ഏരിയക്ക് നൽകിയ യൂസർനെയിം ഉപയോഗിക്കുക',
                 },
                 {
-                  en: 'Default password: MCK + first 4 digits of mobile',
-                  ml: 'സ്ഥിര പാസ്വേഡ്: MCK + മൊബൈലിന്റെ ആദ്യ 4 അക്കങ്ങൾ',
+                  en: 'Other admins: use your registered 10-digit mobile number',
+                  ml: 'മറ്റ് അഡ്മിൻമാർ: രജിസ്റ്റർ ചെയ്ത 10 അക്ക മൊബൈൽ നമ്പർ ഉപയോഗിക്കുക',
                 },
                 {
-                  en: 'Example: Mobile 9876543210 → Password: MCK9876',
-                  ml: 'ഉദാഹരണം: മൊബൈൽ 9876543210 → പാസ്വേഡ്: MCK9876',
+                  en: 'Forgot your password? Contact the state office.',
+                  ml: 'പാസ്‌വേഡ് മറന്നോ? സംസ്ഥാന ഓഫീസുമായി ബന്ധപ്പെടുക.',
                 },
               ].map(({ en, ml }) => (
                 <div key={en} className="flex items-start gap-3">

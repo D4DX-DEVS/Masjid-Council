@@ -8,10 +8,12 @@ const adminSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    // Area admins are issued username + password only (no mobile on record),
+    // so this is sparse-unique rather than required. Regular admins still get one.
     phoneNumber: {
         type: String,
-        required: true,
         unique: true,
+        sparse: true,
         trim: true
     },
     password: {

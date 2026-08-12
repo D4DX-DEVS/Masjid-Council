@@ -8,6 +8,19 @@ import DynamicField, {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Titles are stored as "Scheme name — what the form is for". Show the scheme
+// name as the heading and the rest as a plain, non-green second line.
+const FormTitle = ({ title = '', size = 'text-2xl' }) => {
+  const [main, ...rest] = title.split(/\s[—–-]\s/);
+  const sub = rest.join(' — ');
+  return (
+    <>
+      <h1 className={`${size} font-bold text-emerald-800`}>{main}</h1>
+      {sub && <p className="text-base text-gray-700 mt-0.5">{sub}</p>}
+    </>
+  );
+};
+
 // Public renderer for admin-configured forms. formType comes from the route
 // param (/apply/:formType) or a fixed prop (legacy paths like /mosque-fund).
 const DynamicForm = ({ formType: formTypeProp }) => {
@@ -217,8 +230,8 @@ const DynamicForm = ({ formType: formTypeProp }) => {
     return (
       <div className="min-h-screen bg-gray-50 py-10 px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow p-8">
-          <h1 className="text-2xl font-bold text-emerald-800 mb-1">{config.title}</h1>
-          <p className="text-gray-500 text-sm mb-6">{config.description}</p>
+          <FormTitle title={config.title} size="text-2xl" />
+          <p className="text-gray-500 text-sm mb-6 mt-1">{config.description}</p>
           <h2 className="font-bold text-gray-800 mb-3">ശ്രദ്ധിക്കേണ്ട കാര്യങ്ങൾ</h2>
           <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm mb-8">
             {instructions.map((ins) => (
@@ -239,7 +252,9 @@ const DynamicForm = ({ formType: formTypeProp }) => {
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
-        <h1 className="text-xl font-bold text-emerald-800 mb-1">{config.title}</h1>
+        <div className="mb-1">
+          <FormTitle title={config.title} size="text-xl" />
+        </div>
         {pages.length > 1 && (
           <p className="text-sm text-gray-500 mb-4">
             ഘട്ടം {pageIndex + 1} / {pages.length} — {page.title}
@@ -281,14 +296,18 @@ const DynamicForm = ({ formType: formTypeProp }) => {
         )}
 
         <div className="mt-8 flex justify-between">
-          {pageIndex > 0 ? (
-            <button
-              onClick={() => { setErrors([]); setPageIndex((i) => i - 1); window.scrollTo(0, 0); }}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50"
-            >
-              മുമ്പത്തേത്
-            </button>
-          ) : <span />}
+          <button
+            onClick={() => {
+              setErrors([]);
+              // Page 1 goes back to the instructions screen, not a previous page.
+              if (pageIndex === 0) setShowInstructions(true);
+              else setPageIndex((i) => i - 1);
+              window.scrollTo(0, 0);
+            }}
+            className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50"
+          >
+            മുമ്പത്തേത്
+          </button>
 
           {pageIndex < pages.length - 1 ? (
             <button

@@ -80,6 +80,9 @@ const SubmissionList = ({ role }) => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
+  // Super admin only: the backlog of applications no area admin has verified yet
+  // (usually an area with no area admin assigned). Everyone else never sees these.
+  const [unverified, setUnverified] = useState(false);
 
   // Debounce so each keystroke doesn't hit the server
   useEffect(() => {
@@ -90,11 +93,12 @@ const SubmissionList = ({ role }) => {
   // Any filter change restarts from page 1
   useEffect(() => {
     setPage(1);
-  }, [formType, status, debouncedSearch]);
+  }, [formType, status, debouncedSearch, unverified]);
 
   const query = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
   if (status !== 'all') query.set('status', status);
   if (debouncedSearch) query.set('search', debouncedSearch);
+  if (unverified) query.set('unverified', '1');
   const listUrl = `${API_BASE_URL}/api/submissions/${formType}?${query}`;
 
   useEffect(() => {
@@ -140,6 +144,24 @@ const SubmissionList = ({ role }) => {
         />
 
         <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto space-y-5">
+          {/* Escape hatch: applications stuck because their area has no area admin.
+              Super admin only — nobody else is shown un-verified applications. */}
+          {role === 'superadmin' && (
+            <button
+              onClick={() => setUnverified((v) => !v)}
+              aria-pressed={unverified}
+              className={`w-full sm:w-auto rounded-2xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                unverified
+                  ? 'border-transparent ring-2 ring-amber-500/40 bg-amber-50 text-amber-800'
+                  : 'border-[#E5E7EB] bg-white text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              {unverified
+                ? '← ഏരിയ വെരിഫൈ ചെയ്ത അപേക്ഷകളിലേക്ക് മടങ്ങുക'
+                : 'ഏരിയ അഡ്മിൻ വെരിഫൈ ചെയ്യാത്തവ കാണുക'}
+            </button>
+          )}
+
           {/* Status tiles double as the filter — one control, no dropdown to keep in sync */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {STATUSES.map(({ key, label, en, icon: Icon, tint, ring }) => {

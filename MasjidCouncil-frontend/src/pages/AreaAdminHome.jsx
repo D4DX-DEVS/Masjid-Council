@@ -129,6 +129,13 @@ const AreaAdminHome = () => {
     return counts;
   }, [all]);
 
+  // The username is a roster code (kala01571), so greet by area instead.
+  const titleCase = (value) =>
+    value.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+  const areaGreeting = user.area
+    ? `Welcome back, ${titleCase(user.area)} Area Admin`
+    : 'Welcome back';
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F7F9FB] flex">
@@ -148,7 +155,7 @@ const AreaAdminHome = () => {
       <div className="flex-1 min-w-0">
         <PageHeader
           role="admin"
-          title={isDashboard ? `Welcome back, ${user.username || 'Area Admin'} 👋` : activeType.label}
+          title={isDashboard ? `${areaGreeting} 👋` : activeType.label}
           shortTitle={isDashboard ? '' : activeType.label}
           subtitle={[user.district, user.area].filter(Boolean).join(' / ') || 'Area Admin'}
           count={rows.length}

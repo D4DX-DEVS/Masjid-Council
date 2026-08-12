@@ -2,20 +2,48 @@ const express = require("express");
 const Submission = require("../models/submission");
 const FormConfiguration = require("../models/formConfiguration");
 const validateSubmission = require("../lib/validateSubmission");
+const { str, exactCI, containsCI } = require("../lib/queryHelpers");
 const { authenticateAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
 const ALLOWED_STATUSES = ["pending", "under_review", "approved", "rejected"];
+const PAID_METHODS = ["bank", "cheque", "cash", "upi"];
+
+// Admin / super admin only see an application once the area admin has physically
+// verified it and left a comment. Khateeb registration has no field-verification
+// step, so it is not gated.
+const AREA_GATED = new Set(["welfarefund", "mosquefund", "affiliation"]);
+
+// Reading: gated forms need a comment. Super admin can pull the un-verified
+// backlog with ?unverified=1 — the escape hatch for areas with no area admin yet.
+const areaGate = (formType, req) => {
+  if (!AREA_GATED.has(formType)) return {};
+  if (req.user.role === "superadmin" && str(req.query.unverified) === "1") {
+    return { "areaVerification.comment": null };
+  }
+  return { "areaVerification.comment": { $ne: null } };
+};
+
+// Writing: no escape hatch. Nothing can be approved / paid / commented on
+// before the area admin has spoken.
+const verifiedOnly = (formType) =>
+  AREA_GATED.has(formType) ? { "areaVerification.comment": { $ne: null } } : {};
+
+// Same rule expressed for aggregates over every form type at once.
+const GATE_MATCH = {
+  $or: [
+    { formType: { $nin: [...AREA_GATED] } },
+    { "areaVerification.comment": { $ne: null } },
+  ],
+};
+
+const NOT_FOUND = "Submission not found, or the area admin has not verified it yet";
 
 // Same style as the legacy MAF numbers: prefix + timestamp + 3 random digits.
 const REF_PREFIX = { welfarefund: "WF", mosquefund: "MF", affiliation: "AF", khateeb: "KH" };
 const makeReference = (formType) =>
   `${REF_PREFIX[formType] || formType.slice(0, 2).toUpperCase()}${Date.now()}${Math.floor(Math.random() * 900) + 100}`;
-
-// district / area are stored as free text with inconsistent casing — match them exactly but case-blind.
-const exactCI = (value) =>
-  new RegExp(`^${String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
 
 const parseDate = (value) => {
   if (!value) return null;
@@ -32,8 +60,8 @@ router.get("/stats/spending", authenticateAdmin, async (req, res) => {
     const month = Number(req.query.month) || null; // 1-12
 
     const match = { status: "approved" };
-    if (req.query.district) match.district = exactCI(req.query.district);
-    if (req.query.area) match.area = exactCI(req.query.area);
+    if (str(req.query.district)) match.district = exactCI(str(req.query.district));
+    if (str(req.query.area)) match.area = exactCI(str(req.query.area));
 
     let from = parseDate(req.query.from);
     let to = parseDate(req.query.to);
@@ -79,13 +107,14 @@ router.get("/stats/summary", authenticateAdmin, async (req, res) => {
     const year = new Date().getFullYear();
     const [byTypeStatus, monthly, recent] = await Promise.all([
       Submission.aggregate([
+        { $match: GATE_MATCH },
         { $group: { _id: { t: "$formType", s: "$status" }, n: { $sum: 1 } } },
       ]),
       Submission.aggregate([
-        { $match: { createdAt: { $gte: new Date(year, 0, 1) } } },
+        { $match: { ...GATE_MATCH, createdAt: { $gte: new Date(year, 0, 1) } } },
         { $group: { _id: { $month: "$createdAt" }, n: { $sum: 1 } } },
       ]),
-      Submission.find()
+      Submission.find(GATE_MATCH)
         .sort({ createdAt: -1 })
         .limit(5)
         .select("formType applicantName status createdAt"),
@@ -169,16 +198,20 @@ router.post("/:formType", async (req, res) => {
 // List — admin / super admin
 router.get("/:formType", authenticateAdmin, async (req, res) => {
   try {
-    const { status, district, area, search } = req.query;
-    const query = { formType: req.params.formType };
+    const status = str(req.query.status);
+    const district = str(req.query.district);
+    const area = str(req.query.area);
+    const search = str(req.query.search);
+
+    const query = { formType: req.params.formType, ...areaGate(req.params.formType, req) };
     if (status && ALLOWED_STATUSES.includes(status)) query.status = status;
-    if (district) query.district = district;
-    if (area) query.area = area;
+    if (district) query.district = exactCI(district);
+    if (area) query.area = exactCI(area);
     if (search) {
       query.$or = [
-        { applicantName: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
-        { referenceNumber: { $regex: search, $options: "i" } },
+        { applicantName: containsCI(search) },
+        { phone: containsCI(search) },
+        { referenceNumber: containsCI(search) },
       ];
     }
 
@@ -220,9 +253,12 @@ router.get("/:formType/:id", authenticateAdmin, async (req, res) => {
     const submission = await Submission.findOne({
       _id: req.params.id,
       formType: req.params.formType,
+      // Super admin can always open a single record — they own the un-verified
+      // backlog. Approving it is still blocked until the area admin comments.
+      ...(req.user.role === "superadmin" ? {} : areaGate(req.params.formType, req)),
     });
     if (!submission) {
-      return res.status(404).json({ success: false, message: "Submission not found" });
+      return res.status(404).json({ success: false, message: NOT_FOUND });
     }
     // Detail page needs the config to label formData values
     const config = await FormConfiguration.findOne({ formType: req.params.formType });
@@ -273,12 +309,12 @@ router.patch("/:formType/:id/status", authenticateAdmin, async (req, res) => {
     }
 
     const submission = await Submission.findOneAndUpdate(
-      { _id: req.params.id, formType: req.params.formType },
+      { _id: req.params.id, formType: req.params.formType, ...verifiedOnly(req.params.formType) },
       update,
       { new: true }
     );
     if (!submission) {
-      return res.status(404).json({ success: false, message: "Submission not found" });
+      return res.status(404).json({ success: false, message: NOT_FOUND });
     }
     res.json({ success: true, message: `Status changed to ${status}`, data: submission });
   } catch (error) {
@@ -306,18 +342,27 @@ router.patch("/:formType/:id/paid", authenticateAdmin, async (req, res) => {
 
     const paidAt = clearing ? null : parseDate(req.body.paidAt) || new Date();
 
+    const paidMethod = str(req.body.paidMethod);
+    if (!clearing && paidMethod && !PAID_METHODS.includes(paidMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: `paidMethod must be one of: ${PAID_METHODS.join(", ")}`,
+      });
+    }
+
     const submission = await Submission.findOneAndUpdate(
-      { _id: req.params.id, formType: req.params.formType },
+      { _id: req.params.id, formType: req.params.formType, ...verifiedOnly(req.params.formType) },
       {
         paidAmount,
         paidAt,
         paidByName: clearing ? null : byName,
-        paidNote: clearing ? null : (req.body.paidNote || "").trim() || null,
+        paidNote: clearing ? null : str(req.body.paidNote) || null,
+        paidMethod: clearing ? null : paidMethod || null,
       },
       { new: true }
     );
     if (!submission) {
-      return res.status(404).json({ success: false, message: "Submission not found" });
+      return res.status(404).json({ success: false, message: NOT_FOUND });
     }
     res.json({
       success: true,
@@ -343,7 +388,7 @@ router.patch("/:formType/:id/office-comment", authenticateAdmin, async (req, res
         : (req.user.adminData && req.user.adminData.username) || "Admin";
 
     const submission = await Submission.findOneAndUpdate(
-      { _id: req.params.id, formType: req.params.formType },
+      { _id: req.params.id, formType: req.params.formType, ...verifiedOnly(req.params.formType) },
       {
         officeComment: {
           comment,
@@ -355,7 +400,7 @@ router.patch("/:formType/:id/office-comment", authenticateAdmin, async (req, res
       { new: true }
     );
     if (!submission) {
-      return res.status(404).json({ success: false, message: "Submission not found" });
+      return res.status(404).json({ success: false, message: NOT_FOUND });
     }
     res.json({ success: true, message: "Office comment saved", data: submission });
   } catch (error) {

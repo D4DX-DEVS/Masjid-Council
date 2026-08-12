@@ -62,17 +62,9 @@ const Layout = () => {
     '/superadmin-khateeb-details'
   ];
 
-  const formRoutes = [
-    '/affiliation',
-    '/medical-aid',
-    '/mosque-fund',
-    '/khateeb-registration'
-  ];
-
-  // Parameterized dashboard/form routes hide the navbar too
+  // Parameterized dashboard routes hide the navbar too
   const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/spending-report'];
   const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report'];
-  const formPrefixes = ['/apply'];
 
   const isAdminRoute =
     adminRoutes.includes(location.pathname) ||
@@ -80,15 +72,12 @@ const Layout = () => {
   const isSuperAdminRoute =
     superAdminRoutes.includes(location.pathname) ||
     superAdminPrefixes.some((p) => location.pathname.startsWith(p));
-  const isFormRoute =
-    formRoutes.includes(location.pathname) ||
-    formPrefixes.some((p) => location.pathname.startsWith(p));
   const isAdminLogin = location.pathname === '/admin-login';
   const isSuperAdminLogin = location.pathname === '/superadmin-login';
 
   return (
     <>
-      {!isAdminLogin && !isSuperAdminLogin && !isFormRoute && (isAdminRoute ? null : isSuperAdminRoute ? null : <Navbar />)}
+      {!isAdminLogin && !isSuperAdminLogin && !isAdminRoute && !isSuperAdminRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />

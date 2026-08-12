@@ -1,28 +1,36 @@
 const express = require("express");
 const Submission = require("../models/submission");
 const FormConfiguration = require("../models/formConfiguration");
+const { str, exactCI } = require("../lib/queryHelpers");
 const { authenticateAreaAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
 // Every route is scoped by the authenticated area admin's own district+area.
 // Client-sent district/area query params are deliberately ignored.
+// Case-blind: the area-admin roster is uppercase, master data is mixed case.
 const ownScope = (req) => ({
-  district: req.user.adminData.district,
-  area: req.user.adminData.area,
+  district: exactCI(req.user.adminData.district),
+  area: exactCI(req.user.adminData.area),
 });
+
+// Office-use data belongs to admin / super admin only. Hiding it in the UI is
+// not enough — it must never leave the server on an area-admin request.
+const HIDE_FROM_AREA =
+  "-officeComment -approvedAmount -approvedAt -approvedByName -paidAmount -paidAt -paidByName -paidNote -paidMethod";
 
 // List own-area submissions across all form types
 router.get("/submissions", authenticateAreaAdmin, async (req, res) => {
   try {
-    const { formType, status } = req.query;
+    const formType = str(req.query.formType);
+    const status = str(req.query.status);
     const query = { ...ownScope(req) };
     if (formType) query.formType = formType;
     if (status) query.status = status;
 
     const submissions = await Submission.find(query)
       .sort({ createdAt: -1 })
-      .select("-formData");
+      .select(`-formData ${HIDE_FROM_AREA}`);
     res.json({ success: true, data: submissions });
   } catch (error) {
     console.error("Area list error:", error);
@@ -36,7 +44,7 @@ router.get("/submissions/:id", authenticateAreaAdmin, async (req, res) => {
     const submission = await Submission.findOne({
       _id: req.params.id,
       ...ownScope(req),
-    });
+    }).select(HIDE_FROM_AREA);
     if (!submission) {
       return res.status(404).json({ success: false, message: "Submission not found" });
     }

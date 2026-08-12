@@ -1,6 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const rateLimit = require('../lib/rateLimit');
+const { str } = require('../lib/queryHelpers');
 const Admin = require('../models/admin');
 const mosqueFund = require('../models/mosqueFund');
 const welfarefund = require('../models/welfarefund');
@@ -10,7 +12,15 @@ const { authenticateSuperAdmin, authenticateAdmin } = require('../middleware/aut
 const router = express.Router();
 
 // Super Admin Login
-router.post('/login', async (req, res) => {
+// Credentials are short and guessable by design (area admins get a 6-digit PIN),
+// so the only thing standing between them and a brute force is this limiter.
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: 'Too many login attempts. Please try again in 15 minutes.',
+});
+
+router.post('/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -72,18 +82,23 @@ router.post('/login', async (req, res) => {
 });
 
 // Admin Login (regular admin, by phone number)
-router.post('/admin/login', async (req, res) => {
+router.post('/admin/login', loginLimiter, async (req, res) => {
     try {
-        const { phoneNumber, password } = req.body;
+        // Regular admins sign in with their mobile number, area admins with the
+        // username on their roster card. One field, either value.
+        const loginId = str(req.body.loginId) || str(req.body.phoneNumber) || str(req.body.username);
+        const password = String(req.body.password || '');
 
-        if (!phoneNumber || !password) {
+        if (!loginId || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Phone number and password are required'
+                message: 'Username / phone number and password are required'
             });
         }
 
-        const admin = await Admin.findOne({ phoneNumber });
+        const admin = await Admin.findOne({
+            $or: [{ username: loginId }, { phoneNumber: loginId }]
+        });
         if (!admin || !(await admin.comparePassword(password))) {
             return res.status(401).json({
                 success: false,
@@ -125,20 +140,33 @@ router.post('/admin/login', async (req, res) => {
 router.post('/admin', authenticateSuperAdmin, async (req, res) => {
     try {
 
-        const { username, phoneNumber, password, district, area, role } = req.body;
+        const username = str(req.body.username);
+        const phoneNumber = str(req.body.phoneNumber);
+        const password = String(req.body.password || '');
+        const district = str(req.body.district);
+        const area = str(req.body.area);
+        const role = str(req.body.role) || 'admin';
 
         // Validate input
-        if (!username || !phoneNumber || !password) {
+        if (!username || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Username, phone number, and password are required'
+                message: 'Username and password are required'
             });
         }
 
-        if (role && !['admin', 'areaadmin'].includes(role)) {
+        if (!['admin', 'areaadmin'].includes(role)) {
             return res.status(400).json({
                 success: false,
                 message: "role must be 'admin' or 'areaadmin'"
+            });
+        }
+
+        // Area admins are identified by username alone — the roster carries no mobile number.
+        if (role === 'admin' && !phoneNumber) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number is required for admins'
             });
         }
 
@@ -151,7 +179,7 @@ router.post('/admin', authenticateSuperAdmin, async (req, res) => {
 
         // Check if admin already exists with username or phone number
         const existingAdmin = await Admin.findOne({
-            $or: [{ username }, { phoneNumber }]
+            $or: [{ username }, ...(phoneNumber ? [{ phoneNumber }] : [])]
         });
         if (existingAdmin) {
             return res.status(400).json({
@@ -163,11 +191,12 @@ router.post('/admin', authenticateSuperAdmin, async (req, res) => {
         // Create new admin
         const newAdmin = new Admin({
             username,
-            phoneNumber,
+            // undefined, not "" — the sparse unique index only skips missing values
+            phoneNumber: phoneNumber || undefined,
             password,
             district,
             area,
-            role: role || 'admin'
+            role
         });
 
         await newAdmin.save();

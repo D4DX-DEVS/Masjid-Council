@@ -78,6 +78,14 @@ export const SubmissionData = ({ config, submission }) => (
   </>
 );
 
+// Payment is handed over off-platform; this only records how it was done.
+const PAID_METHOD_LABELS = {
+  bank: 'ബാങ്ക് ട്രാൻസ്ഫർ',
+  cheque: 'ചെക്ക്',
+  cash: 'ക്യാഷ്',
+  upi: 'UPI',
+};
+
 const STATUS_STYLES = {
   pending: 'bg-yellow-100 text-yellow-800',
   under_review: 'bg-blue-100 text-blue-800',
@@ -104,6 +112,7 @@ const SubmissionDetails = ({ role }) => {
   const [paidAmount, setPaidAmount] = useState('');
   const [paidDate, setPaidDate] = useState('');
   const [paidNote, setPaidNote] = useState('');
+  const [paidMethod, setPaidMethod] = useState('');
   const [savingPaid, setSavingPaid] = useState(false);
   const [message, setMessage] = useState('');
   const { contentRef, downloading, handleDownload } = usePdfExport(`submission-${formType}`);
@@ -161,6 +170,7 @@ const SubmissionDetails = ({ role }) => {
     setPaidAmount(s.paidAmount != null ? String(s.paidAmount) : '');
     setPaidDate(isoDay(s.paidAt));
     setPaidNote(s.paidNote || '');
+    setPaidMethod(s.paidMethod || '');
   };
 
   // clear=true wipes the entry; otherwise the typed number is stored as-is.
@@ -170,7 +180,7 @@ const SubmissionDetails = ({ role }) => {
       method: 'PATCH',
       headers: authHeaders,
       body: JSON.stringify(
-        clear ? { paidAmount: null } : { paidAmount, paidAt: paidDate, paidNote }
+        clear ? { paidAmount: null } : { paidAmount, paidAt: paidDate, paidNote, paidMethod }
       ),
     });
     const data = await res.json();
@@ -301,12 +311,13 @@ const SubmissionDetails = ({ role }) => {
                   <span className="text-xs text-gray-500 block">
                     {submission.paidByName}
                     {submission.paidAt && ` — ${new Date(submission.paidAt).toLocaleDateString()}`}
+                    {submission.paidMethod && ` • ${PAID_METHOD_LABELS[submission.paidMethod]}`}
                     {submission.paidNote && ` • ${submission.paidNote}`}
                   </span>
                 </p>
               )}
 
-              <div className="print-hide grid sm:grid-cols-3 gap-2">
+              <div className="print-hide grid sm:grid-cols-4 gap-2">
                 <input
                   type="number"
                   min="0"
@@ -321,10 +332,20 @@ const SubmissionDetails = ({ role }) => {
                   onChange={(e) => setPaidDate(e.target.value)}
                   className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
                 />
+                <select
+                  value={paidMethod}
+                  onChange={(e) => setPaidMethod(e.target.value)}
+                  className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
+                >
+                  <option value="">രീതി തിരഞ്ഞെടുക്കുക</option>
+                  {Object.entries(PAID_METHOD_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
                 <input
                   value={paidNote}
                   onChange={(e) => setPaidNote(e.target.value)}
-                  placeholder="ചെക്ക് / റഫറൻസ്"
+                  placeholder="ചെക്ക് നമ്പർ / റഫറൻസ്"
                   className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white outline-none focus:border-green-600 focus:ring-[3px] focus:ring-green-600/15"
                 />
               </div>
