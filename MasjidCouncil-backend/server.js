@@ -64,6 +64,7 @@ app.use("/api/submissions", uploadRoutes);
 app.use("/api/form-config", require("./routes/formConfigRoutes"));
 app.use("/api/submissions", require("./routes/submissionRoutes"));
 app.use("/api/area", require("./routes/areaRoutes"));
+app.use("/api/district", require("./routes/districtRoutes"));
 
 app.use("/api/mosqueAffiliation", mosqueAffiliationRoutes);
 app.use("/api/welfarefund", welfarefundRoutes);

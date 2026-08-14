@@ -54,6 +54,8 @@ const submissionSchema = new mongoose.Schema(
       verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin", default: null },
       verifiedByName: { type: String, default: null },
       verifiedAt: { type: Date, default: null },
+      // extra label→value answers, labels configured per form (areaVerificationFields)
+      extra: { type: Map, of: String, default: undefined },
     },
 
     // Office-use comment by admin / super admin

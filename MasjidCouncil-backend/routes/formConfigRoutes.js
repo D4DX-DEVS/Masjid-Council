@@ -70,7 +70,7 @@ router.put("/:formType", authenticateSuperAdmin, async (req, res) => {
     const { formType } = req.params;
     if (!FORM_TYPES.includes(formType)) return badFormType(res, formType);
 
-    const { title, description, enabled, pages, instructions, roleMapping } = req.body;
+    const { title, description, areaVerificationHint, areaVerificationFields, officeCommentHint, enabled, pages, instructions, roleMapping } = req.body;
 
     if (!title || !Array.isArray(pages) || pages.length === 0) {
       return res.status(400).json({
@@ -92,6 +92,9 @@ router.put("/:formType", authenticateSuperAdmin, async (req, res) => {
     if (config) {
       config.title = title;
       config.description = description || "";
+      config.areaVerificationHint = areaVerificationHint || "";
+      config.areaVerificationFields = Array.isArray(areaVerificationFields) ? areaVerificationFields : [];
+      config.officeCommentHint = officeCommentHint || "";
       if (enabled !== undefined) config.enabled = enabled;
       config.pages = pages;
       config.instructions = instructions || [];
@@ -102,6 +105,9 @@ router.put("/:formType", authenticateSuperAdmin, async (req, res) => {
         formType,
         title,
         description: description || "",
+        areaVerificationHint: areaVerificationHint || "",
+        areaVerificationFields: Array.isArray(areaVerificationFields) ? areaVerificationFields : [],
+        officeCommentHint: officeCommentHint || "",
         enabled: enabled !== undefined ? enabled : true,
         pages,
         instructions: instructions || [],

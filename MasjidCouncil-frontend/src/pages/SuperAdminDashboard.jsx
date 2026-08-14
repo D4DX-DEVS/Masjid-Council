@@ -168,11 +168,19 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  // Success banner lives at the top of the page; the admin table is far below it.
+  // Scroll it into view and auto-hide, so a save never looks like a silent no-op.
+  const flash = (msg) => {
+    setSuccess(msg);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => setSuccess(''), 5000);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Area admins get a typed password instead — only mobile-based admins auto-derive one.
-    if (name === 'phoneNumber' && formData.role !== 'areaadmin') {
+    // Area/district admins get a typed password instead — only mobile-based admins auto-derive one.
+    if (name === 'phoneNumber' && formData.role === 'admin') {
       const phoneNumber = value.replace(/\D/g, '');
       const firstFourDigits = phoneNumber.substring(0, 4);
       const autoPassword = firstFourDigits.length === 4 ? `MCK${firstFourDigits}` : '';
@@ -197,9 +205,12 @@ const SuperAdminDashboard = () => {
 
     let submitData = { ...formData };
     const isAreaAdmin = formData.role === 'areaadmin';
+    const isDistrictAdmin = formData.role === 'districtadmin';
+    // Scoped roles (area/district) are issued username + password only, no mobile.
+    const isScoped = isAreaAdmin || isDistrictAdmin;
     const digits = (formData.phoneNumber || '').replace(/\D/g, '');
 
-    if (!isAreaAdmin && digits.length !== 10) {
+    if (!isScoped && digits.length !== 10) {
       setError('Enter a valid 10-digit mobile number');
       return;
     }
@@ -207,13 +218,18 @@ const SuperAdminDashboard = () => {
       setError('District and area are required for area admins');
       return;
     }
-    if (isAreaAdmin && !editingAdmin && !formData.password.trim()) {
-      setError('Password is required for area admins');
+    if (isDistrictAdmin && !formData.district) {
+      setError('District is required for district admins');
+      return;
+    }
+    if (isScoped && !editingAdmin && !formData.password.trim()) {
+      setError('Password is required for area/district admins');
       return;
     }
 
-    if (isAreaAdmin) {
+    if (isScoped) {
       delete submitData.phoneNumber;
+      if (isDistrictAdmin) submitData.area = '';
     } else {
       submitData.phoneNumber = digits;
       if (!editingAdmin) {
@@ -240,7 +256,7 @@ const SuperAdminDashboard = () => {
 
       const data = await response.json();
       if (data.success) {
-        setSuccess(editingAdmin ? 'Admin updated successfully!' : 'Admin created successfully!');
+        flash(editingAdmin ? 'Admin updated successfully!' : 'Admin created successfully!');
         setShowModal(false);
         setFormData({
           username: '',
@@ -288,7 +304,7 @@ const SuperAdminDashboard = () => {
 
       const data = await response.json();
       if (data.success) {
-        setSuccess('Admin deleted successfully!');
+        flash('Admin deleted successfully!');
         fetchAdmins();
       } else {
         setError(data.message || 'Failed to delete admin');
@@ -728,8 +744,8 @@ const SuperAdminDashboard = () => {
                 />
               </div>
 
-              {/* Area admins are issued username + password only — the roster carries no mobile. */}
-              {formData.role !== 'areaadmin' && (
+              {/* Area/district admins are issued username + password only — the roster carries no mobile. */}
+              {formData.role === 'admin' && (
                 <div>
                   <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Phone Number</label>
                   <input
@@ -744,7 +760,7 @@ const SuperAdminDashboard = () => {
                 </div>
               )}
 
-              {formData.role === 'areaadmin' && (
+              {formData.role !== 'admin' && (
                 <div>
                   <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">
                     Password {editingAdmin && <span className="text-[#6B7280] font-normal">(leave blank to keep current)</span>}
@@ -755,7 +771,7 @@ const SuperAdminDashboard = () => {
                     value={formData.password}
                     onChange={handleInputChange}
                     className="w-full border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/15 transition-all"
-                    placeholder="Password for this area admin"
+                    placeholder="Password for this admin"
                     required={!editingAdmin}
                   />
                 </div>
@@ -764,13 +780,13 @@ const SuperAdminDashboard = () => {
               <div>
                 <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Role</label>
                 <SelectField name="role" value={formData.role} onChange={handleInputChange}>
-                  {/* Two roles only: state-wide admin and area admin. No district tier. */}
                   <option value="admin">State Admin</option>
                   <option value="areaadmin">Area Admin</option>
+                  <option value="districtadmin">District Admin (view only)</option>
                 </SelectField>
               </div>
 
-              {formData.role === 'areaadmin' && (
+              {formData.role !== 'admin' && (
                 <>
                   <div>
                     <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">District</label>
@@ -786,6 +802,7 @@ const SuperAdminDashboard = () => {
                       ))}
                     </SelectField>
                   </div>
+                  {formData.role === 'areaadmin' && (
                   <div>
                     <label className="block text-[13px] font-semibold text-[#374151] mb-1.5">Area</label>
                     <SelectField
@@ -801,6 +818,7 @@ const SuperAdminDashboard = () => {
                       ))}
                     </SelectField>
                   </div>
+                  )}
                 </>
               )}
 

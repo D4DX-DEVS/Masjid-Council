@@ -29,9 +29,10 @@ const adminSchema = new mongoose.Schema({
         trim: true
     },
     // 'areaadmin' sees only own-area submissions and can add a verification comment
+    // 'districtadmin' is view-only: own-district submissions, decided (approved/rejected) only
     role: {
         type: String,
-        enum: ['admin', 'areaadmin'],
+        enum: ['admin', 'areaadmin', 'districtadmin'],
         default: 'admin'
     }
 }, {

@@ -269,7 +269,7 @@ const DynamicForm = ({ formType: formTypeProp }) => {
               const { visible, required } = evaluateConditional(rawField, formData);
               if (!visible) return null;
               const field = withLocationOptions(rawField);
-              const fullWidth = ['textarea', 'row', 'title', 'group', 'html'].includes(field.type);
+              const fullWidth = field.fullWidth ?? ['textarea', 'row', 'title', 'group', 'html'].includes(field.type);
               return (
                 <div key={field.id} className={fullWidth ? 'sm:col-span-2' : ''}>
                   <DynamicField

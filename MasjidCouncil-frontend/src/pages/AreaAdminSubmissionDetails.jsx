@@ -21,6 +21,7 @@ const AreaAdminSubmissionDetails = () => {
   const [config, setConfig] = useState(cached?.config || null);
   const [loading, setLoading] = useState(!cached);
   const [comment, setComment] = useState('');
+  const [extra, setExtra] = useState({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState(false);
@@ -36,6 +37,7 @@ const AreaAdminSubmissionDetails = () => {
           setSubmission(d.data);
           setConfig(d.config);
           setComment(d.data.areaVerification?.comment || '');
+          setExtra(d.data.areaVerification?.extra || {});
         }
       })
       .finally(() => setLoading(false));
@@ -49,7 +51,7 @@ const AreaAdminSubmissionDetails = () => {
       const res = await fetch(`${API_BASE_URL}/api/area/submissions/${id}/verify`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment }),
+        body: JSON.stringify({ comment, extra }),
       });
       const data = await res.json();
       if (data.success) {
@@ -117,9 +119,9 @@ const AreaAdminSubmissionDetails = () => {
         {/* Verification comment */}
         <div className="bg-white rounded-xl shadow p-4 sm:p-6">
           <h2 className="font-bold text-gray-800 mb-1">ശുപാർശ / വെരിഫിക്കേഷൻ കുറിപ്പ്</h2>
-          <p className="text-xs text-gray-500 mb-3">
-            അപേക്ഷ നേരിട്ട് പരിശോധിച്ചതിന് ശേഷം നിങ്ങളുടെ ശുപാർശ ഇവിടെ രേഖപ്പെടുത്തുക.
-            ഇത് അഡ്മിൻ / സൂപ്പർ അഡ്മിൻ കാണും.
+          <p className="text-xs text-gray-500 mb-3 whitespace-pre-wrap">
+            {config?.areaVerificationHint ||
+              'അപേക്ഷ നേരിട്ട് പരിശോധിച്ചതിന് ശേഷം നിങ്ങളുടെ ശുപാർശ ഇവിടെ രേഖപ്പെടുത്തുക. ഇത് അഡ്മിൻ / സൂപ്പർ അഡ്മിൻ കാണും.'}
           </p>
           {submission.areaVerification?.comment && !editing ? (
             /* Already verified — read-only view; edit only on demand */
@@ -129,6 +131,9 @@ const AreaAdminSubmissionDetails = () => {
                   ✔ വെരിഫൈ ചെയ്തു — {new Date(submission.areaVerification.verifiedAt).toLocaleString()}
                 </p>
                 <p className="text-sm text-gray-800 whitespace-pre-wrap">{submission.areaVerification.comment}</p>
+                {Object.entries(submission.areaVerification.extra || {}).map(([k, v]) => (
+                  <p key={k} className="text-sm text-gray-800 mt-1"><b>{k}</b> {v}</p>
+                ))}
               </div>
               {message && (
                 <div className="mt-2 rounded-lg px-4 py-2.5 text-sm font-medium bg-emerald-50 border border-emerald-200 text-emerald-800">
@@ -136,7 +141,7 @@ const AreaAdminSubmissionDetails = () => {
                 </div>
               )}
               <button
-                onClick={() => { setComment(submission.areaVerification.comment); setEditing(true); setMessage(''); }}
+                onClick={() => { setComment(submission.areaVerification.comment); setExtra(submission.areaVerification.extra || {}); setEditing(true); setMessage(''); }}
                 className="mt-3 px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50"
               >
                 ശുപാർശ എഡിറ്റ് ചെയ്യുക
@@ -151,6 +156,16 @@ const AreaAdminSubmissionDetails = () => {
                 value={comment}
                 onChange={(e) => { setComment(e.target.value); setMessage(''); }}
               />
+              {(config?.areaVerificationFields || []).map((label) => (
+                <label key={label} className="block mt-2">
+                  <span className="text-sm text-gray-600">{label}</span>
+                  <input
+                    className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                    value={extra[label] || ''}
+                    onChange={(e) => { setExtra((x) => ({ ...x, [label]: e.target.value })); setMessage(''); }}
+                  />
+                </label>
+              ))}
               {message && (
                 <div className={`mt-2 rounded-lg px-4 py-2.5 text-sm font-medium ${
                   message.startsWith('ശുപാർശ') ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-red-50 border border-red-200 text-red-700'

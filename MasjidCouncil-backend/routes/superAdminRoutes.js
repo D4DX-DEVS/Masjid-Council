@@ -155,10 +155,10 @@ router.post('/admin', authenticateSuperAdmin, async (req, res) => {
             });
         }
 
-        if (!['admin', 'areaadmin'].includes(role)) {
+        if (!['admin', 'areaadmin', 'districtadmin'].includes(role)) {
             return res.status(400).json({
                 success: false,
-                message: "role must be 'admin' or 'areaadmin'"
+                message: "role must be 'admin', 'areaadmin' or 'districtadmin'"
             });
         }
 
@@ -174,6 +174,13 @@ router.post('/admin', authenticateSuperAdmin, async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'district and area are required for area admins'
+            });
+        }
+
+        if (role === 'districtadmin' && !district) {
+            return res.status(400).json({
+                success: false,
+                message: 'district is required for district admins'
             });
         }
 
@@ -284,10 +291,10 @@ router.put('/admin/:id', authenticateSuperAdmin, async (req, res) => {
     try {
         const { username, phoneNumber, password, district, area, role } = req.body;
 
-        if (role && !['admin', 'areaadmin'].includes(role)) {
+        if (role && !['admin', 'areaadmin', 'districtadmin'].includes(role)) {
             return res.status(400).json({
                 success: false,
-                message: "role must be 'admin' or 'areaadmin'"
+                message: "role must be 'admin', 'areaadmin' or 'districtadmin'"
             });
         }
 
@@ -326,6 +333,13 @@ router.put('/admin/:id', authenticateSuperAdmin, async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'district and area are required for area admins'
+            });
+        }
+
+        if (admin.role === 'districtadmin' && !admin.district) {
+            return res.status(400).json({
+                success: false,
+                message: 'district is required for district admins'
             });
         }
 

@@ -14,6 +14,8 @@ const FIELD_TYPES = [
   'file', 'row', 'title', 'group', 'html',
 ];
 const OPTION_TYPES = ['select', 'radio', 'checkbox', 'multiselect'];
+// types that take a full line by default; per-field `fullWidth` overrides
+const FULL_WIDTH_TYPES = ['textarea', 'row', 'title', 'group', 'html'];
 const OPERATORS = ['equals', 'not_equals', 'contains', 'not_contains', 'greater_than', 'less_than', 'is_empty', 'is_not_empty'];
 const ACTIONS = ['show', 'hide', 'require', 'optional'];
 
@@ -174,6 +176,9 @@ const FormBuilder = ({ role = 'superadmin' }) => {
         body: JSON.stringify({
           title: config.title,
           description: config.description,
+          areaVerificationHint: config.areaVerificationHint,
+          areaVerificationFields: (config.areaVerificationFields || []).filter((o) => o.trim() !== ''),
+          officeCommentHint: config.officeCommentHint,
           enabled: config.enabled,
           pages: config.pages.map((p, i) => ({ ...p, order: i + 1 })),
           instructions: config.instructions,
@@ -272,7 +277,8 @@ const FormBuilder = ({ role = 'superadmin' }) => {
             className={editorInput}
             rows={3}
             value={(field.options || []).join('\n')}
-            onChange={(e) => updateField(field.id, { options: e.target.value.split('\n').filter((o) => o.trim() !== '') })}
+            onChange={(e) => updateField(field.id, { options: e.target.value.split('\n') })}
+            onBlur={(e) => updateField(field.id, { options: e.target.value.split('\n').filter((o) => o.trim() !== '') })}
           />
         </label>
       )}
@@ -488,6 +494,12 @@ const FormBuilder = ({ role = 'superadmin' }) => {
                     <input type="checkbox" checked={field.enabled} onChange={(e) => updateField(field.id, { enabled: e.target.checked })} />
                     enabled
                   </label>
+                  <label className="flex items-center gap-1 text-xs text-gray-600" title="Checked: field takes its own line. Unchecked: sits inline beside the next field.">
+                    <input type="checkbox"
+                      checked={field.fullWidth ?? FULL_WIDTH_TYPES.includes(field.type)}
+                      onChange={(e) => updateField(field.id, { fullWidth: e.target.checked })} />
+                    full width
+                  </label>
                   <div className="flex gap-1 text-gray-400">
                     <button onClick={() => moveField(i, -1)} className="hover:text-gray-700 px-1">↑</button>
                     <button onClick={() => moveField(i, 1)} className="hover:text-gray-700 px-1">↓</button>
@@ -526,7 +538,7 @@ const FormBuilder = ({ role = 'superadmin' }) => {
                 {(p.fields || []).filter((f) => f.enabled).map((field) => {
                   const { visible, required } = evaluateConditional(field, previewData);
                   if (!visible) return null;
-                  const fullWidth = ['textarea', 'row', 'title', 'group', 'html'].includes(field.type);
+                  const fullWidth = field.fullWidth ?? FULL_WIDTH_TYPES.includes(field.type);
                   return (
                     <div key={field.id} className={fullWidth ? 'sm:col-span-2' : ''}>
                       <DynamicField
@@ -556,6 +568,24 @@ const FormBuilder = ({ role = 'superadmin' }) => {
             <span className="text-gray-600 text-sm">Description</span>
             <textarea className={editorInput} rows={2} value={config.description || ''}
               onChange={(e) => updateConfig({ description: e.target.value })} />
+          </label>
+          <label className="block">
+            <span className="text-gray-600 text-sm">Area admin note — shown above the area admin's ശുപാർശ box (admins & super admin see the saved ശുപാർശ, not this note)</span>
+            <textarea className={editorInput} rows={2} value={config.areaVerificationHint || ''}
+              placeholder="അപേക്ഷ നേരിട്ട് പരിശോധിച്ചതിന് ശേഷം നിങ്ങളുടെ ശുപാർശ ഇവിടെ രേഖപ്പെടുത്തുക. ഇത് അഡ്മിൻ / സൂപ്പർ അഡ്മിൻ കാണും."
+              onChange={(e) => updateConfig({ areaVerificationHint: e.target.value })} />
+          </label>
+          <label className="block">
+            <span className="text-gray-600 text-sm">Area admin extra fields — one label per line (e.g. പേര്:). Area admin fills these next to the ശുപാർശ.</span>
+            <textarea className={editorInput} rows={2}
+              value={(config.areaVerificationFields || []).join('\n')}
+              onChange={(e) => updateConfig({ areaVerificationFields: e.target.value.split('\n') })}
+              onBlur={(e) => updateConfig({ areaVerificationFields: e.target.value.split('\n').filter((o) => o.trim() !== '') })} />
+          </label>
+          <label className="block">
+            <span className="text-gray-600 text-sm">Office-use note — shown above the ഓഫീസ് ഉപയോഗത്തിന് box (admins & super admin only)</span>
+            <textarea className={editorInput} rows={2} value={config.officeCommentHint || ''}
+              onChange={(e) => updateConfig({ officeCommentHint: e.target.value })} />
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-700">
             <input type="checkbox" checked={config.enabled} onChange={(e) => updateConfig({ enabled: e.target.checked })} />
