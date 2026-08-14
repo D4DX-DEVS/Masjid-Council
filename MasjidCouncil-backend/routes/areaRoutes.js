@@ -64,6 +64,12 @@ router.patch("/submissions/:id/verify", authenticateAreaAdmin, async (req, res) 
       return res.status(400).json({ success: false, message: "comment is required" });
     }
 
+    // extra answers: only string values, capped lengths — labels come from form config
+    const extra = {};
+    for (const [k, v] of Object.entries(req.body.extra || {})) {
+      if (typeof v === "string" && v.trim()) extra[String(k).slice(0, 200)] = v.trim().slice(0, 500);
+    }
+
     const submission = await Submission.findOneAndUpdate(
       { _id: req.params.id, ...ownScope(req) },
       {
@@ -72,6 +78,7 @@ router.patch("/submissions/:id/verify", authenticateAreaAdmin, async (req, res) 
           verifiedBy: req.user.adminData._id,
           verifiedByName: req.user.adminData.username,
           verifiedAt: new Date(),
+          ...(Object.keys(extra).length ? { extra } : {}),
         },
       },
       { new: true }

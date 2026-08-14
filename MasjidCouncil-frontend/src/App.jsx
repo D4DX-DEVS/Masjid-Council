@@ -30,6 +30,8 @@ import SubmissionList from './pages/SubmissionList';
 import SubmissionDetails from './pages/SubmissionDetails';
 import AreaAdminHome from './pages/AreaAdminHome';
 import AreaAdminSubmissionDetails from './pages/AreaAdminSubmissionDetails';
+import DistrictAdminHome from './pages/DistrictAdminHome';
+import DistrictSubmissionDetails from './pages/DistrictSubmissionDetails';
 import SpendingReport from './pages/SpendingReport';
 
 
@@ -63,7 +65,7 @@ const Layout = () => {
   ];
 
   // Parameterized dashboard routes hide the navbar too
-  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/spending-report'];
+  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/district-home', '/district-submissions', '/spending-report'];
   const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report'];
 
   const isAdminRoute =
@@ -120,6 +122,10 @@ const Layout = () => {
         {/* Area admin */}
         <Route path="/area-home" element={<AreaAdminHome />} />
         <Route path="/area-submissions/:id" element={<AreaAdminSubmissionDetails />} />
+
+        {/* District admin (view-only) */}
+        <Route path="/district-home" element={<DistrictAdminHome />} />
+        <Route path="/district-submissions/:id" element={<DistrictSubmissionDetails />} />
 
         {/* Spending report */}
         <Route path="/spending-report" element={<SpendingReport role="admin" />} />

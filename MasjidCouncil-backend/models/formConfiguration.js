@@ -56,6 +56,8 @@ const fieldSchema = new mongoose.Schema(
     type: { type: String, enum: FIELD_TYPES, required: true },
     required: { type: Boolean, default: false },
     enabled: { type: Boolean, default: true },
+    // layout: true = own line (col-span-2), false = inline half column; unset = per-type default
+    fullWidth: { type: Boolean, default: undefined },
     placeholder: { type: String, default: "", maxlength: 500 },
     helpText: { type: String, default: "", maxlength: 1000 },
     options: { type: [String], default: undefined },
@@ -103,6 +105,12 @@ const formConfigurationSchema = new mongoose.Schema(
     },
     title: { type: String, required: true, maxlength: 300 },
     description: { type: String, default: "", maxlength: 2000 },
+    // note shown to the area admin above the ശുപാർശ/verification comment box
+    areaVerificationHint: { type: String, default: "", maxlength: 1000 },
+    // extra input labels the area admin must fill alongside the ശുപാർശ (e.g. "പേര്:")
+    areaVerificationFields: { type: [String], default: [] },
+    // note shown to admins above the office-use (ഓഫീസ് ഉപയോഗത്തിന്) comment box
+    officeCommentHint: { type: String, default: "", maxlength: 1000 },
 
     enabled: { type: Boolean, default: true },
     isPublished: { type: Boolean, default: false },

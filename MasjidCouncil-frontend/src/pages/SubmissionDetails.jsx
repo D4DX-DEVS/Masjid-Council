@@ -423,6 +423,9 @@ const SubmissionDetails = ({ role }) => {
           {submission.areaVerification?.comment ? (
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
               <p className="text-sm text-gray-800 whitespace-pre-wrap">{submission.areaVerification.comment}</p>
+              {Object.entries(submission.areaVerification.extra || {}).map(([k, v]) => (
+                <p key={k} className="text-sm text-gray-800 mt-1"><b>{k}</b> {v}</p>
+              ))}
               <p className="text-xs text-gray-500 mt-2">
                 — {submission.areaVerification.verifiedByName},{' '}
                 {new Date(submission.areaVerification.verifiedAt).toLocaleString()}
@@ -436,6 +439,9 @@ const SubmissionDetails = ({ role }) => {
         {/* Office use — admins/super admin only; saved text prints, the editor does not */}
         <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-4">
           <h2 className="font-bold text-gray-800 mb-2">ഓഫീസ് ഉപയോഗത്തിന്</h2>
+          {config?.officeCommentHint && (
+            <p className="text-xs text-gray-500 mb-3 whitespace-pre-wrap">{config.officeCommentHint}</p>
+          )}
           {submission.officeComment?.comment ? (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-3">
               <p className="text-sm text-gray-800 whitespace-pre-wrap">{submission.officeComment.comment}</p>
