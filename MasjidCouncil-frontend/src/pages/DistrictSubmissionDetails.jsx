@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SubmissionData } from './SubmissionDetails';
+import SubmissionAttachments from '../components/SubmissionAttachments';
 import AdminSidebar from '../components/AdminSidebar';
 import PageHeader from '../components/PageHeader';
 import { SkeletonBar } from '../components/Skeleton';
@@ -87,6 +88,8 @@ const DistrictSubmissionDetails = () => {
           </div>
 
           <SubmissionData config={config} submission={submission} />
+
+          <SubmissionAttachments config={config} submission={submission} />
         </div>
 
         {/* Decision summary — the part a district admin is here for */}

@@ -8,6 +8,7 @@ import SelectField from '../components/SelectField';
 import DateField from '../components/DateField';
 import { usePdfExport } from '../hooks/usePdfExport';
 import PrintLetterhead from '../components/PrintLetterhead';
+import SubmissionAttachments from '../components/SubmissionAttachments';
 import { invalidate } from '../lib/apiCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -277,6 +278,8 @@ const SubmissionDetails = ({ role }) => {
           </div>
 
           <SubmissionData config={config} submission={submission} />
+
+          <SubmissionAttachments config={config} submission={submission} selectable />
 
           {(submission.requestedAmount != null || submission.approvedAmount != null) && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-3">

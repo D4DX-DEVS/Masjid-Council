@@ -114,6 +114,7 @@ const Layout = () => {
         {/* Dynamic forms */}
         <Route path="/apply/:formType" element={<DynamicForm />} />
         <Route path="/superadmin-form-builder" element={<FormBuilder role="superadmin" />} />
+        <Route path="/admin-form-builder" element={<FormBuilder role="admin" />} />
         <Route path="/submissions/:formType" element={<SubmissionList role="admin" />} />
         <Route path="/submissions/:formType/:id" element={<SubmissionDetails role="admin" />} />
         <Route path="/superadmin-submissions/:formType" element={<SubmissionList role="superadmin" />} />

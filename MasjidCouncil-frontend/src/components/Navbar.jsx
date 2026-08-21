@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LogIn, Menu, X, Home as HomeIcon, FileText, Info, Phone, ChevronRight } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom'; // for navigation
@@ -19,9 +18,12 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState('home-section');
 
   // Shrink header + logo once the page scrolls past the top.
+  // ponytail: hysteresis band (shrink at 72, grow back at 16). A single
+  // threshold jitters — shrinking the sticky bar pulls the page up, which can
+  // drop scrollY back under the threshold, which grows it again, and so on.
   useEffect(() => {
     const onScroll = () => {
-      setIsScrolled(window.scrollY > 12);
+      setIsScrolled((wasScrolled) => (wasScrolled ? window.scrollY > 16 : window.scrollY > 72));
       // ponytail: contact-section is the last element on the page, so it can
       // never fill the observer's mid-viewport band once scrolling bottoms
       // out — force it active at the bottom instead of relying on that band.
