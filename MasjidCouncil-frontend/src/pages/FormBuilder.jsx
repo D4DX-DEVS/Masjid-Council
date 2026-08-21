@@ -5,6 +5,7 @@ import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import AdminSidebar from '../components/AdminSidebar';
 import PageHeader from '../components/PageHeader';
 import SelectField from '../components/SelectField';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -68,6 +69,8 @@ const FormBuilder = ({ role = 'superadmin' }) => {
   const [previewData, setPreviewData] = useState({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  // Destructive builder actions route through one Radix confirm instead of firing on click.
+  const [confirm, setConfirm] = useState(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
@@ -221,13 +224,21 @@ const FormBuilder = ({ role = 'superadmin' }) => {
         <PageHeader role={role} title="Form Builder" shortTitle="Forms" subtitle="Configure the application forms" />
         <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto">{content}</div>
       </div>
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title}
+        description={confirm?.description}
+        confirmLabel="Delete"
+        onConfirm={() => { confirm?.onConfirm?.(); setConfirm(null); }}
+        onCancel={() => setConfirm(null)}
+      />
     </div>
   );
 
   // ---------- form type picker ----------
   if (!config) {
     return shell(
-      <div className="max-w-3xl">
+      <div className="max-w-3xl mx-auto">
         <h2 className="text-lg font-bold text-[#111827] mb-4">ഏത് അപേക്ഷാ ഫോം എഡിറ്റ് ചെയ്യണം?</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           {Object.entries(FORM_TYPE_LABELS).map(([type, label]) => {
@@ -467,7 +478,16 @@ const FormBuilder = ({ role = 'superadmin' }) => {
               <GrowText className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#2E7D4F] focus:ring-[3px] focus:ring-[#2E7D4F]/15 transition-all" placeholder="Page description" value={page.description || ''}
                 onChange={(e) => updatePage(pageIndex, { description: e.target.value })} />
               {config.pages.length > 1 && (
-                <button onClick={() => removePage(pageIndex)} className="px-3 py-2 text-sm text-red-600 border border-red-200 rounded-xl hover:bg-red-50">Delete page</button>
+                <button
+                  onClick={() =>
+                    setConfirm({
+                      title: `Delete page "${page.title || `Page ${pageIndex + 1}`}"?`,
+                      description: `All ${(page.fields || []).length} field(s) on this page will be removed.`,
+                      onConfirm: () => removePage(pageIndex),
+                    })
+                  }
+                  className="px-3 py-2 text-sm text-red-600 border border-red-200 rounded-xl hover:bg-red-50"
+                >Delete page</button>
               )}
             </div>
           </div>
@@ -504,7 +524,17 @@ const FormBuilder = ({ role = 'superadmin' }) => {
                     <button onClick={() => moveField(i, -1)} className="hover:text-gray-700 px-1">↑</button>
                     <button onClick={() => moveField(i, 1)} className="hover:text-gray-700 px-1">↓</button>
                     <button onClick={() => setExpandedField(expandedField === field.id ? null : field.id)} className="hover:text-gray-700 px-1">⚙</button>
-                    <button onClick={() => removeField(field.id)} className="hover:text-red-600 px-1">✕</button>
+                    <button
+                      onClick={() =>
+                        setConfirm({
+                          title: `Delete field #${field.id}?`,
+                          description: `"${field.label || 'Untitled'}" and its settings will be removed from this page. Save the form to make it permanent.`,
+                          onConfirm: () => removeField(field.id),
+                        })
+                      }
+                      className="hover:text-red-600 px-1"
+                      aria-label="Delete field"
+                    >✕</button>
                   </div>
                 </div>
                 {expandedField === field.id && renderFieldEditor(field)}
@@ -524,7 +554,7 @@ const FormBuilder = ({ role = 'superadmin' }) => {
       )}
 
       {tab === 'preview' && (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 max-w-3xl">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 max-w-3xl mx-auto">
           <h2 className="text-lg font-bold text-emerald-800 mb-6">{config.title}</h2>
           {config.pages.map((p, pi) => (
             <div key={p.id} className="mb-8">
@@ -558,7 +588,7 @@ const FormBuilder = ({ role = 'superadmin' }) => {
       )}
 
       {tab === 'settings' && (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 grid gap-4 max-w-2xl">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 grid gap-4 max-w-2xl mx-auto">
           <label className="block">
             <span className="text-gray-600 text-sm">Form title</span>
             <GrowText className={editorInput} value={config.title}
@@ -633,8 +663,18 @@ const FormBuilder = ({ role = 'superadmin' }) => {
                         instructions: config.instructions.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)),
                       })
                     } />
-                  <button className="text-red-500 text-sm" onClick={() =>
-                    updateConfig({ instructions: config.instructions.filter((_, j) => j !== i) })}>✕</button>
+                  <button
+                    className="text-red-500 text-sm"
+                    aria-label="Delete instruction"
+                    onClick={() =>
+                      setConfirm({
+                        title: 'Delete this instruction?',
+                        description: ins.text || undefined,
+                        onConfirm: () =>
+                          updateConfig({ instructions: config.instructions.filter((_, j) => j !== i) }),
+                      })
+                    }
+                  >✕</button>
                 </div>
               ))}
               <button

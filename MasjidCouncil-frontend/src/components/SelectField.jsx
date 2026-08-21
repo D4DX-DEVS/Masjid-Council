@@ -46,7 +46,12 @@ const SelectField = ({ name, value, onChange, required, disabled, placeholder, c
         if (next) {
           setSearch('');
           // ponytail: Radix focuses the checked item on open - steal it back for the search box next tick.
-          requestAnimationFrame(() => searchRef.current?.focus());
+          // Mouse/trackpad only: on touch (tablet/phone) focusing raises the on-screen
+          // keyboard, which shrinks the visual viewport mid-open and leaves the popper
+          // collapsed or pushed off-screen. There the user taps the search box instead.
+          if (window.matchMedia?.('(pointer: fine)').matches) {
+            requestAnimationFrame(() => searchRef.current?.focus());
+          }
         }
       }}
     >
@@ -67,7 +72,8 @@ const SelectField = ({ name, value, onChange, required, disabled, placeholder, c
         <Select.Content
           position="popper"
           sideOffset={6}
-          className="z-[200] max-h-72 w-[var(--radix-select-trigger-width)] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl"
+          collisionPadding={8}
+          className="z-[200] max-h-[min(18rem,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl"
         >
           {/* ponytail: short lists (payment mode, yes/no) fit on screen - search is noise there. */}
           {items.length > 8 && (
