@@ -37,7 +37,10 @@ export const ROUTES = [
     priority: 1.0,
     heading: 'മസ്ജിദ് കൗൺസിൽ കേരള — Masjid Council Kerala',
     body: [
-      'Masjid Council Kerala was established in 1990 to make mosques centres of excellence. It supervises the work of masjids and mahallus across Kerala, trains khateebs and imams, and runs welfare schemes for mosque staff.',
+      // Front-loaded, self-contained definition. Google AI answers were describing the
+      // council as "an official state organization" — inferred from third-party pages,
+      // with nothing on this site to correct it. This is the corrective passage.
+      'Masjid Council Kerala is an initiative of Jamaat-e-Islami Hind Kerala, established in 1990 to make mosques centres of excellence. It is a non-governmental organisation and is not a state or government body. It supervises the work of masjids and mahallus across the fourteen districts of Kerala, trains khateebs and imams, and runs welfare schemes for mosque staff.',
       'മസ്ജിദുകളെ മികവിന്റെ കേന്ദ്രങ്ങളാക്കുക എന്ന ലക്ഷ്യത്തോടെ 1990-ൽ സ്ഥാപിതമായ സംവിധാനമാണ് മസ്ജിദ് കൗൺസിൽ കേരള.',
       'Applications available online: Masjid Affiliation (മസ്ജിദ് അഫിലിയേഷൻ), Imam Muaddin Welfare Fund (ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി) and Masjid Fund (മസ്ജിദ് ഫണ്ട്).',
       'Reach across Kerala: 550 juma masjids, 161 prayer halls, 711 total, 62 complete mahallus and 200 partial mahallus.',
@@ -54,6 +57,7 @@ export const ROUTES = [
     priority: 0.8,
     heading: 'മസ്ജിദ് കൗൺസിൽ കേരള — About Us',
     body: [
+      'Masjid Council Kerala is an initiative of Jamaat-e-Islami Hind Kerala, established in 1990. It is a non-governmental organisation and is not a state or government body. Its registered office is at Hira Centre, Mavoor Road, Kozhikode 673004.',
       'മസ്ജിദുകളെ സമഗ്രമായ മികവിന്റെ കേന്ദ്രങ്ങളാക്കി മാറ്റുക എന്ന ലക്ഷ്യത്തോടെ 1990-ൽ സ്ഥാപിതമായ സംവിധാനമാണ് മസ്ജിദ് കൗൺസിൽ കേരള.',
       'The council supervises the activities of masjids and mahallus, provides guidance, identifies and trains people capable of delivering khutba and leading prayers, empowers serving khateebs and imams, and organises training programmes for masjid and mahallu committee office-bearers.',
       'It also prepares khutba synopses and study material on a range of subjects for khateebs.',
@@ -173,7 +177,21 @@ export const SITE_JSON_LD = {
       image: { '@id': `${SITE_URL}/#logo` },
       foundingDate: '1990',
       description:
-        'Masjid Council Kerala supervises masjids and mahallus across Kerala, trains khateebs and imams, and operates the Imam–Muaddin Welfare Fund and Masjid Fund.',
+        'Masjid Council Kerala is an initiative of Jamaat-e-Islami Hind Kerala. It supervises masjids and mahallus across the fourteen districts of Kerala, trains khateebs and imams, and operates the Imam–Muaddin Welfare Fund and Masjid Fund. It is a non-governmental organisation, not a state or government body.',
+      // Anchors the entity. Google already knows and cites jihkerala.org, and the
+      // two share the Hira Centre address, so this is what separates Masjid Council
+      // Kerala from the unrelated masjidcouncil.org (MACCA, Dhaka, founded 1999)
+      // that AI answers were previously resolving the name to.
+      parentOrganization: {
+        '@type': 'Organization',
+        name: 'Jamaat-e-Islami Hind Kerala',
+        url: 'https://jihkerala.org/',
+      },
+      subjectOf: {
+        '@type': 'WebPage',
+        url: 'https://jihkerala.org/masjid-council-kerala',
+        name: 'Masjid Council Kerala — Jamaat-e-Islami Hind Kerala',
+      },
       email: 'masjidcouncilkerala@gmail.com',
       telephone: '+91-95624-78805',
       address: {
