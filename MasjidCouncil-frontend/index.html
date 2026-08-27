@@ -1,51 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="ml">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/mosque.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Icons. favicon.ico must exist as a real file: Google's favicon fetcher does
+         not run JavaScript, and the SPA redirect would otherwise answer with HTML. -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="/mosque.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#186b3a" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>Masjid Council Kerala | Mosque Affiliation, Medical Aid & Mosque Fund</title>
-    <!-- SEO -->
-    <meta name="description" content="Masjid Council Kerala — official platform for mosque affiliation, medical aid applications, mosque fund support and khateeb registration across Kerala, India." />
-    <meta name="keywords" content="Masjid Council Kerala, mosque affiliation Kerala, medical aid, mosque fund, khateeb registration, masjid Kerala" />
-    <meta name="robots" content="index, follow" />
+
     <meta name="author" content="Masjid Council Kerala" />
-    <link rel="canonical" href="https://masjidcouncilkerala.org/" />
-    <!-- Geo -->
     <meta name="geo.region" content="IN-KL" />
     <meta name="geo.placename" content="Kerala, India" />
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Masjid Council Kerala" />
-    <meta property="og:title" content="Masjid Council Kerala | Mosque Affiliation, Medical Aid & Mosque Fund" />
-    <meta property="og:description" content="Official platform for mosque affiliation, medical aid, mosque fund support and khateeb registration across Kerala." />
-    <meta property="og:url" content="https://masjidcouncilkerala.org/" />
-    <meta property="og:image" content="https://masjidcouncilkerala.org/mosque.svg" />
-    <meta property="og:locale" content="en_IN" />
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Masjid Council Kerala" />
-    <meta name="twitter:description" content="Mosque affiliation, medical aid, mosque fund and khateeb registration for Kerala." />
-    <!-- Structured data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Masjid Council Kerala",
-      "url": "https://masjidcouncilkerala.org/",
-      "logo": "https://masjidcouncilkerala.org/mosque.svg",
-      "description": "Masjid Council Kerala provides mosque affiliation, medical aid, mosque fund support and khateeb registration services across Kerala, India.",
-      "areaServed": {
-        "@type": "State",
-        "name": "Kerala",
-        "containedInPlace": { "@type": "Country", "name": "India" }
-      }
-    }
-    </script>
+
+    <!-- Title, description, canonical, Open Graph, Twitter and JSON-LD are per-route.
+         They come from src/lib/seo.js: rendered by RouteSeo at runtime and baked into
+         static HTML per route by scripts/prerender.mjs at build time. Do not add them
+         back here — two title or canonical elements in one document is undefined
+         behaviour for browsers and crawlers alike. -->
   </head>
   <body>
     <div id="root"></div>
