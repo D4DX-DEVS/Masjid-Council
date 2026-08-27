@@ -8,9 +8,16 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# SPA fallback for admin routes and any unmatched URL.
+#
+# Points at app.html, NOT index.html. Public routes are prerendered to their own
+# files (dist/about/index.html and friends) and Netlify serves those first. If the
+# fallback pointed at index.html, every unknown URL would answer 200 with the full
+# prerendered home page — an unbounded set of soft-404 duplicates. app.html is an
+# empty noindex shell, so the app still boots and routes on the real URL.
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/app.html"
   status = 200
 
 # Opt out of Google's FLoC tracking
@@ -18,3 +25,28 @@
   for = "/*"
   [headers.values]
     Permissions-Policy = "interest-cohort=()"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Icons are content-addressed by name, not hash — keep them cacheable but
+# revalidated, so a logo change reaches Google's favicon fetcher within a day.
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/favicon.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/llms.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    Cache-Control = "public, max-age=3600"

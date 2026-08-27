@@ -1,12 +1,20 @@
 # Masjid Council Kerala
 
-> Official platform of Masjid Council Kerala for mosque affiliation, medical aid applications, mosque fund support and khateeb registration across Kerala, India.
+> Masjid Council Kerala (മസ്ജിദ് കൗൺസിൽ കേരള), established 1990, supervises masjids and mahallus across Kerala, India. It trains khateebs and imams, and runs welfare schemes for masjids and mosque staff. Registered office: Hira Centre, PB No. 833, Mavoor Road, Kozhikode - 4, 673004. Phone +91 95624 78805. Email masjidcouncilkerala@gmail.com.
 
-## Services
-- [Mosque Affiliation](https://masjidcouncilkerala.org/affiliation): Apply to affiliate a mosque with the council.
-- [Medical Aid](https://masjidcouncilkerala.org/medical-aid): Apply for medical financial assistance.
-- [Mosque Fund](https://masjidcouncilkerala.org/mosque-fund): Apply for mosque construction/maintenance fund support.
-- [Khateeb Registration](https://masjidcouncilkerala.org/khateeb-registration): Register as a khateeb.
+## Applications
+- [Masjid Affiliation](https://masjidcouncilkerala.org/affiliation): Affiliate a masjid with Masjid Council Kerala. Affiliation unlocks the welfare schemes, training programmes and the Masjid Excellence Award.
+- [Imam Muaddin Welfare Fund](https://masjidcouncilkerala.org/medical-aid): Financial assistance for imams and muaddins of registered masjids — house construction, repairs, medical treatment and marriage. Funded by an annual Ramadan Jumu'ah collection.
+- [Masjid Fund](https://masjidcouncilkerala.org/mosque-fund): Assistance for financially weaker masjids towards construction, reconstruction and repairs. Funded by a monthly Friday collection at affiliated Jumu'ah masjids.
+- [Khateeb Registration](https://masjidcouncilkerala.org/khateeb-registration): Register as a khateeb and receive council khutba synopses and study material.
 
 ## About
-- [About the council](https://masjidcouncilkerala.org/about)
+- [About the council](https://masjidcouncilkerala.org/about): History from 1990, objectives, welfare schemes and the Masjid Excellence Award.
+- [Privacy policy](https://masjidcouncilkerala.org/privacy-policy): What applicant data is collected and how it is used.
+
+## Key facts
+- Founded: 1990.
+- Reach: 550 juma masjids, 161 prayer halls, 711 total, 62 complete mahallus, 200 partial mahallus.
+- Masjid Excellence Award prizes: Rs 1,00,000, Rs 75,000 and Rs 50,000.
+- Application status can be tracked with the reference number or the registered mobile number on the home page.
+- Content languages: Malayalam (primary) and English.

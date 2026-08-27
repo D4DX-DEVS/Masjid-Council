@@ -20,5 +20,28 @@ Disallow: /khateeb-list-admin
 Disallow: /khateeb-details-admin
 Disallow: /superadmin-khateeb-list
 Disallow: /superadmin-khateeb-details
+Disallow: /submissions/
+Disallow: /superadmin-submissions/
+Disallow: /area-home
+Disallow: /area-submissions/
+Disallow: /district-home
+Disallow: /district-submissions/
+Disallow: /spending-report
+Disallow: /superadmin-spending-report
+Disallow: /superadmin-form-builder
+Disallow: /admin-form-builder
+Disallow: /master-data
+Disallow: /apply/
+
+# AI search crawlers (GPTBot, OAI-SearchBot, PerplexityBot, ClaudeBot,
+# Google-Extended) are intentionally covered by the "*" group above: they are
+# allowed on the public routes and blocked from the admin routes.
+#
+# Do NOT add a per-bot "User-agent: GPTBot / Allow: /" group. robots.txt matches
+# one group per crawler, so a bot-specific group replaces the "*" group entirely
+# and would expose every admin path listed above to that bot.
+#
+# These crawlers do not execute JavaScript, which is why the public routes are
+# prerendered to static HTML at build time (scripts/prerender.mjs).
 
 Sitemap: https://masjidcouncilkerala.org/sitemap.xml
