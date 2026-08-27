@@ -15,10 +15,22 @@ import sharp from 'sharp';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
-const SOURCE_LOGO = resolve(root, 'src/assets/mc-logo2.webp');
 const PUBLIC_DIR = resolve(root, 'public');
 
+/** Full colour horizontal lockup: emblem on the left, wordmark on the right. */
+const SOURCE_LOGO = resolve(root, 'src/assets/logo.webp');
+/** White-on-transparent version of the same lockup, for dark backgrounds. */
+const SOURCE_LOGO_LIGHT = resolve(root, 'src/assets/mc-logo2.webp');
+
+/**
+ * Emblem-only region of SOURCE_LOGO (1354x827). Favicons render as small as
+ * 16px, where the "Masjid Council Kerala" wordmark squeezed into a square is an
+ * illegible smudge — so the icons use the mark alone and the wordmark is dropped.
+ */
+const MARK_CROP = { left: 0, top: 0, width: 560, height: 827 };
+
 const BRAND_GREEN = { r: 0x18, g: 0x6b, b: 0x3a, alpha: 1 };
+const WHITE = { r: 255, g: 255, b: 255, alpha: 1 };
 
 /** Square icon sizes emitted as PNG. */
 const ICON_SIZES = [
@@ -29,16 +41,20 @@ const ICON_SIZES = [
 ];
 
 /**
- * Renders the logo centred on a solid brand-green square.
- * Transparent PNGs render as a black blob in several social embeds, so the
- * background is always flattened.
+ * Renders the emblem centred on a solid white square.
+ *
+ * White, not brand green: the emblem is itself green and dark brown, so a green
+ * plate collapses the contrast between mark and background at favicon sizes.
+ * Transparent PNGs render as a black blob in several embeds, so the background is
+ * always flattened rather than left alpha.
  *
  * @param {number} size
  * @returns {Promise<Buffer>}
  */
 async function squareIcon(size) {
-  const padding = Math.round(size * 0.12);
-  const logo = await sharp(SOURCE_LOGO)
+  const padding = Math.round(size * 0.1);
+  const mark = await sharp(SOURCE_LOGO)
+    .extract(MARK_CROP)
     .resize(size - padding * 2, size - padding * 2, {
       fit: 'contain',
       background: { r: 0, g: 0, b: 0, alpha: 0 },
@@ -47,9 +63,9 @@ async function squareIcon(size) {
     .toBuffer();
 
   return sharp({
-    create: { width: size, height: size, channels: 4, background: BRAND_GREEN },
+    create: { width: size, height: size, channels: 4, background: WHITE },
   })
-    .composite([{ input: logo, gravity: 'center' }])
+    .composite([{ input: mark, gravity: 'center' }])
     .png({ compressionLevel: 9 })
     .toBuffer();
 }
@@ -86,8 +102,10 @@ function pngToIco(png, size) {
  * @returns {Promise<Buffer>}
  */
 async function ogImage() {
-  const logo = await sharp(SOURCE_LOGO)
-    .resize(560, 380, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  // The full lockup, not the bare mark: a share card is read at full size, so the
+  // wordmark is legible and carries the brand name into the preview.
+  const logo = await sharp(SOURCE_LOGO_LIGHT)
+    .resize(700, 400, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
     .toBuffer();
 
