@@ -106,8 +106,10 @@ async function main() {
     await writeFile(resolve(PUBLIC_DIR, name), await squareIcon(size));
   }
 
-  const ico = await squareIcon(64);
-  await writeFile(resolve(PUBLIC_DIR, 'favicon.ico'), pngToIco(ico, 64));
+  // 48px, not 64: Google's favicon guidelines ask for a square that is a multiple
+  // of 48px, and an off-spec size risks the icon being dropped rather than scaled.
+  const ico = await squareIcon(48);
+  await writeFile(resolve(PUBLIC_DIR, 'favicon.ico'), pngToIco(ico, 48));
   await writeFile(resolve(PUBLIC_DIR, 'og-image.png'), await ogImage());
 
   const generated = [...ICON_SIZES.map((i) => i.name), 'favicon.ico', 'og-image.png'];
