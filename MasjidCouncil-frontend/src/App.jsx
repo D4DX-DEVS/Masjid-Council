@@ -68,7 +68,7 @@ const Layout = () => {
   ];
 
   // Parameterized dashboard routes hide the navbar too
-  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/district-home', '/district-submissions', '/spending-report', '/admin-publications'];
+  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/district-home', '/district-submissions', '/spending-report', '/admin-publications', '/admin-form-builder'];
   const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report', '/superadmin-publications'];
 
   const isAdminRoute =

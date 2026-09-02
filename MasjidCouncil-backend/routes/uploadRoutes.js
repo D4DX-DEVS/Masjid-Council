@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const path = require("path");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { authenticateAdmin } = require("../middleware/auth");
+const { requireFeature } = require("../lib/featureAccess");
 
 const router = express.Router();
 
@@ -164,6 +165,16 @@ router.post("/upload-files", (req, res) => {
 // POST /upload-admin-files - same storage, no IP cap. An admin laying out a publication
 // chapter can legitimately paste a dozen images in a minute, which the public limit of 20
 // per 10 minutes would block. Safe to lift only because the login gates it.
-router.post("/upload-admin-files", authenticateAdmin, handleUpload);
+//
+// Guarded by the publications flag because the publications editor is its only caller: when
+// the super admin blocks that feature, a state admin must not keep an uncapped write into the
+// bucket through its back door. Anything else needing admin uploads should get its own route
+// with its own guard rather than widening this one.
+router.post(
+    "/upload-admin-files",
+    authenticateAdmin,
+    requireFeature("publications"),
+    handleUpload
+);
 
 module.exports = router;
