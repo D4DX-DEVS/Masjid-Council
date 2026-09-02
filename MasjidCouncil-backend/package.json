@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "test": "node --test lib/*.test.js scripts/lib/*.test.js",
+    "seed:publications": "node scripts/seedPublications.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +23,7 @@
     "mongoose": "^8.16.4",
     "multer": "^2.0.2",
     "node-fetch": "^2.7.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "sanitize-html": "^2.17.7"
   }
 }
