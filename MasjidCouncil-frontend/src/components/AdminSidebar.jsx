@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee, Wrench } from 'lucide-react';
+import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee, Wrench , BookOpen} from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 
@@ -27,6 +27,7 @@ const AdminSidebar = ({ items }) => {
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
     { to: '/admin-form-builder', icon: Wrench, label: 'Form Builder', short: 'Forms' },
     { to: '/spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
+    { to: '/admin-publications', icon: BookOpen, label: 'Publications', short: 'Books' },
   ];
 
   // Collapsed rail centers the icon instead of leaving it left-aligned in an 80px column.

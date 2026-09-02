@@ -10,6 +10,7 @@ import affiliationIcon from '../assets/mosque.webp';
 import welfareIcon from '../assets/moududi2.webp';
 import mosqueFundIcon from '../assets/investment.webp';
 import { useNavigate, Link } from 'react-router-dom';
+import PublicationsSection from '../components/PublicationsSection';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -224,6 +225,8 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      <PublicationsSection />
 
       <div id="applications-section" className="bg-white py-7 sm:py-10 px-4">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 text-center mb-6 sm:mb-8 relative leading-tight"
