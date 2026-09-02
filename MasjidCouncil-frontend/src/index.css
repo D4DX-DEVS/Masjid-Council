@@ -226,12 +226,16 @@ body:has(.mc-form) {
   background: linear-gradient(to bottom, #22c55e, #16a34a);
   flex-shrink: 0;
 }
-/* ── Publications section ────────────────────────────────────────────────────
+/* ── Publications section ───────────────────────────────────────
    Phones: one card at a time, swiped sideways, so a five-book section does not
    push അപേക്ഷകൾ a screen and a half down the page.
    sm and up: a single row whose column count comes from the data — 2 books give
    2 wide cards, 5 give 5. Tablet caps at 2 because a fifth of 640px cannot hold
    a Malayalam title. */
+/* The navbar is sticky, so an anchor jump to #publications-section would otherwise park the
+   heading underneath it — which is how the reader's back link arrives here. */
+#publications-section { scroll-margin-top: 5rem; }
+
 .mc-pub-grid {
   display: grid;
   grid-auto-flow: column;
@@ -245,6 +249,19 @@ body:has(.mc-form) {
 
 .mc-pub-grid::-webkit-scrollbar { display: none; }
 .mc-pub-grid > .mc-pub-card { scroll-snap-align: center; }
+
+/* Six stacked blocks: figure, title, subtitle, description, chapter count, button.
+   The button is pushed to the bottom so cards of unequal height still end together. */
+.mc-pub-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+.mc-pub-card > .mc-pub-figure { margin-bottom: 0.5rem; }
+.mc-pub-card > :last-child { margin-top: auto; padding-top: 0.75rem; }
 
 @media (min-width: 640px) {
   .mc-pub-grid {
@@ -261,6 +278,36 @@ body:has(.mc-form) {
   .mc-pub-grid {
     grid-template-columns: repeat(var(--mc-pub-cols, 3), minmax(0, 1fr));
     gap: 2rem;
+  }
+}
+
+/* Aligning the cards to each other, not just topping and tailing them.
+   Each card hands its six rows back to the parent grid via subgrid, so a two-line
+   title in one card and a three-line title in the next still leave both
+   descriptions — and both chapter counts — starting on the same line. Without this
+   the counts sit at different heights whenever the text above them wraps differently.
+   Cards keep identical padding, so the uniform inset preserves the alignment. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 640px) {
+    .mc-pub-grid { grid-template-rows: repeat(6, auto); }
+
+    .mc-pub-grid > .mc-pub-card {
+      grid-row: span 6;
+      display: grid;
+      grid-template-rows: subgrid;
+      justify-items: center;
+      /* The flex rule above sets align-items: center to centre the cards horizontally. In a
+         grid that same property works on the block axis, which floats a one-line title in the
+         middle of a row sized for three. Start-align so every row begins at its own top. */
+      align-items: start;
+      gap: 0;
+    }
+
+    /* Row gaps come back as padding, since the subgrid tracks own the spacing now. */
+    .mc-pub-card > .mc-pub-figure { margin-bottom: 0; padding-bottom: 1rem; }
+    .mc-pub-card > :nth-child(4) { padding-top: 0.5rem; }
+    .mc-pub-card > :nth-child(5) { padding-top: 0.5rem; }
+    .mc-pub-card > :last-child { margin-top: 0; padding-top: 1rem; align-self: end; }
   }
 }
 
