@@ -6,6 +6,11 @@ const { uniqueSlug } = require("../lib/slug");
 // Publications are editorial content, so both the super admin and the state admin manage
 // them — authenticateAdmin already admits exactly those two roles. Public GETs are unguarded.
 const { authenticateAdmin } = require("../middleware/auth");
+// The super admin can switch this feature off for state admins; hiding the sidebar entry is
+// cosmetic, this guard is what enforces it.
+const { requireFeature } = require("../lib/featureAccess");
+
+const canManage = [authenticateAdmin, requireFeature("publications")];
 
 const router = express.Router();
 
@@ -96,7 +101,7 @@ router.get("/section", async (_req, res) => {
 });
 
 // Everything including drafts, for the admin list.
-router.get("/admin/all", authenticateAdmin, async (_req, res) => {
+router.get("/admin/all", canManage, async (_req, res) => {
   try {
     const publications = await Publication.find({}, "-chapters.bodyHtml").sort({
       order: 1,
@@ -109,7 +114,7 @@ router.get("/admin/all", authenticateAdmin, async (_req, res) => {
 });
 
 // Full record for the editor — drafts included, so this cannot be the public route.
-router.get("/admin/:id", authenticateAdmin, async (req, res) => {
+router.get("/admin/:id", canManage, async (req, res) => {
   try {
     const publication = await Publication.findById(req.params.id);
     if (!publication) {
@@ -140,7 +145,7 @@ router.get("/:slug", async (req, res) => {
 
 /* ------------------------------------------------------------------- admin */
 
-router.post("/", authenticateAdmin, async (req, res) => {
+router.post("/", canManage, async (req, res) => {
   try {
     if (!String(req.body.title || "").trim()) {
       return res.status(400).json({ success: false, message: "Title is required" });
@@ -162,7 +167,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
 });
 
 // Literal paths must come before /:id or they are swallowed as an id.
-router.put("/reorder", authenticateAdmin, async (req, res) => {
+router.put("/reorder", canManage, async (req, res) => {
   try {
     const items = Array.isArray(req.body.items) ? req.body.items : [];
     await Promise.all(
@@ -176,7 +181,7 @@ router.put("/reorder", authenticateAdmin, async (req, res) => {
   }
 });
 
-router.put("/section", authenticateAdmin, async (req, res) => {
+router.put("/section", canManage, async (req, res) => {
   try {
     const section = await SiteSection.findOneAndUpdate(
       { key: SECTION_KEY },
@@ -196,7 +201,7 @@ router.put("/section", authenticateAdmin, async (req, res) => {
   }
 });
 
-router.put("/:id", authenticateAdmin, async (req, res) => {
+router.put("/:id", canManage, async (req, res) => {
   try {
     const existing = await Publication.findById(req.params.id);
     if (!existing) {
@@ -231,7 +236,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
   }
 });
 
-router.delete("/:id", authenticateAdmin, async (req, res) => {
+router.delete("/:id", canManage, async (req, res) => {
   try {
     const deleted = await Publication.findByIdAndDelete(req.params.id);
     if (!deleted) {

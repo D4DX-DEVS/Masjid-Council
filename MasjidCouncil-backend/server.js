@@ -74,6 +74,7 @@ app.use("/api/superadmin", superAdminRoutes);
 app.use("/api/track", require("./routes/trackRoutes"));
 app.use("/api/master-data", require("./routes/masterDataRoutes"));
 app.use("/api/publications", require("./routes/publicationRoutes"));
+app.use("/api/admin-access", require("./routes/adminAccessRoutes"));
 // app.use("/api/admin", adminRoutes);
 
 PORT = process.env.PORT;

@@ -17,6 +17,9 @@ import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import PageHeader from '../components/PageHeader';
 import ConfirmDialog from '../components/ConfirmDialog';
+import StateAdminAccessToggle from '../components/StateAdminAccessToggle';
+import FeatureBlocked from '../components/FeatureBlocked';
+import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import {
   createPublication,
   deletePublication,
@@ -46,6 +49,8 @@ const Field = ({ label, hint, ...props }) => (
 const PublicationsAdmin = ({ role = 'superadmin' }) => {
   const navigate = useNavigate();
   const Sidebar = role === 'superadmin' ? SuperAdminSidebar : AdminSidebar;
+  const isSuper = role === 'superadmin';
+  const access = useFeatureAccess('publications');
 
   const [publications, setPublications] = useState(null);
   const [section, setSection] = useState(null);
@@ -55,6 +60,7 @@ const PublicationsAdmin = ({ role = 'superadmin' }) => {
   const [deleting, setDeleting] = useState(null);
 
   const load = async () => {
+    if (access !== 'allowed') return;
     try {
       const [list, sectionData] = await Promise.all([
         fetchPublicationsAdmin(),
@@ -70,7 +76,8 @@ const PublicationsAdmin = ({ role = 'superadmin' }) => {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [access]);
 
   const saveSection = async () => {
     setSavingSection(true);
@@ -156,6 +163,12 @@ const PublicationsAdmin = ({ role = 'superadmin' }) => {
         />
 
         <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <StateAdminAccessToggle feature="publications" show={isSuper} />
+
+          {access === 'denied' && <FeatureBlocked feature="publications" />}
+
+          {access !== 'allowed' ? null : (
+          <>
           {message && (
             <div
               className={`rounded-xl px-4 py-3 text-sm ${
@@ -374,6 +387,8 @@ const PublicationsAdmin = ({ role = 'superadmin' }) => {
               ))}
             </ul>
           </section>
+          </>
+          )}
         </div>
       </div>
 

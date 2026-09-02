@@ -15,6 +15,8 @@ import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import PageHeader from '../components/PageHeader';
 import ConfirmDialog from '../components/ConfirmDialog';
+import FeatureBlocked from '../components/FeatureBlocked';
+import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import {
   fetchPublicationAdmin,
   updatePublication,
@@ -49,6 +51,7 @@ const PublicationEditor = ({ role = 'superadmin' }) => {
   const navigate = useNavigate();
   const Sidebar = role === 'superadmin' ? SuperAdminSidebar : AdminSidebar;
   const listPath = `/${role === 'superadmin' ? 'superadmin' : 'admin'}-publications`;
+  const access = useFeatureAccess('publications');
 
   const [publication, setPublication] = useState(null);
   const [activeChapter, setActiveChapter] = useState(0);
@@ -59,10 +62,11 @@ const PublicationEditor = ({ role = 'superadmin' }) => {
   const [removingChapter, setRemovingChapter] = useState(null);
 
   useEffect(() => {
+    if (access !== 'allowed') return;
     fetchPublicationAdmin(id)
       .then(setPublication)
       .catch((error) => setMessage({ type: 'error', text: error.message }));
-  }, [id]);
+  }, [id, access]);
 
   // A misclick on the browser's back button should not throw away an edited chapter.
   useEffect(() => {
@@ -144,6 +148,18 @@ const PublicationEditor = ({ role = 'superadmin' }) => {
       setSaving(false);
     }
   };
+
+  if (access === 'denied') {
+    return (
+      <div className="flex min-h-screen bg-[#F7F8FA]">
+        <Sidebar />
+        <div className="min-w-0 flex-1">
+          <PageHeader role={role} title="Publication" shortTitle="Publication" />
+          <FeatureBlocked feature="publications" />
+        </div>
+      </div>
+    );
+  }
 
   if (!publication) {
     return (

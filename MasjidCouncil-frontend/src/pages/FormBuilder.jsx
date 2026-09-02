@@ -6,6 +6,9 @@ import AdminSidebar from '../components/AdminSidebar';
 import PageHeader from '../components/PageHeader';
 import SelectField from '../components/SelectField';
 import ConfirmDialog from '../components/ConfirmDialog';
+import StateAdminAccessToggle from '../components/StateAdminAccessToggle';
+import FeatureBlocked from '../components/FeatureBlocked';
+import { useFeatureAccess } from '../hooks/useFeatureAccess';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -58,6 +61,9 @@ const numberInput = `${editorInput} [appearance:textfield] [&::-webkit-outer-spi
 const FormBuilder = ({ role = 'superadmin' }) => {
   const navigate = useNavigate();
   const isAdmin = role === 'admin';
+  // Whether this console may edit forms at all. The super admin owns the switch and is never
+  // subject to it; a state admin sees the blocked state instead of the builder.
+  const access = useFeatureAccess('formBuilder');
   const token = localStorage.getItem(isAdmin ? 'adminToken' : 'superAdminToken');
 
   const [formType, setFormType] = useState('');
@@ -222,7 +228,10 @@ const FormBuilder = ({ role = 'superadmin' }) => {
       {isAdmin ? <AdminSidebar /> : <SuperAdminSidebar />}
       <div className="flex-1 min-w-0">
         <PageHeader role={role} title="Form Builder" shortTitle="Forms" subtitle="Configure the application forms" />
-        <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto">{content}</div>
+        <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto">
+          <StateAdminAccessToggle feature="formBuilder" show={!isAdmin} />
+          {content}
+        </div>
       </div>
       <ConfirmDialog
         open={!!confirm}
@@ -234,6 +243,11 @@ const FormBuilder = ({ role = 'superadmin' }) => {
       />
     </div>
   );
+
+  if (access === 'denied') return shell(<FeatureBlocked feature="formBuilder" />);
+  if (access === 'loading') {
+    return shell(<div className="h-64 animate-pulse rounded-2xl bg-gray-100" />);
+  }
 
   // ---------- form type picker ----------
   if (!config) {
