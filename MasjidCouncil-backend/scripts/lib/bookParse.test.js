@@ -101,6 +101,17 @@ test("does not promote a wrapped paragraph that merely starts short", () => {
   assert.ok(html.includes("ഇടപെടലുകൾ"), html);
 });
 
+test("a source that is not hard-wrapped separates every line with a space", () => {
+  // The signature block of the Minimum booklet: three complete lines, none punctuated.
+  // Under the hard-wrapped default these would run together as "ചെയർമാൻമസ്ജിദ്".
+  const html = parseBook({
+    text: ["*T*", "ചെയർമാൻ", "മസ്ജിദ് കൗൺസിൽ കേരള", "09/01/2024"].join("\n"),
+    chapterDefs: [{ slug: "t", title: "T", markers: ["*T*"] }],
+    hardWrapped: false,
+  })[0].bodyHtml;
+  assert.strictEqual(html, "<p>ചെയർമാൻ മസ്ജിദ് കൗൺസിൽ കേരള 09/01/2024</p>");
+});
+
 test("escapes html metacharacters in the source", () => {
   const html = parseFixture(["പെയിൻ & പാലിയേറ്റീവ് <b> പ്രവർത്തനം."]);
   assert.ok(html.includes("&amp;"));
@@ -126,13 +137,14 @@ test("rejects a chapter map whose markers are out of order", () => {
 for (const book of BOOKS) {
   test(`parses ${book.slug} into its full chapter list`, () => {
     const text = fs.readFileSync(path.join(BACKEND_ROOT, book.sourceFile), "utf8");
-    const joins = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "..", "data", book.joinsFile), "utf8")
-    );
+    const joins = book.joinsFile
+      ? JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", book.joinsFile), "utf8"))
+      : { spaceBreaks: [] };
     const chapters = parseBook({
       text: text.replace(/^﻿/, ""),
       chapterDefs: book.chapters,
       spaceBreaks: new Set(joins.spaceBreaks),
+      hardWrapped: book.hardWrapped !== false,
     });
 
     assert.strictEqual(chapters.length, book.chapters.length);

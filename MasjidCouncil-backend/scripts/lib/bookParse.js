@@ -179,8 +179,11 @@ class BlockBuilder {
 // lines: the whole file, already normalised and split.
 // from/to: half-open range of line indices for this chapter's body.
 // spaceBreaks: Set of line indices i where the break between line i and i+1 is a word
-//   boundary. Any other unresolved break is closed up with no space.
-const linesToHtml = (lines, from, to, spaceBreaks) => {
+//   boundary. Only consulted for hard-wrapped sources.
+// hardWrapped: true when the file was broken at the printed line width, so an unlisted break
+//   is a split word and closes up. False for sources typed one unit per line, where every
+//   break is a word boundary — running those together would produce "ചെയർമാൻമസ്ജിദ്".
+const linesToHtml = (lines, from, to, spaceBreaks, hardWrapped) => {
   const builder = new BlockBuilder();
   let previousIndex = -1;
   let previousWasIndented = false;
@@ -228,11 +231,11 @@ const linesToHtml = (lines, from, to, spaceBreaks) => {
       builder.startParagraph(line);
     } else {
       const previous = lines[previousIndex].trim();
-      // Word boundary when the reviewed decisions say so, or when the previous line ended
-      // on punctuation that can only follow a whole word.
-      const separator =
-        spaceBreaks.has(previousIndex) || endsWithSoftPunctuation(previous) ? " " : "";
-      builder.append(separator, line);
+      // Word boundary when the source is not hard-wrapped, when the reviewed decisions say
+      // so, or when the previous line ended on punctuation that can only follow a whole word.
+      const isWordBoundary =
+        !hardWrapped || spaceBreaks.has(previousIndex) || endsWithSoftPunctuation(previous);
+      builder.append(isWordBoundary ? " " : "", line);
     }
 
     previousWasIndented = indented;
@@ -250,7 +253,7 @@ const linesToHtml = (lines, from, to, spaceBreaks) => {
 // chapterDefs: [{ title, slug, markers: [exact line text, …] }] in document order. `markers`
 // are the consecutive lines that make up the printed chapter title; the body runs from just
 // after them to the first marker of the next chapter.
-const parseBook = ({ text, chapterDefs, spaceBreaks = new Set() }) => {
+const parseBook = ({ text, chapterDefs, spaceBreaks = new Set(), hardWrapped = true }) => {
   const lines = normaliseText(text).split("\n");
   const trimmed = lines.map((l) => l.trim());
 
@@ -278,7 +281,7 @@ const parseBook = ({ text, chapterDefs, spaceBreaks = new Set() }) => {
       slug: def.slug,
       title: def.title,
       order: n,
-      bodyHtml: linesToHtml(lines, bodyFrom, bodyTo, spaceBreaks),
+      bodyHtml: linesToHtml(lines, bodyFrom, bodyTo, spaceBreaks, hardWrapped),
     };
   });
 };

@@ -27,14 +27,18 @@ const loadChapters = (book) => {
   if (!fs.existsSync(sourcePath)) {
     throw new Error(`Source text not found: ${book.sourceFile}`);
   }
-  const joinsPath = path.join(__dirname, "data", book.joinsFile);
-  const joins = JSON.parse(fs.readFileSync(joinsPath, "utf8"));
+  // Only the two hard-wrapped books need reviewed line-break decisions; the later ones were
+  // supplied with one paragraph per line, so there is nothing to decide.
+  const joins = book.joinsFile
+    ? JSON.parse(fs.readFileSync(path.join(__dirname, "data", book.joinsFile), "utf8"))
+    : { spaceBreaks: [] };
 
   const chapters = parseBook({
     // Strip a UTF-8 BOM; it would otherwise land inside the first chapter's first word.
     text: fs.readFileSync(sourcePath, "utf8").replace(/^﻿/, ""),
     chapterDefs: book.chapters,
     spaceBreaks: new Set(joins.spaceBreaks),
+    hardWrapped: book.hardWrapped !== false,
   });
 
   // A silently truncated parse would seed a half book that looks fine in the list, so fail

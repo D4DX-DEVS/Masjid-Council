@@ -123,6 +123,48 @@ const REKHA_CHAPTERS = [
   },
 ];
 
+// Both of these arrived as legacy-font PDFs whose text layer carries no Unicode Malayalam at
+// all ("anIhpä akvPnZv" for മികവുറ്റ മസ്ജിദ്). The council supplied the same text typed in
+// Unicode, which is what the .txt files hold — verified against the PDFs by list structure:
+// Excellent Masjid has 2 bullets then 6 / 13 / 6 numbered items, Minimum has 8 / 3 + a–f / 6.
+const EXCELLENT_MASJID_CHAPTERS = [
+  {
+    slug: "aamukham",
+    title: "ആമുഖം",
+    markers: ["*മികവുറ്റ മസ്ജിദ് (Excellent Masjid)*"],
+  },
+  {
+    slug: "iqamathussalath",
+    title: "ഇഖാമത്തുസ്സ്വലാത്ത്",
+    markers: ["*ഇഖാമത്തുസ്സ്വലാത്ത്*"],
+  },
+  {
+    slug: "imarathul-masjid",
+    title: "ഇമാറത്തുൽ മസ്ജിദ്",
+    markers: ["*ഇമാറത്തുൽ മസ്ജിദ്*"],
+  },
+  {
+    slug: "thaleem-va-tharbiyath",
+    title: "തഅ്‌ലീം വ തർബിയത്ത്",
+    markers: ["*തഅ്‌ലീം വ തർബിയത്ത്*"],
+  },
+];
+
+const MINIMUM_CHAPTERS = [
+  {
+    slug: "aamukham",
+    title: "ആമുഖം",
+    markers: ["*മസ്ജിദ് മിനിമം പരിപാടികൾ*"],
+  },
+  {
+    slug: "iqamathussalath",
+    title: "ഇഖാമത്തുസ്സ്വലാത്ത്",
+    markers: ["*ഇഖാമത്തുസ്സ്വലാത്ത്*"],
+  },
+  { slug: "samskaranam", title: "സംസ്‌കരണം", markers: ["*സംസ്‌കരണം*"] },
+  { slug: "ghadana", title: "ഘടന", markers: ["*ഘടന*"] },
+];
+
 const BOOKS = [
   {
     slug: "mahallukalkku-oru-margarekha",
@@ -146,6 +188,38 @@ const BOOKS = [
       "കക്ഷിഭേദമന്യേ ഏതു മഹല്ലിനും സ്വീകരിക്കാവുന്ന പ്രവർത്തന പദ്ധതികൾ — വിദ്യാഭ്യാസ സമിതി, സകാത് കമ്മറ്റി, വനിതാ വേദി, സേവന വേദി എന്നിവ ഉൾപ്പെടെ.",
     chapters: REKHA_CHAPTERS,
   },
+  {
+    slug: "mikavutta-masjid",
+    sourceFile: "Excellent-Masjid.txt",
+    // Typed one unit per line rather than broken at a printed measure, so every line end is a
+    // word boundary and there are no line-break decisions to review.
+    joinsFile: null,
+    hardWrapped: false,
+    title: "Excellent Masjid",
+    titleMalayalam: "മികവുറ്റ മസ്ജിദ്",
+    subtitle: "Excellent Masjid",
+    description:
+      "ഓരോ ജില്ലയിലും ഒരു മസ്ജിദെങ്കിലും മികവുറ്റ നിലവാരത്തിലേക്ക് ഉയർത്താനുള്ള മാനദണ്ഡങ്ങൾ — ഇഖാമത്തുസ്സ്വലാത്ത്, ഇമാറത്തുൽ മസ്ജിദ്, തഅ്‌ലീം വ തർബിയത്ത്.",
+    chapters: EXCELLENT_MASJID_CHAPTERS,
+  },
+  {
+    slug: "masjid-minimum-paripadikal",
+    sourceFile: "Masjid-Minimum.txt",
+    joinsFile: null,
+    hardWrapped: false,
+    title: "Masjid Minimum Programmes",
+    titleMalayalam: "മസ്ജിദ് മിനിമം പരിപാടികൾ",
+    subtitle: "",
+    description:
+      "മസ്ജിദ് കൗൺസിൽ കേരളക്ക് കീഴിലുള്ള പള്ളികളിൽ മിനിമം ഉണ്ടായിരിക്കേണ്ട സംവിധാനങ്ങൾ — ഇഖാമത്തുസ്സ്വലാത്ത്, സംസ്‌കരണം, ഘടന.",
+    chapters: MINIMUM_CHAPTERS,
+  },
 ];
 
-module.exports = { BOOKS, MARGHAREGHA_CHAPTERS, REKHA_CHAPTERS };
+module.exports = {
+  BOOKS,
+  MARGHAREGHA_CHAPTERS,
+  REKHA_CHAPTERS,
+  EXCELLENT_MASJID_CHAPTERS,
+  MINIMUM_CHAPTERS,
+};
