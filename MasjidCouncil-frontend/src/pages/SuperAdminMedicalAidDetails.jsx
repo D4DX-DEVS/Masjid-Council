@@ -246,7 +246,7 @@ const SuperAdminMedicalAidDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>
             Error: {error}
           </h2>
           <button 
@@ -264,7 +264,7 @@ const SuperAdminMedicalAidDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: 'var(--font-ml-title)' }}>
             ഡാറ്റ ലഭ്യമല്ല
           </h2>
           <button 

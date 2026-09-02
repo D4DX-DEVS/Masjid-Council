@@ -11,15 +11,76 @@ const json = async (response) => {
   return data;
 };
 
-/* ------------------------------------------------------------------ public */
+/* ------------------------------------------------------------- public reads
+ *
+ * Publications change a few times a year and a book is the largest payload the public site
+ * fetches, so the three public GETs are cached for the tab's lifetime rather than refetched
+ * on every visit: leaving a book and opening it again, or bouncing between the home page and
+ * the reader, then costs nothing.
+ *
+ * In flight requests are shared as well, which is what stops React StrictMode's double mount
+ * (and the home page asking for the list and the section at once) from firing two requests
+ * for the same URL.
+ *
+ * Server data can still change under a long-lived tab, so entries expire; admin writes call
+ * invalidatePublicationCache() so an editor sees their own save immediately. Admin GETs are
+ * never cached — the editor must always load the true record, drafts included.
+ */
 
-export const fetchPublications = async () => (await json(await fetch(BASE))).data;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const cache = new Map();
+const inflight = new Map();
 
-export const fetchPublicationSection = async () =>
-  (await json(await fetch(`${BASE}/section`))).data;
+const cachedGet = (key, load) => {
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.storedAt < CACHE_TTL_MS) return Promise.resolve(hit.value);
 
-export const fetchPublication = async (slug) =>
-  (await json(await fetch(`${BASE}/${encodeURIComponent(slug)}`))).data;
+  const pending = inflight.get(key);
+  if (pending) return pending;
+
+  const request = load()
+    .then((value) => {
+      cache.set(key, { storedAt: Date.now(), value });
+      return value;
+    })
+    .finally(() => inflight.delete(key));
+
+  inflight.set(key, request);
+  return request;
+};
+
+export const invalidatePublicationCache = () => {
+  cache.clear();
+  inflight.clear();
+};
+
+export const fetchPublications = () =>
+  cachedGet('list', async () => (await json(await fetch(BASE))).data);
+
+export const fetchPublicationSection = () =>
+  cachedGet('section', async () => (await json(await fetch(`${BASE}/section`))).data);
+
+// The book without its chapter bodies: enough to render the header, the chapter list and
+// the prev/next links.
+export const fetchPublication = (slug) =>
+  cachedGet(
+    `publication:${slug}`,
+    async () => (await json(await fetch(`${BASE}/${encodeURIComponent(slug)}`))).data
+  );
+
+// One chapter's body, fetched when the reader opens it and kept for the rest of the visit.
+export const fetchPublicationChapter = (slug, chapterSlug) =>
+  cachedGet(
+    `chapter:${slug}:${chapterSlug}`,
+    async () =>
+      (
+        await json(
+          await fetch(
+            `${BASE}/${encodeURIComponent(slug)}/chapters/${encodeURIComponent(chapterSlug)}`
+          )
+        )
+      ).data
+  );
 
 /* ------------------------------------------------------------------- admin */
 
@@ -31,46 +92,65 @@ export const fetchPublicationsAdmin = async () =>
 export const fetchPublicationAdmin = async (id) =>
   (await json(await fetch(`${BASE}/admin/${id}`, { headers: authHeaders() }))).data;
 
+// Every write drops the cached public copies, so an admin who saves and then looks at the
+// home page sees the change rather than the copy their own earlier visit cached.
+const afterWrite = (result) => {
+  invalidatePublicationCache();
+  return result;
+};
+
 export const createPublication = async (body) =>
-  (
-    await json(
-      await fetch(BASE, { method: 'POST', headers: adminJsonHeaders(), body: JSON.stringify(body) })
-    )
-  ).data;
+  afterWrite(
+    (
+      await json(
+        await fetch(BASE, {
+          method: 'POST',
+          headers: adminJsonHeaders(),
+          body: JSON.stringify(body),
+        })
+      )
+    ).data
+  );
 
 export const updatePublication = async (id, body) =>
-  (
-    await json(
-      await fetch(`${BASE}/${id}`, {
-        method: 'PUT',
-        headers: adminJsonHeaders(),
-        body: JSON.stringify(body),
-      })
-    )
-  ).data;
+  afterWrite(
+    (
+      await json(
+        await fetch(`${BASE}/${id}`, {
+          method: 'PUT',
+          headers: adminJsonHeaders(),
+          body: JSON.stringify(body),
+        })
+      )
+    ).data
+  );
 
 export const deletePublication = async (id) =>
-  json(await fetch(`${BASE}/${id}`, { method: 'DELETE', headers: authHeaders() }));
+  afterWrite(await json(await fetch(`${BASE}/${id}`, { method: 'DELETE', headers: authHeaders() })));
 
 export const reorderPublications = async (items) =>
-  json(
-    await fetch(`${BASE}/reorder`, {
-      method: 'PUT',
-      headers: adminJsonHeaders(),
-      body: JSON.stringify({ items }),
-    })
+  afterWrite(
+    await json(
+      await fetch(`${BASE}/reorder`, {
+        method: 'PUT',
+        headers: adminJsonHeaders(),
+        body: JSON.stringify({ items }),
+      })
+    )
   );
 
 export const updatePublicationSection = async (body) =>
-  (
-    await json(
-      await fetch(`${BASE}/section`, {
-        method: 'PUT',
-        headers: adminJsonHeaders(),
-        body: JSON.stringify(body),
-      })
-    )
-  ).data;
+  afterWrite(
+    (
+      await json(
+        await fetch(`${BASE}/section`, {
+          method: 'PUT',
+          headers: adminJsonHeaders(),
+          body: JSON.stringify(body),
+        })
+      )
+    ).data
+  );
 
 /**
  * Uploads one file to DO Spaces and returns { url, key }.

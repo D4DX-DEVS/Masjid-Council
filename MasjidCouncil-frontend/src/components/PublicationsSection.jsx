@@ -56,7 +56,7 @@ const PublicationCard = ({ publication, ctaLabel }) => (
 
     <h3
       className="text-base font-bold leading-snug text-gray-900 sm:text-lg"
-      style={{ fontFamily: 'Noto Sans Malayalam' }}
+      style={{ fontFamily: 'var(--font-ml-title)' }}
     >
       {publication.titleMalayalam || publication.title}
     </h3>
@@ -81,7 +81,10 @@ const PublicationCard = ({ publication, ctaLabel }) => (
       )}
     </p>
 
-    <span className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2.5 font-semibold text-white transition-colors duration-200 group-hover:bg-green-800">
+    <span
+      className="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:brightness-95"
+      style={{ background: 'linear-gradient(135deg, #6fae44 0%, #3f7f34 55%, #1e5a30 100%)' }}
+    >
       <span style={{ fontFamily: 'Noto Sans Malayalam' }}>{ctaLabel}</span>
       <ArrowRight className="h-4 w-4" />
     </span>
@@ -114,29 +117,36 @@ const PublicationsSection = () => {
   const loading = publications === null;
   const columns = Math.min(publications?.length || 3, MAX_COLUMNS_IN_ONE_ROW);
   const ctaLabel = section?.ctaLabel || 'വായിക്കുക';
+  const heading = (section?.heading || '').trim();
+  const subtitle = (section?.subtitle || '').trim();
 
   return (
     <div id="publications-section" className="bg-white px-4 py-7 sm:py-10">
-      <h2
-        className="relative mb-2 text-center text-2xl font-bold leading-tight text-green-900 sm:text-3xl md:text-4xl"
-        style={{ fontFamily: 'Noto Sans Malayalam' }}
-      >
-        {section?.heading || 'പ്രസിദ്ധീകരണങ്ങൾ'}
-        <div
-          className="absolute bottom-0 left-1/2 h-0.5 w-24 -translate-x-1/2 transform"
-          style={{ backgroundColor: '#9ece88' }}
-        />
-      </h2>
-
-      {section?.subtitle && (
-        <p
-          className="mx-auto mb-6 max-w-2xl text-center text-sm text-gray-500 sm:mb-8"
-          style={{ fontFamily: 'Noto Sans Malayalam' }}
+      {/* Heading and subtitle are both optional copy. Left blank in the admin screen they are
+          not rendered at all — no placeholder text, and no reserved gap above the cards. */}
+      {heading && (
+        <h2
+          className="relative mb-2 text-center text-2xl font-bold leading-tight text-green-900 sm:text-3xl md:text-4xl"
+          style={{ fontFamily: 'var(--font-ml-title)' }}
         >
-          {section.subtitle}
+          {heading}
+          <div
+            className="absolute bottom-0 left-1/2 h-0.5 w-24 -translate-x-1/2 transform"
+            style={{ backgroundColor: '#9ece88' }}
+          />
+        </h2>
+      )}
+
+      {subtitle && (
+        <p
+          className="mx-auto max-w-2xl text-center text-sm text-gray-500"
+          style={{ fontFamily: 'var(--font-ml-body)' }}
+        >
+          {subtitle}
         </p>
       )}
-      {!section?.subtitle && <div className="mb-6 sm:mb-8" />}
+
+      {(heading || subtitle) && <div className="mb-6 sm:mb-8" />}
 
       {/* Phones scroll sideways so the section stays short; from sm up every card sits on a
           single row, with the column count taken from the data (see .mc-pub-grid). */}

@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
 import {
   Bold,
   Italic,
@@ -61,15 +60,25 @@ const RichTextEditor = ({ value, onChange, onError }) => {
         codeBlock: false,
         code: false,
         horizontalRule: {},
+        // StarterKit ships Link itself since v3. Registering @tiptap/extension-link
+        // alongside it defines the mark twice, which TipTap warns about and which leaves
+        // the second definition to win in ways nothing here controls.
+        link: { openOnClick: false, autolink: false },
       }),
-      Link.configure({ openOnClick: false, autolink: false }),
       Image.configure({ inline: false }),
     ],
     content: value || '',
-    onUpdate: ({ editor: instance }) => onChange(instance.getHTML()),
+    onUpdate: ({ editor: instance }) => {
+      if (instance.isDestroyed) return;
+      onChange(instance.getHTML());
+    },
     editorProps: {
       attributes: {
-        class: 'mc-prose min-h-[320px] max-w-none px-4 py-4 focus:outline-none',
+        // Chapters run to thousands of words, so the writing surface scrolls inside itself
+        // rather than growing the page — the toolbar stays reachable and the chapter list
+        // beside it stays in view. min-h keeps a short chapter from collapsing to a strip.
+        class:
+          'mc-prose min-h-[320px] max-h-[60vh] overflow-y-auto max-w-none px-4 py-4 focus:outline-none',
       },
     },
   });
@@ -77,7 +86,10 @@ const RichTextEditor = ({ value, onChange, onError }) => {
   // Switching chapters swaps `value` under the same editor instance. Without this the new
   // chapter opens showing the previous one's text.
   useEffect(() => {
-    if (!editor) return;
+    // isDestroyed matters under StrictMode and Fast Refresh: useEditor tears the instance
+    // down on the throwaway first mount, and this effect still fires against it. Reading
+    // getHTML() off a destroyed editor hits a null schema and throws.
+    if (!editor || editor.isDestroyed) return;
     const incoming = value || '';
     if (incoming !== editor.getHTML()) {
       editor.commands.setContent(incoming, { emitUpdate: false });
@@ -118,7 +130,10 @@ const RichTextEditor = ({ value, onChange, onError }) => {
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor, onError]);
 
-  if (!editor) {
+  // A destroyed instance still comes back from useEditor for a render or two (StrictMode's
+  // throwaway mount, Fast Refresh, and the moment the route changes). isActive/can/getHTML
+  // all reach through a schema that is null by then, so nothing may read it.
+  if (!editor || editor.isDestroyed) {
     return (
       <div className="flex min-h-[380px] items-center justify-center rounded-xl border border-gray-200 bg-white">
         <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
@@ -128,7 +143,7 @@ const RichTextEditor = ({ value, onChange, onError }) => {
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-700/15">
-      <div className="flex flex-wrap items-center gap-0.5 border-b border-gray-100 bg-gray-50/70 px-2 py-1.5">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center gap-0.5 border-b border-gray-100 bg-gray-50/95 px-2 py-1.5 backdrop-blur">
         <ToolbarButton
           label="Bold"
           active={editor.isActive('bold')}

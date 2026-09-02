@@ -105,10 +105,12 @@ const run = async () => {
   // Create the section copy on first run only; after that the admin owns the wording.
   const section = await SiteSection.findOne({ key: "publications" });
   if (!section) {
+    // Heading and subtitle start empty on purpose — the home page shows neither until an
+    // admin types them in, so a fresh install has no placeholder copy to delete.
     await SiteSection.create({
       key: "publications",
-      heading: "പ്രസിദ്ധീകരണങ്ങൾ",
-      subtitle: "മഹല്ല് ഭാരവാഹികൾക്കുള്ള മാർഗരേഖകൾ",
+      heading: "",
+      subtitle: "",
       ctaLabel: "വായിക്കുക",
       enabled: true,
     });

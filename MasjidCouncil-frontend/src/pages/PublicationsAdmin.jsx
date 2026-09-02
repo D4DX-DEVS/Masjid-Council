@@ -192,6 +192,7 @@ const PublicationsAdmin = ({ role = 'superadmin' }) => {
                     value={section.heading}
                     onChange={(e) => setSection({ ...section, heading: e.target.value })}
                     placeholder="പ്രസിദ്ധീകരണങ്ങൾ"
+                    hint="Optional. Left empty, the home page shows the cards with no heading."
                   />
                   <Field
                     label="Button label"
@@ -205,6 +206,7 @@ const PublicationsAdmin = ({ role = 'superadmin' }) => {
                   value={section.subtitle}
                   onChange={(e) => setSection({ ...section, subtitle: e.target.value })}
                   placeholder="Optional line under the heading"
+                  hint="Optional, same as the heading."
                 />
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <label className="inline-flex min-h-11 cursor-pointer items-center gap-2.5">
@@ -314,7 +316,7 @@ const PublicationsAdmin = ({ role = 'superadmin' }) => {
                   <div className="min-w-0 flex-1">
                     <p
                       className="truncate font-semibold text-gray-900"
-                      style={{ fontFamily: 'Noto Sans Malayalam' }}
+                      style={{ fontFamily: 'var(--font-ml-title)' }}
                     >
                       {publication.titleMalayalam || publication.title}
                     </p>

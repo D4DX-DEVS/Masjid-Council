@@ -16,10 +16,12 @@ const router = express.Router();
 
 const SECTION_KEY = "publications";
 
-// Shown until an admin sets the real wording from the admin screen.
+// Used until an admin saves the section for the first time. Heading and subtitle are
+// deliberately blank: the strip reads fine without them, so nothing is shown unless the
+// council actually types copy in. Only the card button needs a label to fall back on.
 const SECTION_DEFAULTS = {
   key: SECTION_KEY,
-  heading: "പ്രസിദ്ധീകരണങ്ങൾ",
+  heading: "",
   subtitle: "",
   ctaLabel: "വായിക്കുക",
   enabled: true,
@@ -64,9 +66,19 @@ const publicationFromBody = (body, slug) => ({
 
 /* ------------------------------------------------------------------ public */
 
+// Public reads are cacheable: a browser or CDN may serve them for a minute, then keep
+// serving the stale copy for five more while it revalidates in the background — so an edit
+// is live within a minute, and a visitor never waits on a revalidation. Express already
+// emits a weak ETag per response, which turns those revalidations into 304s with no body.
+// Admin routes get none of this; they must always read the true record.
+const publicCache = (_req, res, next) => {
+  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+  next();
+};
+
 // Card list. Chapter bodies are deliberately excluded — the home page only needs titles,
 // and the two seeded books are ~70KB of HTML between them.
-router.get("/", async (_req, res) => {
+router.get("/", publicCache, async (_req, res) => {
   try {
     const publications = await Publication.find(
       { isPublished: true, enabled: true },
@@ -91,7 +103,7 @@ router.get("/", async (_req, res) => {
 });
 
 // Declared before /:slug, otherwise "section" is read as a publication slug.
-router.get("/section", async (_req, res) => {
+router.get("/section", publicCache, async (_req, res) => {
   try {
     const section = await SiteSection.findOne({ key: SECTION_KEY });
     res.json({ success: true, data: section || SECTION_DEFAULTS });
@@ -126,20 +138,48 @@ router.get("/admin/:id", canManage, async (req, res) => {
   }
 });
 
-// Reader payload. Published only — a draft must not be readable by guessing its slug.
-router.get("/:slug", async (req, res) => {
+// Reader outline: the book minus every chapter body. A reader opens one chapter at a time,
+// so shipping all fourteen bodies to render one of them was most of the payload wasted —
+// and Malayalam costs three UTF-8 bytes a character, which makes that waste expensive on a
+// phone connection. Bodies come from the route below, one chapter per request.
+router.get("/:slug", publicCache, async (req, res) => {
   try {
-    const publication = await Publication.findOne({
-      slug: String(req.params.slug).toLowerCase(),
-      isPublished: true,
-      enabled: true,
-    });
+    const publication = await Publication.findOne(
+      {
+        slug: String(req.params.slug).toLowerCase(),
+        isPublished: true,
+        enabled: true,
+      },
+      "-chapters.bodyHtml"
+    );
     if (!publication) {
       return res.status(404).json({ success: false, message: "Publication not found" });
     }
     res.json({ success: true, data: publication });
   } catch (error) {
     fail(res, error, "Get publication");
+  }
+});
+
+// One chapter's body. $elemMatch keeps the projection to the single chapter asked for, so
+// Mongo never reads the rest of the book off disk to answer this.
+router.get("/:slug/chapters/:chapterSlug", publicCache, async (req, res) => {
+  try {
+    const publication = await Publication.findOne(
+      {
+        slug: String(req.params.slug).toLowerCase(),
+        isPublished: true,
+        enabled: true,
+      },
+      { chapters: { $elemMatch: { slug: String(req.params.chapterSlug).toLowerCase() } } }
+    );
+    const chapter = publication && publication.chapters && publication.chapters[0];
+    if (!chapter) {
+      return res.status(404).json({ success: false, message: "Chapter not found" });
+    }
+    res.json({ success: true, data: chapter });
+  } catch (error) {
+    fail(res, error, "Get chapter");
   }
 });
 

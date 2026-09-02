@@ -15,6 +15,7 @@ import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import PageHeader from '../components/PageHeader';
 import ConfirmDialog from '../components/ConfirmDialog';
+import ErrorBoundary from '../components/ErrorBoundary';
 import FeatureBlocked from '../components/FeatureBlocked';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import {
@@ -397,20 +398,25 @@ const PublicationEditor = ({ role = 'superadmin' }) => {
                     </div>
                   </div>
 
-                  <Suspense
-                    fallback={
-                      <div className="flex min-h-[380px] items-center justify-center rounded-xl border border-gray-200">
-                        <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
-                      </div>
-                    }
-                  >
-                    <RichTextEditor
-                      key={chapter.id}
-                      value={chapter.bodyHtml}
-                      onChange={(html) => patchChapter(activeChapter, { bodyHtml: html })}
-                      onError={(text) => setMessage({ type: 'error', text })}
-                    />
-                  </Suspense>
+                  {/* A crash inside TipTap used to reach the router and blank the whole page.
+                      Bounded here, the rest of the editor — and the unsaved text in the other
+                      fields — survives it. */}
+                  <ErrorBoundary title="The chapter editor stopped responding">
+                    <Suspense
+                      fallback={
+                        <div className="flex min-h-[380px] items-center justify-center rounded-xl border border-gray-200">
+                          <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
+                        </div>
+                      }
+                    >
+                      <RichTextEditor
+                        key={chapter.id}
+                        value={chapter.bodyHtml}
+                        onChange={(html) => patchChapter(activeChapter, { bodyHtml: html })}
+                        onError={(text) => setMessage({ type: 'error', text })}
+                      />
+                    </Suspense>
+                  </ErrorBoundary>
                 </>
               ) : (
                 <div className="py-16 text-center">

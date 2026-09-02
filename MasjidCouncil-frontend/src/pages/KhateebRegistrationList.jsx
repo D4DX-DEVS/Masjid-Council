@@ -90,7 +90,7 @@ const KhateebRegistrationList = ({ role = 'admin' }) => {
           role={role}
           title="MIRQATH '26 — ഖത്തീബ് സംഗമം രജിസ്ട്രേഷൻ"
           shortTitle="MIRQATH '26"
-          titleStyle={{ fontFamily: "Noto Sans Malayalam" }}
+          titleStyle={{ fontFamily: 'var(--font-ml-title)' }}
           subtitle="Khateeb meet registrations"
           count={loading ? null : filteredRegistrations.length}
           actions={
