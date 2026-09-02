@@ -1,8 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { ArrowLeft, ArrowRight, BookOpen, ChevronDown, List } from 'lucide-react';
 import { fetchPublication, fetchPublicationChapter } from '../lib/publications';
+import {
+  OG_IMAGE,
+  SITE_NAME,
+  SITE_URL,
+  chapterMeta,
+  publicationJsonLd,
+  publicationName,
+} from '../lib/seo';
 
 /**
  * Reader for one publication: /resources/:slug/:chapterSlug
@@ -15,12 +23,67 @@ import { fetchPublication, fetchPublicationChapter } from '../lib/publications';
  * cached per chapter for the rest of the visit, and the next chapter is prefetched once the
  * current one is on screen so paging forward is instant.
  *
+ * <head> is this page's own responsibility. RouteSeo skips /resources/* because a chapter's
+ * title, description and JSON-LD can only come from the record, so they are built here from
+ * the same helpers scripts/prerender.mjs uses at build time — the prerendered HTML and the
+ * hydrated DOM then agree on every tag.
+ *
  * Chapter bodies are sanitized server-side on write (lib/sanitizeRichText.js). That is the
  * control that matters, and it is the one with tests. DOMPurify runs again here as a second
  * layer, because the write path is not the only way HTML can reach this document — a future
  * route that forgets to sanitize, or anything written straight into Mongo, would otherwise
  * render unchecked.
  */
+
+/**
+ * Removes the head scripts/prerender.mjs baked into the static HTML.
+ *
+ * React 19 appends its own hoisted tags rather than replacing what is already there, so
+ * without this a prerendered chapter would carry two titles and two canonicals — and on a
+ * chapter published since the last deploy, Netlify answers with app.html, whose shell is
+ * noindex. Every caller renders its own tags in the same commit, so by the time this runs
+ * the replacement is already in the document and the page is never left without a head.
+ */
+const useReplacePrerenderedHead = () => {
+  useEffect(() => {
+    document.querySelectorAll('[data-prerendered-seo]').forEach((el) => el.remove());
+  }, []);
+};
+
+const PublicationSeo = ({ publication, chapters, chapter, bodyHtml }) => {
+  useReplacePrerenderedHead();
+
+  const meta = chapterMeta(publication, chapter, bodyHtml);
+  const canonical = `${SITE_URL}${meta.path}`;
+  const image = publication.coverImage?.url || OG_IMAGE;
+
+  return (
+    <>
+      <title>{meta.title}</title>
+      <meta name="description" content={meta.description} />
+      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+      <link rel="canonical" href={canonical} />
+
+      <meta property="og:type" content="article" />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:title" content={meta.title} />
+      <meta property="og:description" content={meta.description} />
+      <meta property="og:url" content={canonical} />
+      <meta property="og:image" content={image} />
+      <meta property="og:locale" content="ml_IN" />
+      <meta property="article:section" content={publicationName(publication)} />
+
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={meta.title} />
+      <meta name="twitter:description" content={meta.description} />
+      <meta name="twitter:image" content={image} />
+
+      <script type="application/ld+json">
+        {JSON.stringify(publicationJsonLd({ publication, chapters, chapter }))}
+      </script>
+    </>
+  );
+};
 
 const ReaderShell = ({ children }) => (
   <div className="min-h-screen bg-[#f7faf6]">
@@ -47,22 +110,28 @@ const LoadingState = () => (
   </ReaderShell>
 );
 
-const NotFoundState = ({ message }) => (
-  <ReaderShell>
-    <div className="mx-auto max-w-md rounded-2xl bg-white p-8 text-center shadow-sm">
-      <BookOpen className="mx-auto h-10 w-10 text-gray-300" strokeWidth={1.5} />
-      <h1 className="mt-4 text-lg font-bold text-gray-900">ഈ പ്രസിദ്ധീകരണം കണ്ടെത്താനായില്ല</h1>
-      <p className="mt-2 text-sm text-gray-500">{message}</p>
-      <Link
-        to="/"
-        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-800"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        ഹോം പേജിലേക്ക്
-      </Link>
-    </div>
-  </ReaderShell>
-);
+const NotFoundState = ({ message }) => {
+  useReplacePrerenderedHead();
+
+  return (
+    <ReaderShell>
+      <title>{SITE_NAME}</title>
+      <meta name="robots" content="noindex, nofollow" />
+      <div className="mx-auto max-w-md rounded-2xl bg-white p-8 text-center shadow-sm">
+        <BookOpen className="mx-auto h-10 w-10 text-gray-300" strokeWidth={1.5} />
+        <h1 className="mt-4 text-lg font-bold text-gray-900">ഈ പ്രസിദ്ധീകരണം കണ്ടെത്താനായില്ല</h1>
+        <p className="mt-2 text-sm text-gray-500">{message}</p>
+        <Link
+          to="/"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-800"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          ഹോം പേജിലേക്ക്
+        </Link>
+      </div>
+    </ReaderShell>
+  );
+};
 
 const ChapterList = ({ chapters, activeSlug, publicationSlug, onNavigate }) => (
   // Rows are separated by the soft shadow rule defined for .mc-toc in index.css; the per-row
@@ -106,7 +175,6 @@ const PublicationReader = () => {
   const [body, setBody] = useState(null);
   const [error, setError] = useState('');
   const [tocOpen, setTocOpen] = useState(false);
-  const articleRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -164,17 +232,8 @@ const PublicationReader = () => {
     }
   }, [chapters, chapterSlug, activeIndex, slug, navigate]);
 
-  // Moving between chapters should start at the top of the new one. Arriving at one must not
-  // scroll at all — and "arriving" includes the redirect from a bare /resources/:slug, which
-  // changes chapterSlug from undefined to the first chapter. Comparing against the previous
-  // slug distinguishes that from a real chapter change; a plain first-render flag does not.
-  const previousChapterSlug = useRef(chapterSlug);
-  useEffect(() => {
-    const cameFrom = previousChapterSlug.current;
-    previousChapterSlug.current = chapterSlug;
-    if (!cameFrom || cameFrom === chapterSlug) return;
-    articleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [chapterSlug]);
+  // Scrolling is not this page's job: every chapter has its own URL, so the app-wide
+  // ScrollToTop puts both an arriving reader and a chapter change at the top of the page.
 
   if (error) return <NotFoundState message={error} />;
   if (!publication) return <LoadingState />;
@@ -188,6 +247,13 @@ const PublicationReader = () => {
 
   return (
     <ReaderShell>
+      <PublicationSeo
+        publication={publication}
+        chapters={chapters}
+        chapter={chapter}
+        bodyHtml={safeBody}
+      />
+
       <Link
         to="/#publications-section"
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-green-800"
@@ -261,7 +327,7 @@ const PublicationReader = () => {
           </div>
         </nav>
 
-        <article ref={articleRef} className="scroll-mt-24">
+        <article>
           <div className="mc-card-shadow rounded-2xl bg-white p-5 sm:p-8 lg:p-10">
             <h2
               className="mb-6 text-xl font-bold leading-snug text-green-900 sm:text-2xl"

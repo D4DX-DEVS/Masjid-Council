@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { SITE_URL, SITE_NAME, OG_IMAGE, SITE_JSON_LD, getRouteMeta } from '../lib/seo';
+import {
+  SITE_URL,
+  SITE_NAME,
+  OG_IMAGE,
+  SITE_JSON_LD,
+  getRouteMeta,
+  isPublicationPath,
+} from '../lib/seo';
 
 /**
  * Per-route <head> for the client-rendered app.
@@ -10,13 +17,19 @@ import { SITE_URL, SITE_NAME, OG_IMAGE, SITE_JSON_LD, getRouteMeta } from '../li
  * description or canonical — otherwise there would be two of each, which React's
  * docs call out as undefined behaviour for browsers and search engines.
  *
- * Any route not listed in seo.js is a private admin screen and is marked noindex.
+ * Any route not listed in seo.js is a private admin screen and is marked noindex —
+ * except /resources/*, whose head is built from the publication record itself and is
+ * therefore owned by <PublicationReader />. This component keeps its hands off those
+ * routes entirely, including the prerendered-tag cleanup below: dropping the baked head
+ * before the reader has loaded its replacement would leave the page with no robots
+ * directive at all for as long as the fetch takes.
  */
 const RouteSeo = () => {
   const { pathname } = useLocation();
   const meta = getRouteMeta(pathname);
+  const publicationRoute = isPublicationPath(pathname);
   const canonical = meta ? `${SITE_URL}${meta.path === '/' ? '/' : meta.path}` : null;
-  const lang = meta?.lang ?? 'en';
+  const lang = meta?.lang ?? (publicationRoute ? 'ml' : 'en');
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -28,8 +41,11 @@ const RouteSeo = () => {
   // an unprerendered route with the SPA fallback, the stale pair is the home page's,
   // which is exactly the duplicate-canonical bug this work set out to remove.
   useEffect(() => {
+    if (publicationRoute) return;
     document.querySelectorAll('[data-prerendered-seo]').forEach((el) => el.remove());
-  }, []);
+  }, [publicationRoute]);
+
+  if (publicationRoute) return null;
 
   if (!meta) {
     return (

@@ -15,21 +15,45 @@ import { fetchPublications, fetchPublicationSection } from '../lib/publications'
 // cards would be too narrow to read a Malayalam title in, so it wraps instead.
 const MAX_COLUMNS_IN_ONE_ROW = 5;
 
+/**
+ * A placeholder in the shape of a real card: the same four blocks in the same order, the same
+ * paddings, and the same .mc-pub-card class, so the placeholders sit on the subgrid rows the
+ * cards themselves will use instead of stacking to their own rhythm.
+ *
+ * The figure is sized off a cover image rather than the fallback icon, since a published book
+ * normally has one and the taller of the two guesses leaves the smaller gap when the data
+ * lands. The heading above the strip is deliberately not mocked: it is optional copy that
+ * arrives with the same request, so reserving a line for it would be wrong on every site that
+ * leaves it blank.
+ */
 const CardSkeleton = () => (
-  <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
-    <div className="mb-4 h-14 w-14 animate-pulse rounded-full bg-gray-200" />
-    <div className="mb-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-    <div className="mb-4 h-3 w-1/2 animate-pulse rounded bg-gray-100" />
-    <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100" />
+  <div className="mc-pub-card rounded-2xl border border-gray-100 bg-white p-6 shadow-lg sm:p-7">
+    <span className="mc-pub-figure">
+      <span className="block h-32 w-24 animate-pulse rounded-lg bg-gray-200 sm:h-36 sm:w-28" />
+    </span>
+
+    <div className="mc-pub-copy w-full space-y-2">
+      <div className="mx-auto h-5 w-3/4 animate-pulse rounded bg-gray-200 sm:h-6" />
+      <div className="mx-auto h-4 w-1/2 animate-pulse rounded bg-gray-100" />
+      <div className="mx-auto h-3 w-full animate-pulse rounded bg-gray-100" />
+      <div className="mx-auto h-3 w-5/6 animate-pulse rounded bg-gray-100" />
+    </div>
+
+    <div className="h-4 w-24 animate-pulse rounded bg-gray-100" />
+
+    <div className="h-11 w-full animate-pulse rounded-lg bg-gray-100" />
   </div>
 );
 
 /**
- * Every card emits the same six blocks in the same order — icon, title, subtitle,
- * description, chapter count, button — even when a book has no subtitle. The empty ones still
- * occupy their row, which is what lets .mc-pub-card line all six up across the strip via
- * subgrid. Dropping an absent block instead would shift every row below it out of step, which
- * is exactly what made the chapter counts sit at two different heights.
+ * Every card emits the same four blocks in the same order — icon, copy, chapter count,
+ * button — which is what lets .mc-pub-card line them up across the strip via subgrid, so the
+ * chapter counts never sit at two different heights.
+ *
+ * Title, subtitle and description share one block rather than owning a row each. Given a row
+ * of their own, a row is as tall as the tallest card's title, so a one-line title left a hole
+ * above its description; keeping them together lets each description follow its own title
+ * while every title still starts on the same line.
  */
 const PublicationCard = ({ publication, ctaLabel }) => (
   <Link
@@ -54,23 +78,29 @@ const PublicationCard = ({ publication, ctaLabel }) => (
       )}
     </span>
 
-    <h3
-      className="text-base font-bold leading-snug text-gray-900 sm:text-lg"
-      style={{ fontFamily: 'var(--font-ml-title)' }}
-    >
-      {publication.titleMalayalam || publication.title}
-    </h3>
+    <div className="mc-pub-copy space-y-2">
+      <h3
+        className="text-base font-bold leading-snug text-gray-900 sm:text-lg"
+        style={{ fontFamily: 'var(--font-ml-title)' }}
+      >
+        {publication.titleMalayalam || publication.title}
+      </h3>
 
-    <p className="text-sm text-green-800" style={{ fontFamily: 'Noto Sans Malayalam' }}>
-      {publication.subtitle}
-    </p>
+      {publication.subtitle && (
+        <p className="text-sm text-green-800" style={{ fontFamily: 'Noto Sans Malayalam' }}>
+          {publication.subtitle}
+        </p>
+      )}
 
-    <p
-      className="line-clamp-4 text-sm leading-relaxed text-gray-500"
-      style={{ fontFamily: 'Noto Sans Malayalam' }}
-    >
-      {publication.description}
-    </p>
+      {publication.description && (
+        <p
+          className="line-clamp-4 text-sm leading-relaxed text-gray-500"
+          style={{ fontFamily: 'Noto Sans Malayalam' }}
+        >
+          {publication.description}
+        </p>
+      )}
+    </div>
 
     <p className="inline-flex items-center justify-center gap-1.5 text-xs text-gray-400">
       {publication.chapterCount > 0 && (
@@ -121,7 +151,7 @@ const PublicationsSection = () => {
   const subtitle = (section?.subtitle || '').trim();
 
   return (
-    <div id="publications-section" className="bg-white px-4 py-7 sm:py-10">
+    <div id="publications-section" className="bg-white px-4 pb-7 pt-5 sm:pb-10 sm:pt-6">
       {/* Heading and subtitle are both optional copy. Left blank in the admin screen they are
           not rendered at all — no placeholder text, and no reserved gap above the cards. */}
       {heading && (
@@ -159,8 +189,10 @@ const PublicationsSection = () => {
           '--mc-pub-cols-sm': Math.min(columns, 2),
         }}
       >
+        {/* One placeholder per grid track: the track count is a guess until the list arrives
+            (see `columns`), and fewer cards than tracks would leave a hole on the right. */}
         {loading
-          ? Array.from({ length: 2 }, (_, i) => <CardSkeleton key={i} />)
+          ? Array.from({ length: columns }, (_, i) => <CardSkeleton key={i} />)
           : publications.map((publication) => (
               <PublicationCard
                 key={publication.slug}

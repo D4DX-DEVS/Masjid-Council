@@ -22,6 +22,7 @@ export const LOGO_URL = `${SITE_URL}/logo-512.png`;
  * @property {string} description Unique meta description, 140-160 chars.
  * @property {string} lang        Dominant content language, drives <html lang>.
  * @property {number} priority    Sitemap priority.
+ * @property {string} changefreq  Sitemap changefreq.
  * @property {string} heading     H1 used in the prerendered static fallback.
  * @property {string[]} body      Paragraphs for the prerendered static fallback.
  */
@@ -35,6 +36,7 @@ export const ROUTES = [
       'Official platform of Masjid Council Kerala. Apply for masjid affiliation, Imam–Muaddin Welfare Fund and Masjid Fund assistance, and track your application status online.',
     lang: 'ml',
     priority: 1.0,
+    changefreq: 'weekly',
     heading: 'മസ്ജിദ് കൗൺസിൽ കേരള — Masjid Council Kerala',
     body: [
       // Front-loaded, self-contained definition. Google AI answers were describing the
@@ -55,6 +57,7 @@ export const ROUTES = [
       'Masjid Council Kerala, founded in 1990, supervises masjids and mahallus, trains khateebs and imams, and runs the Imam–Muaddin Welfare Fund, Masjid Fund and Masjid Excellence Award.',
     lang: 'ml',
     priority: 0.8,
+    changefreq: 'monthly',
     heading: 'മസ്ജിദ് കൗൺസിൽ കേരള — About Us',
     body: [
       'Masjid Council Kerala is an initiative of Jamaat-e-Islami Hind Kerala, established in 1990. It is a non-governmental organisation and is not a state or government body. Its registered office is at Hira Centre, Mavoor Road, Kozhikode 673004.',
@@ -74,6 +77,7 @@ export const ROUTES = [
       'Apply online to affiliate your masjid with Masjid Council Kerala. Affiliation gives access to the Imam–Muaddin Welfare Fund, Masjid Fund and the Masjid Excellence Award.',
     lang: 'ml',
     priority: 0.9,
+    changefreq: 'monthly',
     heading: 'Masjid Affiliation — മസ്ജിദ് അഫിലിയേഷൻ',
     body: [
       'Apply for masjid affiliation with Masjid Council Kerala using this form.',
@@ -88,6 +92,7 @@ export const ROUTES = [
       'Apply for Imam–Muaddin Welfare Fund assistance from Masjid Council Kerala. Support for imams and muaddins of registered masjids for treatment, housing, repairs and marriage.',
     lang: 'ml',
     priority: 0.9,
+    changefreq: 'monthly',
     heading: 'Imam Muaddin Welfare Fund — ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി',
     body: [
       'The Imam–Muaddin Welfare Fund provides financial assistance to imams and muaddins serving in masjids registered with Masjid Council Kerala.',
@@ -103,6 +108,7 @@ export const ROUTES = [
       'Apply for Masjid Fund assistance from Masjid Council Kerala for masjid construction, reconstruction and repair work. Open to affiliated masjids across Kerala.',
     lang: 'ml',
     priority: 0.9,
+    changefreq: 'monthly',
     heading: 'Masjid Fund — മസ്ജിദ് ഫണ്ട്',
     body: [
       'The Masjid Fund is a welfare scheme of Masjid Council Kerala that helps financially weaker masjids.',
@@ -118,6 +124,7 @@ export const ROUTES = [
       'Register as a khateeb with Masjid Council Kerala. Registration supports training programmes, khutba synopses and study material for khateebs serving masjids in Kerala.',
     lang: 'ml',
     priority: 0.7,
+    changefreq: 'monthly',
     heading: 'Khateeb Registration — ഖത്തീബ് രജിസ്ട്രേഷൻ',
     body: [
       'Register as a khateeb with Masjid Council Kerala.',
@@ -132,6 +139,7 @@ export const ROUTES = [
       'How Masjid Council Kerala collects, uses, stores and protects the personal information submitted through its affiliation, welfare fund, masjid fund and khateeb registration forms.',
     lang: 'en',
     priority: 0.3,
+    changefreq: 'yearly',
     heading: 'Privacy Policy',
     body: [
       'Masjid Council Kerala respects your privacy and is committed to protecting the personal information you share through this website and its application forms.',
@@ -219,3 +227,201 @@ export const SITE_JSON_LD = {
     },
   ],
 };
+
+/* ------------------------------------------------------------- publications
+ *
+ * Publications live in Mongo, not in ROUTES, so their <head> is built from the record
+ * rather than from a table. The builders below run twice, exactly like ROUTES does:
+ * in <PublicationReader /> at runtime, and in scripts/prerender.mjs at build time —
+ * so a crawler that never executes JS and a browser that does end up with the same
+ * title, canonical and JSON-LD.
+ */
+
+export const PUBLICATIONS_PREFIX = '/resources';
+
+/** @param {string} pathname */
+export const isPublicationPath = (pathname) =>
+  pathname === PUBLICATIONS_PREFIX || pathname.startsWith(`${PUBLICATIONS_PREFIX}/`);
+
+// The reader's <h1> is the Malayalam title when there is one, so the <title> follows it.
+export const publicationName = (publication) => publication.titleMalayalam || publication.title;
+
+export const publicationPath = (publication) => `${PUBLICATIONS_PREFIX}/${publication.slug}`;
+
+export const chapterPath = (publication, chapter) =>
+  `${publicationPath(publication)}/${chapter.slug}`;
+
+export const sortChapters = (chapters) => [...(chapters || [])].sort((a, b) => a.order - b.order);
+
+/**
+ * Chapter body HTML → one line of plain text, for meta descriptions only — never for
+ * rendering, which is why it decodes entities without re-encoding anything.
+ * @param {string} html
+ * @returns {string}
+ */
+export function htmlToText(html) {
+  return String(html || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#(?:39|x27);/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Trim to a whole word near `max`, the way a description should end.
+ * @param {string} text
+ * @param {number} [max]
+ * @returns {string}
+ */
+export function clampText(text, max = 158) {
+  const value = String(text || '').trim();
+  if (value.length <= max) return value;
+  const cut = value.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
+/**
+ * Head metadata for one chapter — the canonical unit of a publication, since every
+ * chapter has its own URL.
+ *
+ * The description prefers the chapter's own opening text: it is what makes one chapter
+ * distinct from the next to a search engine, and it is the passage an AI answer quotes.
+ * The book blurb is the fallback for a chapter that opens on an image or a bare heading.
+ *
+ * @returns {{path: string, title: string, description: string, lang: string}}
+ */
+export function chapterMeta(publication, chapter, bodyHtml) {
+  const book = publicationName(publication);
+  const lead = htmlToText(bodyHtml);
+  return {
+    path: chapterPath(publication, chapter),
+    title: `${chapter.title} — ${book} | ${SITE_NAME}`,
+    description: clampText(
+      lead || publication.description || publication.subtitle || `${chapter.title} — ${book}.`,
+    ),
+    lang: 'ml',
+  };
+}
+
+/**
+ * Head metadata for a bare /resources/:slug. The reader redirects that URL to the first
+ * chapter, so the page canonicalises there too rather than competing with it.
+ *
+ * @returns {{path: string, canonicalPath: string, title: string, description: string, lang: string}}
+ */
+export function bookMeta(publication, firstChapter) {
+  const book = publicationName(publication);
+  return {
+    path: publicationPath(publication),
+    canonicalPath: firstChapter
+      ? chapterPath(publication, firstChapter)
+      : publicationPath(publication),
+    title: `${book} | ${SITE_NAME}`,
+    description: clampText(
+      publication.description || publication.subtitle || `${book} — a publication of ${SITE_NAME}.`,
+    ),
+    lang: 'ml',
+  };
+}
+
+const isoDate = (value) => (value ? String(value).slice(0, 10) : undefined);
+
+const breadcrumbFor = (publication, open, canonical, bookUrl) => ({
+  '@type': 'BreadcrumbList',
+  '@id': `${canonical}#breadcrumb`,
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${SITE_URL}/` },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: publicationName(publication),
+      item: bookUrl,
+    },
+    ...(open
+      ? [
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: open.title,
+            item: canonical,
+          },
+        ]
+      : []),
+  ],
+});
+
+/**
+ * Organization + WebSite (so the entity references still resolve on a page that never
+ * renders SITE_JSON_LD) + Book + the open chapter + BreadcrumbList.
+ *
+ * hasPart declares every chapter by @id; the open one repeats that @id with its full
+ * properties. Two nodes sharing an @id are one node in JSON-LD, which is what lets the
+ * book carry its whole table of contents without describing the open chapter twice.
+ *
+ * @returns {object}
+ */
+export function publicationJsonLd({ publication, chapters, chapter }) {
+  const list = sortChapters(chapters || publication.chapters);
+  const organization = { '@id': `${SITE_URL}/#organization` };
+  const bookUrl = `${SITE_URL}${publicationPath(publication)}`;
+  const bookId = `${bookUrl}#book`;
+  const open = chapter || list[0];
+  const canonical = open ? `${SITE_URL}${chapterPath(publication, open)}` : bookUrl;
+
+  const book = {
+    '@type': 'Book',
+    '@id': bookId,
+    name: publicationName(publication),
+    alternateName:
+      publication.titleMalayalam && publication.title !== publication.titleMalayalam
+        ? publication.title
+        : undefined,
+    url: bookUrl,
+    description: publication.description || publication.subtitle || undefined,
+    image: publication.coverImage?.url || undefined,
+    inLanguage: 'ml',
+    author: organization,
+    publisher: organization,
+    datePublished: isoDate(publication.publishedAt),
+    dateModified: isoDate(publication.updatedAt),
+    hasPart: list.map((c, index) => ({
+      '@type': 'Chapter',
+      '@id': `${SITE_URL}${chapterPath(publication, c)}#chapter`,
+      name: c.title,
+      url: `${SITE_URL}${chapterPath(publication, c)}`,
+      position: index + 1,
+    })),
+  };
+
+  const openChapter = open && {
+    '@type': 'Chapter',
+    '@id': `${canonical}#chapter`,
+    name: open.title,
+    headline: open.title,
+    url: canonical,
+    mainEntityOfPage: canonical,
+    position: list.findIndex((c) => c.slug === open.slug) + 1,
+    isPartOf: { '@id': bookId },
+    inLanguage: 'ml',
+    author: organization,
+    publisher: organization,
+    datePublished: isoDate(publication.publishedAt),
+    dateModified: isoDate(publication.updatedAt),
+  };
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      ...SITE_JSON_LD['@graph'],
+      book,
+      ...(openChapter ? [openChapter] : []),
+      breadcrumbFor(publication, open, canonical, bookUrl),
+    ],
+  };
+}

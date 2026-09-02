@@ -263,7 +263,7 @@ body:has(.mc-form) {
 .mc-pub-grid::-webkit-scrollbar { display: none; }
 .mc-pub-grid > .mc-pub-card { scroll-snap-align: center; }
 
-/* Six stacked blocks: figure, title, subtitle, description, chapter count, button.
+/* Four stacked blocks: figure, copy (title + subtitle + description), chapter count, button.
    The button is pushed to the bottom so cards of unequal height still end together. */
 .mc-pub-card {
   display: flex;
@@ -295,31 +295,36 @@ body:has(.mc-form) {
 }
 
 /* Aligning the cards to each other, not just topping and tailing them.
-   Each card hands its six rows back to the parent grid via subgrid, so a two-line
-   title in one card and a three-line title in the next still leave both
-   descriptions — and both chapter counts — starting on the same line. Without this
-   the counts sit at different heights whenever the text above them wraps differently.
-   Cards keep identical padding, so the uniform inset preserves the alignment. */
+   Each card hands its four rows back to the parent grid via subgrid, so the icons, the
+   chapter counts and the buttons all sit on the same lines however differently the copy
+   above them wraps. Without this the counts sit at different heights.
+   Cards keep identical padding, so the uniform inset preserves the alignment.
+
+   The copy is one row, not three. Giving the title a row of its own aligned the titles but
+   made that row as tall as the longest title in the strip, so a one-line title left a hole
+   above its own description. Sharing a row, every title still starts on the same line and
+   each description follows its own title immediately; the slack that remains falls at the
+   foot of the shorter block, just above the aligned chapter count. */
 @supports (grid-template-rows: subgrid) {
   @media (min-width: 640px) {
-    .mc-pub-grid { grid-template-rows: repeat(6, auto); }
+    .mc-pub-grid { grid-template-rows: repeat(4, auto); }
 
     .mc-pub-grid > .mc-pub-card {
-      grid-row: span 6;
+      grid-row: span 4;
       display: grid;
       grid-template-rows: subgrid;
       justify-items: center;
       /* The flex rule above sets align-items: center to centre the cards horizontally. In a
-         grid that same property works on the block axis, which floats a one-line title in the
-         middle of a row sized for three. Start-align so every row begins at its own top. */
+         grid that same property works on the block axis, which would float a short block in
+         the middle of its row. Start-align so every row begins at its own top. */
       align-items: start;
       gap: 0;
     }
 
     /* Row gaps come back as padding, since the subgrid tracks own the spacing now. */
     .mc-pub-card > .mc-pub-figure { margin-bottom: 0; padding-bottom: 1rem; }
-    .mc-pub-card > :nth-child(4) { padding-top: 0.5rem; }
-    .mc-pub-card > :nth-child(5) { padding-top: 0.5rem; }
+    .mc-pub-card > .mc-pub-copy { width: 100%; }
+    .mc-pub-card > :nth-child(3) { padding-top: 0.5rem; }
     .mc-pub-card > :last-child { margin-top: 0; padding-top: 1rem; align-self: end; }
   }
 }
