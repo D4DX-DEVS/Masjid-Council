@@ -10,6 +10,7 @@ import affiliationIcon from '../assets/mosque.webp';
 import welfareIcon from '../assets/moududi2.webp';
 import mosqueFundIcon from '../assets/investment.webp';
 import { useNavigate, Link } from 'react-router-dom';
+import PublicationsSection from '../components/PublicationsSection';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -189,7 +190,7 @@ const HeroSection = () => {
             <h1
               className="mc-hero-in mc-hero-up mx-auto mt-6 sm:mt-8 max-w-[1000px] font-bold"
               style={{
-                fontFamily: "'Noto Sans Malayalam', 'Manjari', sans-serif",
+                fontFamily: 'var(--font-ml-title)',
                 // ponytail: 2.2vw = the 42px-at-1920 ratio, so the heading keeps
                 // the desktop footprint on the artwork at every width instead of
                 // ballooning at ~1280 and colliding with the minaret/qubba.
@@ -225,9 +226,14 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div id="applications-section" className="bg-white py-7 sm:py-10 px-4">
+      <PublicationsSection />
+
+      {/* Publications and അപേക്ഷകൾ are both strips of white cards, so they only read as two
+          sections if the ground behind them differs — this one sits on the pale mint the
+          reader pages use, with the white cards floating on it. */}
+      <div id="applications-section" className="bg-[#f1f7ef] py-9 sm:py-12 px-4">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 text-center mb-6 sm:mb-8 relative leading-tight"
-        style={{ fontFamily: "Noto Sans Malayalam" }}
+        style={{ fontFamily: 'var(--font-ml-title)' }}
         >
           അപേക്ഷകൾ
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5" style={{ backgroundColor: '#9ece88' }}></div>
@@ -299,7 +305,7 @@ const HeroSection = () => {
 
             {/* Right side - About Us Content */}
             <div className="order-1 lg:order-2 space-y-6">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 relative pb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-900 relative pb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                 മസ്ജിദ് കൗൺസിൽ കേരള
                 <div className="absolute bottom-0 left-0 w-20 h-1 rounded-full" style={{ backgroundColor: '#2f6b2f' }}></div>
               </h2>

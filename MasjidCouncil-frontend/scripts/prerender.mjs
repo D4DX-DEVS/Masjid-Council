@@ -88,12 +88,17 @@ function bodyFor(route) {
 
   const paragraphs = route.body.map((p) => `<p>${escapeHtml(p)}</p>`).join('');
 
+  // The inline script hides the static copy the moment the parser reaches it —
+  // before first paint — so JS-enabled browsers never flash unstyled text while
+  // the React bundle loads. Crawlers and no-JS readers don't execute it and keep
+  // seeing the content; hydration replaces the whole #root subtree anyway.
   return [
     '<div id="prerendered-content">',
     `<h1>${escapeHtml(route.heading)}</h1>`,
     paragraphs,
     `<nav aria-label="Site"><ul>${nav}</ul></nav>`,
     '</div>',
+    `<script>document.getElementById('prerendered-content').style.display='none'</script>`,
   ].join('');
 }
 

@@ -33,6 +33,9 @@ import AreaAdminSubmissionDetails from './pages/AreaAdminSubmissionDetails';
 import DistrictAdminHome from './pages/DistrictAdminHome';
 import DistrictSubmissionDetails from './pages/DistrictSubmissionDetails';
 import SpendingReport from './pages/SpendingReport';
+import PublicationReader from './pages/PublicationReader';
+import PublicationsAdmin from './pages/PublicationsAdmin';
+import PublicationEditor from './pages/PublicationEditor';
 
 
 // Helper component to wrap Routes and conditional navbar
@@ -65,8 +68,8 @@ const Layout = () => {
   ];
 
   // Parameterized dashboard routes hide the navbar too
-  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/district-home', '/district-submissions', '/spending-report'];
-  const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report'];
+  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/district-home', '/district-submissions', '/spending-report', '/admin-publications', '/admin-form-builder'];
+  const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report', '/superadmin-publications'];
 
   const isAdminRoute =
     adminRoutes.includes(location.pathname) ||
@@ -85,6 +88,10 @@ const Layout = () => {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+        {/* Publications reader. The bare slug redirects to the first chapter. */}
+        <Route path="/resources/:slug" element={<PublicationReader />} />
+        <Route path="/resources/:slug/:chapterSlug" element={<PublicationReader />} />
         {/* Public forms now render from admin-configured FormConfigurations */}
         <Route path="/affiliation" element={<DynamicForm formType="affiliation" />} />
         <Route path="/medical-aid" element={<DynamicForm formType="welfarefund" />} />
@@ -132,6 +139,12 @@ const Layout = () => {
         {/* Spending report */}
         <Route path="/spending-report" element={<SpendingReport role="admin" />} />
         <Route path="/superadmin-spending-report" element={<SpendingReport role="superadmin" />} />
+
+        {/* Publications admin — super admin and state admin both manage editorial content */}
+        <Route path="/superadmin-publications" element={<PublicationsAdmin role="superadmin" />} />
+        <Route path="/superadmin-publications/:id" element={<PublicationEditor role="superadmin" />} />
+        <Route path="/admin-publications" element={<PublicationsAdmin role="admin" />} />
+        <Route path="/admin-publications/:id" element={<PublicationEditor role="admin" />} />
       </Routes>
     </>
   );

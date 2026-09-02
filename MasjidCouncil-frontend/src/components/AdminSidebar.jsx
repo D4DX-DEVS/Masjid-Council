@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee, Wrench } from 'lucide-react';
+import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee, Wrench , BookOpen} from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
+import { fetchAdminAccess } from '../lib/adminAccess';
 
 // Logout and the account details live in the page header's profile menu, not here.
 const AdminSidebar = ({ items }) => {
@@ -18,6 +19,24 @@ const AdminSidebar = ({ items }) => {
   // Desktop uses `label`; the mobile footer bar uses the shorter `short`.
   // Form items open the live submissions pages; old-collection records are
   // reachable from the "പഴയ രേഖകൾ" link on each submissions page.
+  // Features the super admin has switched off for state admins are dropped from the menu.
+  // Null until the lookup returns, so an entry never flashes in and then disappears; if the
+  // lookup fails everything stays visible and the endpoints do the refusing.
+  const [access, setAccess] = useState(null);
+
+  useEffect(() => {
+    if (items) return undefined;
+    let active = true;
+    fetchAdminAccess()
+      .then(({ effective }) => active && setAccess(effective))
+      .catch(() => active && setAccess({}));
+    return () => {
+      active = false;
+    };
+  }, [items]);
+
+  const allowed = (feature) => access === null || access[feature] !== false;
+
   const navItems = items || [
     { to: '/admin-home', icon: Home, label: 'Dashboard', short: 'Home' },
     { to: '/submissions/affiliation', icon: FileText, label: 'Affiliation', short: 'Affiliation' },
@@ -25,8 +44,13 @@ const AdminSidebar = ({ items }) => {
     { to: '/submissions/mosquefund', icon: Building2, label: 'Masjid Fund', short: 'Fund' },
     { to: '/submissions/khateeb', icon: CalendarDays, label: "Mirqath '26", short: 'Mirqath' },
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
-    { to: '/admin-form-builder', icon: Wrench, label: 'Form Builder', short: 'Forms' },
+    ...(allowed('formBuilder')
+      ? [{ to: '/admin-form-builder', icon: Wrench, label: 'Form Builder', short: 'Forms' }]
+      : []),
     { to: '/spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
+    ...(allowed('publications')
+      ? [{ to: '/admin-publications', icon: BookOpen, label: 'Publications', short: 'Books' }]
+      : []),
   ];
 
   // Collapsed rail centers the icon instead of leaving it left-aligned in an 80px column.

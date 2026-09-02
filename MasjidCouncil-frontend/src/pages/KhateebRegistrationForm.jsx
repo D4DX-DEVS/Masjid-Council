@@ -26,9 +26,9 @@ const EMPTY_FORM = {
   notAttendingReason: ''
 };
 
-// Matches the other forms: Noto Sans Malayalam throughout (the family loaded in index.html)
-const headingFont = { fontFamily: 'Noto Sans Malayalam' };
-const bodyFont = { fontFamily: 'Noto Sans Malayalam, sans-serif' };
+// Matches the other forms: Anek for headings, Noto Sans for body (both loaded in index.html).
+const headingFont = { fontFamily: 'var(--font-ml-title)' };
+const bodyFont = { fontFamily: 'var(--font-ml-body)' };
 
 const KhateebRegistrationForm = () => {
   const navigate = useNavigate();

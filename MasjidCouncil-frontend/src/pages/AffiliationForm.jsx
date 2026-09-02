@@ -894,7 +894,7 @@ const AffiliationForm = () => {
             <div>
               <h1
                 className="text-lg sm:text-2xl font-bold text-gray-900"
-                style={{ fontFamily: "Noto Sans Malayalam" }}
+                style={{ fontFamily: 'var(--font-ml-title)' }}
               >
                 മസ്ജിദ് അഫിലിയേഷനുള്ള അപേക്ഷ
               </h1>
@@ -908,7 +908,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               അടിസ്ഥാന വിവരങ്ങൾ
             </h2>
@@ -1044,7 +1044,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               5. വിലാസം
             </h2>
@@ -1189,7 +1189,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               6. ജമാഅത്തെ ഇസ്‌ലാമി ഘടകം
             </h2>
@@ -1271,7 +1271,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               7. പള്ളിയോടനുബന്ധിച്ച ഇതര സംവിധാനങ്ങൾ
             </h2>
@@ -1299,7 +1299,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               8. ഖബർസ്ഥാൻ വിവരങ്ങൾ
             </h2>
@@ -1366,7 +1366,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               9. പള്ളിയിൽ ഉൾക്കൊള്ളാവുന്ന ആളുകളുടെ എണ്ണം
             </h2>
@@ -1412,7 +1412,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               10. ജുമുഅക്ക് പങ്കെടുക്കുന്നവരുടെ ശരാശരി എണ്ണം
             </h2>
@@ -1458,7 +1458,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               11,12,13. സാമ്പത്തിക വിവരങ്ങൾ
             </h2>
@@ -1519,7 +1519,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               14,15. ഓഡിറ്റും രേഖകളും
             </h2>
@@ -1601,7 +1601,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               16. കഴിഞ്ഞ ഒരു വർഷത്തെ മൊത്തം കണക്ക്
             </h2>
@@ -1647,7 +1647,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               17. മഹല്ലിന്‍റെ / പള്ളിയുടെ മേൽനോട്ടത്തിൽ നടക്കുന്ന ജനസേവന
               സംരംഭങ്ങൾ
@@ -1691,7 +1691,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               18,19. മാനേജിംഗ് കമ്മിറ്റിയും ഭാരവാഹികളും
             </h2>
@@ -1747,7 +1747,7 @@ const AffiliationForm = () => {
                 <div>
                   <h3
                     className="font-medium mb-3"
-                    style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                    style={{ fontFamily: 'var(--font-ml-title)' }}
                   >
                     19. പ്രസിഡന്‍റ് / ചെയർമാൻ
                   </h3>
@@ -1808,7 +1808,7 @@ const AffiliationForm = () => {
                 <div>
                   <h3
                     className="font-medium mb-3"
-                    style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                    style={{ fontFamily: 'var(--font-ml-title)' }}
                   >
                     സെക്രട്ടറി
                   </h3>
@@ -1873,7 +1873,7 @@ const AffiliationForm = () => {
           <section>
             <h2
               className="text-xl font-semibold mb-4 text-gray-800"
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              style={{ fontFamily: 'var(--font-ml-title)' }}
             >
               20. ജീവനക്കാരുടെ വിവരങ്ങൾ
             </h2>
@@ -2307,7 +2307,7 @@ const AffiliationForm = () => {
               <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       പള്ളിയുടെ പേര്:
                     </h4>
                     <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -2315,7 +2315,7 @@ const AffiliationForm = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       ജില്ല:
                     </h4>
                     <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -2323,7 +2323,7 @@ const AffiliationForm = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       ഫോൺ നമ്പർ:
                     </h4>
                     <p className="text-gray-600">
@@ -2331,7 +2331,7 @@ const AffiliationForm = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       പ്രസിഡന്റ്:
                     </h4>
                     <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>

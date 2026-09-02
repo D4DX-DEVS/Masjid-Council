@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Wrench, IndianRupee } from 'lucide-react';
+import { Plus, Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, Wrench, IndianRupee , BookOpen} from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 
@@ -26,6 +26,7 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
     { to: '/master-data', icon: Database, label: 'Master Data', short: 'Master' },
     { to: '/superadmin-form-builder', icon: Wrench, label: 'Form Builder', short: 'Forms' },
     { to: '/superadmin-spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
+    { to: '/superadmin-publications', icon: BookOpen, label: 'Publications', short: 'Books' },
   ];
 
   return (

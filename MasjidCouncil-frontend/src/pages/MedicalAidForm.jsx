@@ -795,7 +795,7 @@ const MedicalAidForm = () => {
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "Noto Sans Malayalam" }}>
+            <h1 className="text-2xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'var(--font-ml-title)' }}>
               ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി
             </h1>
             <p className="text-lg text-gray-500" style={{ fontFamily: "Noto Sans Malayalam" }}>സഹായം ലഭിക്കുന്നതിനുള്ള അപേക്ഷ</p>
@@ -803,14 +803,14 @@ const MedicalAidForm = () => {
         </div>
 
         <div className="bg-green-50 ring-1 ring-green-100 rounded-xl p-4 mb-6">
-          <h2 className="text-xl font-semibold text-green-900 flex items-center gap-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
+          <h2 className="text-xl font-semibold text-green-900 flex items-center gap-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
             അപേക്ഷ പൂരിപ്പിക്കുന്നതിന് മുൻപ് ശ്രദ്ധിക്കേണ്ട കാര്യങ്ങൾ
           </h2>
         </div>
 
         <div className="space-y-4">
           <div className="bg-gray-50 ring-1 ring-gray-100 p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Noto Sans Malayalam" }}>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: 'var(--font-ml-title)' }}>
             ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി - പൊതു നിര്‍ദ്ദേശങ്ങൾ:
             </h3>
             <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Noto Sans Malayalam" }}>
@@ -824,7 +824,7 @@ const MedicalAidForm = () => {
           </div>
 
           <div className="bg-emerald-50 ring-1 ring-emerald-100 p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Noto Sans Malayalam" }}>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: 'var(--font-ml-title)' }}>
               സഹായം ലഭിക്കുന്ന ഇനങ്ങൾ:
             </h3>
             <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Noto Sans Malayalam" }}>
@@ -837,7 +837,7 @@ const MedicalAidForm = () => {
           </div>
 
           <div className="bg-amber-50 ring-1 ring-amber-100 p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: "Noto Sans Malayalam" }}>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3" style={{ fontFamily: 'var(--font-ml-title)' }}>
               അപേക്ഷയോടൊപ്പം സമർപ്പിക്കേണ്ട രേഖകൾ:
             </h3>
             <ul className="space-y-1 text-gray-700" style={{ fontFamily: "Noto Sans Malayalam" }}>
@@ -900,7 +900,7 @@ const MedicalAidForm = () => {
           </div>
           
           <div>
-            <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: "Noto Sans Malayalam" }}>
+            <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'var(--font-ml-title)' }}>
               ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി
             </h1>
             <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>സഹായം ലഭിക്കുന്നതിന് അപേക്ഷ</p>
@@ -911,7 +911,7 @@ const MedicalAidForm = () => {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Mosque Details Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -982,7 +982,7 @@ const MedicalAidForm = () => {
 
         {/* Management Details Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മാനേജ്മെന്റ് വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>മാനേജ്മെന്റ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1084,7 +1084,7 @@ const MedicalAidForm = () => {
 
         {/* Jamaat Details Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>ജമാഅത്തെ ഇസ്‌ലാമി വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>ജമാഅത്തെ ഇസ്‌ലാമി വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1169,7 +1169,7 @@ const MedicalAidForm = () => {
 
         {/* Application Details Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>അപേക്ഷ വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>അപേക്ഷ വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1223,7 +1223,7 @@ const MedicalAidForm = () => {
 
         {/* Help Details Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>സഹായ വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>സഹായ വിവരങ്ങൾ</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1306,7 +1306,7 @@ const MedicalAidForm = () => {
         {/* Supporting Documents - the list depends on the selected help purpose */}
         {formData.helpPurpose && (
           <div className="mc-section">
-            <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>
+            <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>
               അപേക്ഷയോടൊപ്പം ചേർക്കേണ്ട രേഖകൾ
             </h2>
             <div className="space-y-3">
@@ -1364,7 +1364,7 @@ const MedicalAidForm = () => {
 
         {/* Previous Help Section */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മുമ്പത്തെ സഹായം</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>മുമ്പത്തെ സഹായം</h2>
           <div className="mb-4">
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
             മസ്ജിദ് കൗൺസിലിൽ നിന്ന് മുമ്പ് സഹായം ലഭ്യമായിട്ടുണ്ടോ <span className="text-red-500">*</span>
@@ -1402,7 +1402,7 @@ const MedicalAidForm = () => {
 
         {/* Mosque Official Details */}
         <div className="mc-section">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: "Noto Sans Malayalam" }}>മസ്‌ജിദ് ഭാരവാഹിയുടെ വിവരങ്ങൾ</h2>
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4" style={{ fontFamily: 'var(--font-ml-title)' }}>മസ്‌ജിദ് ഭാരവാഹിയുടെ വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
@@ -1633,7 +1633,7 @@ const MedicalAidForm = () => {
               <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       മസ്ജിദിന്റെ പേര്:
                     </h4>
                     <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
@@ -1641,7 +1641,7 @@ const MedicalAidForm = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       ജില്ല:
                     </h4>
                     <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>
@@ -1649,7 +1649,7 @@ const MedicalAidForm = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       ഫോൺ നമ്പർ:
                     </h4>
                     <p className="text-gray-600">
@@ -1657,7 +1657,7 @@ const MedicalAidForm = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam" }}>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: 'var(--font-ml-title)' }}>
                       സഹായ ഉദ്ദേശം:
                     </h4>
                     <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam" }}>

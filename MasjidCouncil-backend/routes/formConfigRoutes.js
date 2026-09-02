@@ -3,6 +3,11 @@ const FormConfiguration = require("../models/formConfiguration");
 // Form configuration is super-admin-only. State admins work with submissions,
 // never with the field definitions. Only the public GET /:formType is unguarded.
 const { authenticateAdmin } = require("../middleware/auth");
+// The super admin can switch form editing off for state admins. The sidebar entry is hidden
+// too, but that is cosmetic — this guard is what actually enforces the switch.
+const { requireFeature } = require("../lib/featureAccess");
+
+const canManage = [authenticateAdmin, requireFeature("formBuilder")];
 
 const router = express.Router();
 
@@ -15,7 +20,7 @@ const badFormType = (res, formType) =>
   });
 
 // List all configs (summary) — super admin
-router.get("/", authenticateAdmin, async (req, res) => {
+router.get("/", canManage, async (req, res) => {
   try {
     const configs = await FormConfiguration.find(
       {},
@@ -29,7 +34,7 @@ router.get("/", authenticateAdmin, async (req, res) => {
 });
 
 // Full config for the builder — super admin
-router.get("/:formType/admin", authenticateAdmin, async (req, res) => {
+router.get("/:formType/admin", canManage, async (req, res) => {
   try {
     const config = await FormConfiguration.findOne({ formType: req.params.formType });
     if (!config) {
@@ -65,7 +70,7 @@ router.get("/:formType", async (req, res) => {
 });
 
 // Create/update config — super admin. Version increments on every save.
-router.put("/:formType", authenticateAdmin, async (req, res) => {
+router.put("/:formType", canManage, async (req, res) => {
   try {
     const { formType } = req.params;
     if (!FORM_TYPES.includes(formType)) return badFormType(res, formType);
@@ -124,7 +129,7 @@ router.put("/:formType", authenticateAdmin, async (req, res) => {
 });
 
 // Publish / unpublish — super admin
-router.patch("/:formType/publish", authenticateAdmin, async (req, res) => {
+router.patch("/:formType/publish", canManage, async (req, res) => {
   try {
     const { isPublished } = req.body;
     const config = await FormConfiguration.findOne({ formType: req.params.formType });

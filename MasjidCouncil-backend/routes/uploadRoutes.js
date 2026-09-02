@@ -3,6 +3,8 @@ const multer = require("multer");
 const crypto = require("crypto");
 const path = require("path");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { authenticateAdmin } = require("../middleware/auth");
+const { requireFeature } = require("../lib/featureAccess");
 
 const router = express.Router();
 
@@ -79,16 +81,9 @@ const isRateLimited = (ip) => {
     return false;
 };
 
-// POST /upload-files - accepts any field name; responds keyed by field name so each
-// form can map the result back to the document it was uploading.
-router.post("/upload-files", (req, res) => {
-    if (isRateLimited(req.ip)) {
-        return res.status(429).json({
-            success: false,
-            message: "Too many uploads. Please try again later.",
-        });
-    }
-
+// Accepts any field name; responds keyed by field name so each form can map the result
+// back to the document it was uploading.
+const handleUpload = (req, res) => {
     upload.any()(req, res, async (uploadError) => {
         if (uploadError) {
             // Drain whatever multer left unread, otherwise the client sees a reset
@@ -154,6 +149,32 @@ router.post("/upload-files", (req, res) => {
             });
         }
     });
+};
+
+// POST /upload-files - public, because the application forms are public. Capped per IP.
+router.post("/upload-files", (req, res) => {
+    if (isRateLimited(req.ip)) {
+        return res.status(429).json({
+            success: false,
+            message: "Too many uploads. Please try again later.",
+        });
+    }
+    handleUpload(req, res);
 });
+
+// POST /upload-admin-files - same storage, no IP cap. An admin laying out a publication
+// chapter can legitimately paste a dozen images in a minute, which the public limit of 20
+// per 10 minutes would block. Safe to lift only because the login gates it.
+//
+// Guarded by the publications flag because the publications editor is its only caller: when
+// the super admin blocks that feature, a state admin must not keep an uncapped write into the
+// bucket through its back door. Anything else needing admin uploads should get its own route
+// with its own guard rather than widening this one.
+router.post(
+    "/upload-admin-files",
+    authenticateAdmin,
+    requireFeature("publications"),
+    handleUpload
+);
 
 module.exports = router;

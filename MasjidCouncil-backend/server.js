@@ -35,7 +35,14 @@ app.use(cors({
         : (origin, cb) =>
             cb(null, !origin || allowedOrigins.includes(origin) || (allowLocalhost && isLocalhost(origin))),
 }));
-app.use(express.json());
+// A publication save carries every chapter body in one request. A book-length one runs well
+// past body-parser's 100kb default — and Malayalam costs three UTF-8 bytes a character, so
+// the byte count is roughly triple what the text looks like — which is what returned 413 on
+// "Save changes". Only that router gets the large limit: body-parser marks the request as
+// parsed, so this runs first and the global parser below skips it, leaving every public form
+// endpoint at a size no form can legitimately exceed.
+app.use("/api/publications", express.json({ limit: "12mb" }));
+app.use(express.json({ limit: "1mb" }));
 
 // MongoDB connection with retry logic
 const connectDB = async () => {
@@ -73,6 +80,8 @@ app.use("/api/khateebRegistration", khateebRegistrationRoutes);
 app.use("/api/superadmin", superAdminRoutes);
 app.use("/api/track", require("./routes/trackRoutes"));
 app.use("/api/master-data", require("./routes/masterDataRoutes"));
+app.use("/api/publications", require("./routes/publicationRoutes"));
+app.use("/api/admin-access", require("./routes/adminAccessRoutes"));
 // app.use("/api/admin", adminRoutes);
 
 PORT = process.env.PORT;

@@ -1,9 +1,22 @@
 @import "tailwindcss";
 
+/* Malayalam type pairing, used everywhere: Anek for titles, Noto Sans for running text.
+   Anek's shorter descenders and tighter counters hold up at display sizes; Noto Sans keeps
+   long paragraphs legible. Components reference these through the two vars below so the
+   pairing can be changed in one place. */
+:root {
+  --font-ml-title: 'Anek Malayalam', 'Noto Sans Malayalam', system-ui, sans-serif;
+  --font-ml-body: 'Noto Sans Malayalam', 'Manjari', system-ui, sans-serif;
+}
+
 /* Malayalam glyphs fall back here on any element without an explicit font. */
 body {
   font-family: Poppins, "Noto Sans Malayalam", system-ui, sans-serif;
 }
+
+/* Escape hatches for markup that cannot carry an inline style. */
+.ml-title { font-family: var(--font-ml-title); }
+.ml-body { font-family: var(--font-ml-body); }
 
 /* Browser print (Ctrl+P / Print button): chrome hidden, application content only.
    .pdf-hide doubles up so PDF-excluded editors stay out of paper prints too. */
@@ -226,3 +239,235 @@ body:has(.mc-form) {
   background: linear-gradient(to bottom, #22c55e, #16a34a);
   flex-shrink: 0;
 }
+/* ── Publications section ───────────────────────────────────────
+   Phones: one card at a time, swiped sideways, so a five-book section does not
+   push അപേക്ഷകൾ a screen and a half down the page.
+   sm and up: a single row whose column count comes from the data — 2 books give
+   2 wide cards, 5 give 5. Tablet caps at 2 because a fifth of 640px cannot hold
+   a Malayalam title. */
+/* The navbar is sticky, so an anchor jump to #publications-section would otherwise park the
+   heading underneath it — which is how the reader's back link arrives here. */
+#publications-section { scroll-margin-top: 5rem; }
+
+.mc-pub-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78vw;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.mc-pub-grid::-webkit-scrollbar { display: none; }
+.mc-pub-grid > .mc-pub-card { scroll-snap-align: center; }
+
+/* Six stacked blocks: figure, title, subtitle, description, chapter count, button.
+   The button is pushed to the bottom so cards of unequal height still end together. */
+.mc-pub-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+.mc-pub-card > .mc-pub-figure { margin-bottom: 0.5rem; }
+.mc-pub-card > :last-child { margin-top: auto; padding-top: 0.75rem; }
+
+@media (min-width: 640px) {
+  .mc-pub-grid {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: repeat(var(--mc-pub-cols-sm, 2), minmax(0, 1fr));
+    gap: 1.5rem;
+    padding-bottom: 0;
+    overflow-x: visible;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mc-pub-grid {
+    grid-template-columns: repeat(var(--mc-pub-cols, 3), minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Aligning the cards to each other, not just topping and tailing them.
+   Each card hands its six rows back to the parent grid via subgrid, so a two-line
+   title in one card and a three-line title in the next still leave both
+   descriptions — and both chapter counts — starting on the same line. Without this
+   the counts sit at different heights whenever the text above them wraps differently.
+   Cards keep identical padding, so the uniform inset preserves the alignment. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 640px) {
+    .mc-pub-grid { grid-template-rows: repeat(6, auto); }
+
+    .mc-pub-grid > .mc-pub-card {
+      grid-row: span 6;
+      display: grid;
+      grid-template-rows: subgrid;
+      justify-items: center;
+      /* The flex rule above sets align-items: center to centre the cards horizontally. In a
+         grid that same property works on the block axis, which floats a one-line title in the
+         middle of a row sized for three. Start-align so every row begins at its own top. */
+      align-items: start;
+      gap: 0;
+    }
+
+    /* Row gaps come back as padding, since the subgrid tracks own the spacing now. */
+    .mc-pub-card > .mc-pub-figure { margin-bottom: 0; padding-bottom: 1rem; }
+    .mc-pub-card > :nth-child(4) { padding-top: 0.5rem; }
+    .mc-pub-card > :nth-child(5) { padding-top: 0.5rem; }
+    .mc-pub-card > :last-child { margin-top: 0; padding-top: 1rem; align-self: end; }
+  }
+}
+
+/* ── Reader chapter list ─────────────────────────────────────────────────────
+   Rows are separated by a soft shadow rather than a hard rule: a hairline that fades out
+   at both ends, with a faint drop under it, so the list reads as stacked cards instead of
+   a ruled table. */
+.mc-toc > li + li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0.5rem;
+  right: 0.5rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0) 0%,
+    rgba(15, 23, 42, 0.09) 18%,
+    rgba(15, 23, 42, 0.09) 82%,
+    rgba(15, 23, 42, 0) 100%
+  );
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  pointer-events: none;
+}
+
+/* Shadow standing in for a border: two layers — a tight contact edge that reads as the
+   border itself, and a wide soft cast that lifts the card off the page. */
+.mc-card-shadow {
+  box-shadow:
+    0 0 0 1px rgba(16, 24, 40, 0.04),
+    0 1px 2px rgba(16, 24, 40, 0.06),
+    0 12px 28px -10px rgba(16, 24, 40, 0.12);
+}
+
+.mc-card-shadow-hover:hover {
+  box-shadow:
+    0 0 0 1px rgba(16, 24, 40, 0.05),
+    0 2px 4px rgba(16, 24, 40, 0.07),
+    0 18px 38px -12px rgba(16, 24, 40, 0.18);
+}
+
+/* ── Confirmation dialog ─────────────────────────────────────────────────────
+   Radix stamps data-state on the overlay and the panel; these are the actual keyframes for
+   it. The project has no tailwindcss-animate, so the animate-in utilities that used to sit
+   in the markup rendered nothing at all.
+
+   The panel animates `scale`, never `transform`. Tailwind v4 centres it with the standalone
+   `translate` property (-translate-x-1/2 sets --tw-translate-x, applied as `translate:`), so
+   a keyframe carrying `transform: translate(-50%, …)` stacks on top of that and starts the
+   panel a full width to the left before it snaps back on the last frame. `scale` is its own
+   property too, so the two compose instead of fighting. */
+@keyframes mc-dialog-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mc-dialog-panel-in {
+  from { opacity: 0; scale: 0.96; }
+  to { opacity: 1; scale: 1; }
+}
+
+.mc-dialog-overlay[data-state='open'] {
+  animation: mc-dialog-overlay-in 150ms ease-out;
+}
+
+.mc-dialog-panel[data-state='open'] {
+  animation: mc-dialog-panel-in 170ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-dialog-overlay[data-state='open'],
+  .mc-dialog-panel[data-state='open'] {
+    animation: none;
+  }
+}
+
+/* ── Reader prose ────────────────────────────────────────────────────────────
+   Hand-rolled rather than @tailwindcss/typography: Malayalam glyph ink runs about
+   1.27x the font size, so the plugin's line-heights make wrapped lines collide —
+   the same reason the hero heading carries its own line-height. */
+.mc-prose {
+  font-family: var(--font-ml-body);
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #1f2937;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 640px) {
+  .mc-prose { font-size: 1.0625rem; line-height: 1.88; }
+}
+
+.mc-prose > * + * { margin-top: 1.15em; }
+
+/* Not justified. Malayalam words are long and cannot hyphenate, so justification pulls the
+   spaces apart into rivers — badly enough to hurt reading over a 70-page book. */
+.mc-prose p { text-align: start; }
+
+.mc-prose h2,
+.mc-prose h3,
+.mc-prose h4 {
+  font-family: var(--font-ml-title);
+  font-weight: 700;
+  color: #14532d;
+  line-height: 1.5;
+  margin-top: 2em;
+  margin-bottom: 0.35em;
+}
+
+.mc-prose h2 { font-size: 1.35em; }
+.mc-prose h3 { font-size: 1.18em; }
+.mc-prose h4 { font-size: 1.05em; }
+.mc-prose :is(h2, h3, h4):first-child { margin-top: 0; }
+
+.mc-prose ol,
+.mc-prose ul { padding-inline-start: 1.6em; }
+.mc-prose ol { list-style-type: decimal; }
+.mc-prose ol[type='a'] { list-style-type: lower-alpha; }
+.mc-prose ol[type='I'] { list-style-type: upper-roman; }
+.mc-prose ul { list-style-type: disc; }
+.mc-prose li { margin-top: 0.5em; padding-inline-start: 0.25em; }
+.mc-prose li::marker { color: #2f6b2f; font-weight: 600; }
+
+.mc-prose blockquote {
+  border-inline-start: 3px solid #9ece88;
+  padding-inline-start: 1em;
+  color: #374151;
+  font-style: italic;
+}
+
+.mc-prose a { color: #15803d; text-decoration: underline; text-underline-offset: 2px; }
+.mc-prose a:hover { color: #14532d; }
+
+.mc-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin-inline: auto;
+}
+
+.mc-prose figure { margin-block: 1.5em; }
+.mc-prose figcaption {
+  margin-top: 0.5em;
+  text-align: center;
+  font-size: 0.85em;
+  color: #6b7280;
+}
+
+.mc-prose hr { border: 0; border-top: 1px solid #e5e7eb; margin-block: 2em; }
+.mc-prose strong { font-weight: 700; color: #111827; }
