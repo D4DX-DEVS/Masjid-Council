@@ -1,0 +1,236 @@
+[
+  {
+    "_id": "6a7c06264f68bcfffe0dfd1e",
+    "formType": "welfarefund",
+    "formVersion": 4,
+    "formData": {
+      "field_1": "Test Jama Masjid Kalamassery",
+      "field_2": "MCK-TEST-001",
+      "field_3": "Kalamassery, Ernakulam",
+      "field_4": "Test President",
+      "field_5": "9000000001",
+      "field_11": "ERNAKULAM",
+      "field_12": "KALAMASSERY",
+      "field_13": "Abdul Rahman (Imam)",
+      "field_14": "ഇമാം",
+      "field_15": "12000",
+      "field_16": "ചികിത്സ",
+      "field_17": "Heart surgery at Amrita Hospital, Kochi",
+      "field_18": "50000",
+      "field_19": "20000",
+      "field_20": "no",
+      "field_24": "Test President",
+      "field_25": "9000000001",
+      "field_26": "Abdul Rahman",
+      "field_27": "Test Jama Masjid Kalamassery",
+      "field_39": "Kalamassery, Ernakulam 683104",
+      "field_40": "https://cdn.example.com/uploads/aadhaar-test.png",
+      "field_41": "https://cdn.example.com/uploads/passbook-test.png",
+      "field_43": "0123456789012",
+      "field_44": "SBIN0001234",
+      "field_45": "State Bank of India"
+    },
+    "referenceNumber": "WF1786512934511964",
+    "district": "ERNAKULAM",
+    "area": "KALAMASSERY",
+    "applicantName": "Abdul Rahman (Imam)",
+    "phone": "9000000001",
+    "status": "approved",
+    "rejectionReason": null,
+    "requestedAmount": 50000,
+    "ownContribution": 20000,
+    "approvedAmount": 20000,
+    "approvedAt": "2026-08-12T05:43:24.432Z",
+    "approvedByName": "nihadh",
+    "paidAmount": 20000,
+    "paidAt": "2026-08-12T00:00:00.000Z",
+    "paidByName": "nihadh",
+    "paidNote": "CHQ 445566",
+    "paidMethod": "cheque",
+    "areaVerification": {
+      "comment": "നേരിട്ട് സന്ദർശിച്ച് പരിശോധിച്ചു. ചികിത്സാ രേഖകൾ ശരിയാണ്. സഹായം അനുവദിക്കാൻ ശുപാർശ ചെയ്യുന്നു. — Kalamassery Area",
+      "verifiedBy": "6a7c0210464e221ccb8cd1d5",
+      "verifiedByName": "kala01571",
+      "verifiedAt": "2026-08-12T05:40:15.353Z"
+    },
+    "officeComment": {
+      "comment": "സഹായം അനുവദിchu",
+      "byName": "nihadh",
+      "byRole": "admin",
+      "at": "2026-08-12T06:25:14.528Z"
+    },
+    "createdAt": "2026-08-12T05:35:34.517Z",
+    "updatedAt": "2026-08-12T06:27:10.410Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a7c215da482bf925a75853c",
+    "formType": "affiliation",
+    "formVersion": 4,
+    "formData": {
+      "field_1": "noora masjid",
+      "field_2": "മഹല്ല് പള്ളി",
+      "field_3": "പൂർണ മഹല്ല്",
+      "field_4": "1988",
+      "field_5": "perinthalmaana",
+      "field_6": "malappuram east",
+      "field_7": "679322",
+      "field_8": "6238399055",
+      "field_12": "PERINTHALMANNA",
+      "field_13": [
+        "മദ്രസ",
+        "സേവന വേദി"
+      ],
+      "field_14": "yes",
+      "field_15": "333",
+      "field_16": "400",
+      "field_17": "2000",
+      "field_18": "300",
+      "field_20": "aa",
+      "field_21": "aa",
+      "field_22": "120000",
+      "field_23": "yes",
+      "field_25": "110000",
+      "field_24": [
+        "അസറ്റ് രജിസ്റ്റർ",
+        "വരിസംഖ്യ റസീപ്റ്റ്",
+        "വിവാഹ മോചന രജിസ്റ്റർ",
+        "സ്റ്റാഫ് പേറോൾ",
+        "വിവാഹ രജിസ്റ്റർ"
+      ],
+      "field_26": "10000",
+      "field_27": [
+        "പലിശരഹിത നിധി",
+        "കരിയർ ഹെൽപ് സെന്റർ"
+      ],
+      "field_29": [
+        "ഹെൽപ് ഡെസ്ക്"
+      ],
+      "field_30": "drx",
+      "field_31": "erwt4",
+      "field_32": "atr",
+      "field_33": "no",
+      "field_35": "yes",
+      "field_36": "43w",
+      "field_37": "34",
+      "field_38": "wera",
+      "field_39": "rwae",
+      "field_40": "മികച്ചത്",
+      "field_41": "മികച്ചത്",
+      "field_44": "r3",
+      "field_45": "അസോസിയേഷൻ കമ്മിറ്റി",
+      "field_46": [
+        [
+          "president",
+          "kk/tt",
+          "6238399054",
+          ""
+        ],
+        [
+          "securtry",
+          "jj/vv",
+          "6238399053",
+          ""
+        ]
+      ],
+      "field_47": [
+        [
+          "vice president",
+          "uu/bb",
+          "6238399052",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "field_48": [
+        [
+          "ilas",
+          "33",
+          "iman",
+          "degree",
+          "30000",
+          ""
+        ],
+        [
+          "ffj",
+          "44",
+          "muhadin",
+          "+2",
+          "15000",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "field_49": "no",
+      "field_52": "2026-08-07",
+      "field_53": "sdz",
+      "field_54": [
+        "സമ്മതിക്കുന്നു"
+      ],
+      "field_55": "2026-08-12",
+      "field_56": "perinthamanna",
+      "field_57": "ilas",
+      "field_58": "പ്രസിഡന്റ്"
+    },
+    "referenceNumber": "AF1786519901922542",
+    "district": "malappuram east",
+    "area": "PERINTHALMANNA",
+    "applicantName": "noora masjid",
+    "phone": "6238399055",
+    "status": "approved",
+    "rejectionReason": null,
+    "requestedAmount": null,
+    "ownContribution": null,
+    "approvedAmount": 23000,
+    "approvedAt": "2026-08-12T07:35:01.984Z",
+    "approvedByName": "masjidck",
+    "paidAmount": 12000,
+    "paidAt": "2026-08-18T00:00:00.000Z",
+    "paidByName": "nihadh",
+    "paidNote": null,
+    "paidMethod": null,
+    "areaVerification": {
+      "comment": "gzs",
+      "verifiedBy": "6a7c0227464e221ccb8cd2f5",
+      "verifiedByName": "peri03941",
+      "verifiedAt": "2026-08-12T07:33:43.850Z"
+    },
+    "officeComment": {
+      "comment": "qwe",
+      "byName": "masjidck",
+      "byRole": "superadmin",
+      "at": "2026-08-12T07:34:54.244Z"
+    },
+    "createdAt": "2026-08-12T07:31:41.923Z",
+    "updatedAt": "2026-08-18T09:46:31.022Z",
+    "__v": 0
+  }
+]
