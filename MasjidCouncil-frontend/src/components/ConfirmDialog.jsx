@@ -15,6 +15,7 @@ const ConfirmDialog = ({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   destructive = true,
+  loading = false,
   onConfirm,
   onCancel,
 }) => {
@@ -24,7 +25,9 @@ const ConfirmDialog = ({
     <AlertDialog.Root
       open={open}
       onOpenChange={(next) => {
-        if (!next) onCancel();
+        // While the confirmed action is in flight, Escape and outside-clicks must not
+        // close the dialog: the caller has not been told the outcome yet.
+        if (!next && !loading) onCancel();
       }}
     >
       <AlertDialog.Portal>
@@ -60,7 +63,7 @@ const ConfirmDialog = ({
                 {cancelLabel}
               </button>
             </AlertDialog.Cancel>
-            <AlertDialog.Action asChild>
+            <AlertDialog.Action asChild onClick={(e) => e.preventDefault()}>
               <button
                 type="button"
                 onClick={onConfirm}

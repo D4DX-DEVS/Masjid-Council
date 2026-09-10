@@ -295,6 +295,53 @@ const FormBuilder = ({ role = 'superadmin' }) => {
         </label>
       </div>
 
+      {field.unique && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 grid gap-3">
+          <p className="text-xs text-amber-900">
+            This field is the form's duplicate key. It is always required, and its value is
+            compared after spaces and hyphens are stripped and letters upper-cased. Set a
+            format under Validation if the value has a fixed shape.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <label className="block">
+              <span className="text-gray-600">A duplicate collides with</span>
+              <SelectField
+                name={`uniqueBlocks-${field.id}`}
+                value={field.uniqueBlocks || 'approved'}
+                onChange={(e) => updateField(field.id, { uniqueBlocks: e.target.value })}
+              >
+                <option value="approved">Approved applications only</option>
+                <option value="active">Approved, pending and under-review</option>
+              </SelectField>
+              <span className="mt-1 block text-xs text-gray-500">
+                {(field.uniqueBlocks || 'approved') === 'approved'
+                  ? 'A second application may queue while the first is still undecided. Rejection frees the value.'
+                  : 'The value is reserved as soon as an application uses it, until that application is rejected.'}
+              </span>
+            </label>
+            <label className="block">
+              <span className="text-gray-600">Approved value is held for (years)</span>
+              <input
+                type="number"
+                min="0"
+                placeholder="forever"
+                className={numberInput}
+                value={field.uniqueLockYears ?? ''}
+                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) =>
+                  updateField(field.id, {
+                    uniqueLockYears: e.target.value === '' ? null : Math.max(0, Number(e.target.value)),
+                  })
+                }
+              />
+              <span className="mt-1 block text-xs text-gray-500">
+                Leave blank to hold it forever — an approved value can never be reused.
+              </span>
+            </label>
+          </div>
+        </div>
+      )}
+
       {OPTION_TYPES.includes(field.type) && (
         <label className="block">
           <span className="text-gray-600">Options (one per line)</span>
@@ -528,6 +575,14 @@ const FormBuilder = ({ role = 'superadmin' }) => {
                     <input type="checkbox" checked={field.enabled} onChange={(e) => updateField(field.id, { enabled: e.target.checked })} />
                     enabled
                   </label>
+                  <label
+                    className="flex items-center gap-1 text-xs text-gray-600"
+                    title="This field is the form's duplicate key. Two applications cannot hold the same value. A unique field is always required — open ⚙ to choose what a duplicate collides with."
+                  >
+                    <input type="checkbox" checked={!!field.unique}
+                      onChange={(e) => updateField(field.id, { unique: e.target.checked })} />
+                    unique
+                  </label>
                   <label className="flex items-center gap-1 text-xs text-gray-600" title="Checked: field takes its own line. Unchecked: sits inline beside the next field.">
                     <input type="checkbox"
                       checked={field.fullWidth ?? FULL_WIDTH_TYPES.includes(field.type)}
@@ -645,25 +700,12 @@ const FormBuilder = ({ role = 'superadmin' }) => {
               {roleMappingSelect('nameFieldId', 'Applicant name field')}
               {roleMappingSelect('amountFieldId', 'Requested amount field (for spending report)')}
               {roleMappingSelect('ownAmountFieldId', 'Own contribution field (സ്വന്തമായി ശേഖരിക്കാവുന്ന തുക)')}
-              {roleMappingSelect('aadhaarFieldId', 'Aadhaar field (blocks duplicate applications)')}
-              <label className="block">
-                <span className="text-gray-600">Aadhaar lock period after approval (years, 0 = no lock)</span>
-                <input
-                  type="number"
-                  min="0"
-                  className="mt-1 w-full border rounded-lg px-3 py-2"
-                  value={config.roleMapping?.aadhaarLockYears ?? 4}
-                  onChange={(e) =>
-                    updateConfig({
-                      roleMapping: {
-                        ...config.roleMapping,
-                        aadhaarLockYears: e.target.value === '' ? 4 : Math.max(0, Number(e.target.value)),
-                      },
-                    })
-                  }
-                />
-              </label>
             </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Duplicate applications are no longer configured here. Tick <b>unique</b> on the
+              field that identifies an applicant — Aadhaar, affiliation number, whatever the
+              form uses — and set the rule under that field's ⚙.
+            </p>
           </div>
 
           <div>

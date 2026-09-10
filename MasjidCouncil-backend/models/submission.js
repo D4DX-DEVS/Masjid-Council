@@ -20,9 +20,27 @@ const submissionSchema = new mongoose.Schema(
     area: { type: String, default: "", index: true },
     applicantName: { type: String, default: "" },
     phone: { type: String, default: "" },
-    // Digits-only Aadhaar, denormalized via roleMapping.aadhaarFieldId; drives the
-    // one-application-per-Aadhaar rule on submit.
+    // Digits-only Aadhaar, denormalized via roleMapping.aadhaarFieldId. Kept as a
+    // reporting column; the duplicate rule it used to drive now lives in uniqueKeys.
     aadhaarNumber: { type: String, default: "", index: true },
+
+    // Denormalized copies of every field the form marks `unique`, normalized by
+    // lib/validateSubmission's normalizeKey so lookups are exact. This is what the
+    // submit route queries to refuse a duplicate application; `blocks` and
+    // `lockYears` are snapshotted from the field so a later config change cannot
+    // silently rewrite the rule an existing application was accepted under.
+    uniqueKeys: {
+      type: [
+        {
+          _id: false,
+          fieldId: { type: Number, required: true },
+          value: { type: String, required: true },
+          blocks: { type: String, enum: ["approved", "active"], default: "approved" },
+          lockYears: { type: Number, default: null },
+        },
+      ],
+      default: [],
+    },
 
     status: {
       type: String,
@@ -65,10 +83,18 @@ const submissionSchema = new mongoose.Schema(
       byRole: { type: String, default: null },
       at: { type: Date, default: null },
     },
+
+    // Admins can correct an applicant's answers and attachments after submission.
+    // Not a full history — the point is that an unexplained change is visible to
+    // whoever looks next, not that every prior value stays recoverable.
+    lastEditedByName: { type: String, default: null },
+    lastEditedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
 
 submissionSchema.index({ formType: 1, district: 1, area: 1 });
+// Backs the duplicate lookup on submit.
+submissionSchema.index({ formType: 1, "uniqueKeys.value": 1 });
 
 module.exports = mongoose.model("Submission", submissionSchema);

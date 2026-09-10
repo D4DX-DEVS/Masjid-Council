@@ -56,6 +56,18 @@ const fieldSchema = new mongoose.Schema(
     type: { type: String, enum: FIELD_TYPES, required: true },
     required: { type: Boolean, default: false },
     enabled: { type: Boolean, default: true },
+    // Duplicate key for this form. A unique field is implicitly required — a key
+    // nobody filled in identifies nothing — and its format is checked against its
+    // own validation.pattern, so an Aadhaar and an MAF affiliation number are both
+    // valid keys. uniqueBlocks says what a duplicate collides with: "approved" only
+    // (the value is free again the moment an application is rejected, and a second
+    // application may queue behind a pending one), or "active" which also reserves
+    // the value while a pending / under-review application holds it.
+    // uniqueLockYears bounds how long an approved application holds the value;
+    // null means forever.
+    unique: { type: Boolean, default: false },
+    uniqueBlocks: { type: String, enum: ["approved", "active"], default: "approved" },
+    uniqueLockYears: { type: Number, default: null, min: 0 },
     // layout: true = own line (col-span-2), false = inline half column; unset = per-type default
     fullWidth: { type: Boolean, default: undefined },
     placeholder: { type: String, default: "", maxlength: 500 },

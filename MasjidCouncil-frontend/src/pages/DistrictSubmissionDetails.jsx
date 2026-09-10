@@ -117,24 +117,6 @@ const DistrictSubmissionDetails = () => {
           )}
         </div>
 
-        {/* Area president's recommendation (read-only) */}
-        <div className="bg-white rounded-xl shadow p-4 sm:p-6">
-          <h2 className="font-bold text-gray-800 mb-2">ജമാഅത്തെ ഇസ്ലാമി ഏരിയാ പ്രസിഡന്റിന്റെ ശുപാർശ</h2>
-          {submission.areaVerification?.comment ? (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-              <p className="text-sm text-gray-800 whitespace-pre-wrap">{submission.areaVerification.comment}</p>
-              {Object.entries(submission.areaVerification.extra || {}).map(([k, v]) => (
-                <p key={k} className="text-sm text-gray-800 mt-1"><b>{k}</b> {v}</p>
-              ))}
-              <p className="text-xs text-gray-500 mt-2">
-                — {submission.areaVerification.verifiedByName},{' '}
-                {new Date(submission.areaVerification.verifiedAt).toLocaleString()}
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400">ഏരിയ വെരിഫിക്കേഷൻ ഇല്ല.</p>
-          )}
-        </div>
       </div>
       </div>
       </div>

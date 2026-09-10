@@ -12,8 +12,11 @@ const router = express.Router();
 //  2. Decided submissions only — pending/under_review never leave the server.
 const DECIDED = ["approved", "rejected"];
 
-// Office-use comment stays admin/super-admin only.
-const HIDE = "-officeComment";
+// Review notes are for the people who write them. The office-use comment belongs to
+// admin / super admin, the recommendation belongs to the area admin, and a district
+// admin observes decisions rather than the deliberation behind them. Hiding these in
+// the UI is not enough — they must never leave the server on a district request.
+const HIDE = "-officeComment -areaVerification";
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
