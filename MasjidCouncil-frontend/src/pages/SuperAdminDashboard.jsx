@@ -42,6 +42,20 @@ const readSuperAdminName = () => {
 
 const PAGE_SIZE = 10;
 
+// Admin roles as labelled/coloured in the Admin Management table and its filter.
+const ROLE_META = {
+  admin: { label: 'State Admin', color: '#1F6B3A', bg: '#EAF6EF' },
+  districtadmin: { label: 'District Admin', color: '#1D4ED8', bg: '#EFF6FF' },
+  areaadmin: { label: 'Area Admin', color: '#7C3AED', bg: '#F5F3FF' }
+};
+const roleMeta = (role) => ROLE_META[role] || ROLE_META.admin;
+const ROLE_FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'admin', label: 'State Admin' },
+  { key: 'districtadmin', label: 'District Admin' },
+  { key: 'areaadmin', label: 'Area Admin' }
+];
+
 const SuperAdminDashboard = () => {
   const superAdminName = readSuperAdminName();
   const [admins, setAdmins] = useState([]);
@@ -52,6 +66,7 @@ const SuperAdminDashboard = () => {
   const [editingAdmin, setEditingAdmin] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
@@ -331,8 +346,15 @@ const SuperAdminDashboard = () => {
 
   const exportAdminsCsv = () => {
     const rows = [
-      ['Username', 'Phone Number', 'Created'],
-      ...filteredAdmins.map(a => [a.username, a.phoneNumber, new Date(a.createdAt).toLocaleDateString('en-GB')])
+      ['Username', 'Role', 'District', 'Area', 'Phone Number', 'Created'],
+      ...filteredAdmins.map(a => [
+        a.username,
+        roleMeta(a.role).label,
+        a.district || '',
+        a.area || '',
+        a.phoneNumber || '',
+        new Date(a.createdAt).toLocaleDateString('en-GB')
+      ])
     ];
     const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -343,10 +365,28 @@ const SuperAdminDashboard = () => {
     URL.revokeObjectURL(url);
   };
 
-  const filteredAdmins = admins.filter(admin =>
-    admin.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (admin.phoneNumber || '').includes(searchTerm) ||
-    (admin.area || '').toLowerCase().includes(searchTerm.toLowerCase())
+  // Role filter + free-text search. Scoped admins carry no phone, so district/area
+  // are searchable too - otherwise they'd only be reachable by username.
+  const filteredAdmins = admins.filter(admin => {
+    if (roleFilter !== 'all' && (admin.role || 'admin') !== roleFilter) return false;
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      admin.username.toLowerCase().includes(q) ||
+      (admin.phoneNumber || '').includes(searchTerm.trim()) ||
+      (admin.district || '').toLowerCase().includes(q) ||
+      (admin.area || '').toLowerCase().includes(q)
+    );
+  });
+
+  const roleCounts = useMemo(
+    () => admins.reduce((acc, a) => {
+      const role = a.role || 'admin';
+      acc[role] = (acc[role] || 0) + 1;
+      acc.all += 1;
+      return acc;
+    }, { all: 0 }),
+    [admins]
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredAdmins.length / PAGE_SIZE));
@@ -592,12 +632,37 @@ const SuperAdminDashboard = () => {
               </button>
             </div>
 
+            {/* Role filter */}
+            <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] mr-1">Role</span>
+              {ROLE_FILTERS.map(({ key, label }) => {
+                const active = roleFilter === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => { setRoleFilter(key); setPage(1); }}
+                    aria-pressed={active}
+                    className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-full border text-[13px] font-medium transition-colors ${
+                      active
+                        ? 'bg-[#1F6B3A] border-[#1F6B3A] text-white'
+                        : 'bg-white border-[#E5E7EB] text-[#374151] hover:bg-gray-50'
+                    }`}
+                  >
+                    {label}
+                    <span className={`inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[11px] font-semibold leading-none tabular-nums ${active ? 'bg-white/25 text-white' : 'bg-[#F3F4F6] text-[#6B7280]'}`}>
+                      {roleCounts[key] || 0}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Table — desktop/tablet */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="min-w-full">
                 <thead className="sticky top-0 bg-[#F7F9FB]">
                   <tr>
-                    {['Username', 'Phone Number', 'Created', 'Actions'].map(h => (
+                    {['Username', 'Role', 'Phone Number', 'Created', 'Actions'].map(h => (
                       <th key={h} className="px-6 py-3.5 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
@@ -606,7 +671,20 @@ const SuperAdminDashboard = () => {
                   {pagedAdmins.map((admin, i) => (
                     <tr key={admin._id} className={`transition-colors hover:bg-[#EAF6EF]/40 ${i % 2 ? 'bg-[#F7F9FB]/50' : 'bg-white'}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#111827]">{admin.username}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.phoneNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                          style={{ color: roleMeta(admin.role).color, backgroundColor: roleMeta(admin.role).bg }}
+                        >
+                          {roleMeta(admin.role).label}
+                        </span>
+                        {(admin.area || admin.district) && (
+                          <span className="block mt-1 text-xs text-[#6B7280]">
+                            {[admin.area, admin.district].filter(Boolean).join(' · ')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{admin.phoneNumber || '—'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
                         {new Date(admin.createdAt).toLocaleDateString('en-GB')}
                       </td>
@@ -640,7 +718,17 @@ const SuperAdminDashboard = () => {
                 <div key={admin._id} className="px-4 py-3 flex items-center gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-[#111827] truncate">{admin.username}</p>
-                    <p className="text-xs text-[#6B7280] truncate">{admin.phoneNumber}</p>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                      <span
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                        style={{ color: roleMeta(admin.role).color, backgroundColor: roleMeta(admin.role).bg }}
+                      >
+                        {roleMeta(admin.role).label}
+                      </span>
+                      <span className="text-xs text-[#6B7280] truncate">
+                        {admin.phoneNumber || [admin.area, admin.district].filter(Boolean).join(' · ') || '—'}
+                      </span>
+                    </p>
                   </div>
                   <div className="flex gap-1.5 flex-shrink-0">
                     <button
@@ -667,7 +755,9 @@ const SuperAdminDashboard = () => {
                 <Users className="w-14 h-14 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-base font-medium text-[#111827] mb-1">No admins found</h3>
                 <p className="text-[#6B7280] text-sm">
-                  {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating your first admin.'}
+                  {searchTerm || roleFilter !== 'all'
+                    ? 'Try adjusting your search or role filter.'
+                    : 'Get started by creating your first admin.'}
                 </p>
               </div>
             ) : (

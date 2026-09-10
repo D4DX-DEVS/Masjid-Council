@@ -135,3 +135,154 @@ test("option value must be one of the configured options", () => {
   });
   assert.ok(errors.some((e) => e.includes("District")));
 });
+
+// --- per-field uniqueness -------------------------------------------------
+// A field marked `unique` in the builder becomes the form's duplicate key. The
+// value is denormalized onto the submission as uniqueKeys so the submit route can
+// query it, and it is always mandatory: a duplicate key nobody filled in is not a key.
+
+test("unique fields are collected into uniqueKeys, normalized", () => {
+  const cfg = {
+    ...config,
+    pages: [
+      {
+        ...config.pages[0],
+        fields: config.pages[0].fields.map((f) =>
+          f.id === 2 ? { ...f, label: "Affiliation number", unique: true } : f
+        ),
+      },
+    ],
+  };
+  const result = validateSubmission(cfg, {
+    field_1: "Someone",
+    field_2: " maf 1758-696285 ",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.strictEqual(result.errors.length, 0);
+  assert.deepStrictEqual(result.uniqueKeys, [
+    { fieldId: 2, value: "MAF1758696285", blocks: "approved", lockYears: null },
+  ]);
+});
+
+test("a unique field is required even when its required flag is off", () => {
+  const cfg = {
+    ...config,
+    pages: [
+      {
+        ...config.pages[0],
+        fields: config.pages[0].fields.map((f) =>
+          f.id === 2 ? { ...f, label: "Affiliation number", required: false, unique: true } : f
+        ),
+      },
+    ],
+  };
+  const result = validateSubmission(cfg, {
+    field_1: "Someone",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.ok(result.errors.some((e) => e.includes("Affiliation number")));
+  assert.deepStrictEqual(result.uniqueKeys, []);
+});
+
+test("a unique field validates against its own pattern, not a hardcoded one", () => {
+  const cfg = {
+    ...config,
+    pages: [
+      {
+        ...config.pages[0],
+        fields: config.pages[0].fields.map((f) =>
+          f.id === 2
+            ? {
+                ...f,
+                label: "Affiliation number",
+                unique: true,
+                validation: { pattern: "^MAF\\d{4,}$", customMessage: "Affiliation number looks wrong" },
+              }
+            : f
+        ),
+      },
+    ],
+  };
+  const good = validateSubmission(cfg, {
+    field_1: "Someone",
+    field_2: "MAF1758696285090354",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.strictEqual(good.errors.length, 0);
+  assert.strictEqual(good.uniqueKeys[0].value, "MAF1758696285090354");
+
+  const bad = validateSubmission(cfg, {
+    field_1: "Someone",
+    field_2: "12345",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.ok(bad.errors.some((e) => e.includes("Affiliation number looks wrong")));
+  assert.deepStrictEqual(bad.uniqueKeys, []);
+});
+
+test("uniqueBlocks and uniqueLockYears ride along per field", () => {
+  const cfg = {
+    ...config,
+    pages: [
+      {
+        ...config.pages[0],
+        fields: config.pages[0].fields.map((f) =>
+          f.id === 2
+            ? { ...f, label: "Aadhaar", unique: true, uniqueBlocks: "active", uniqueLockYears: 4 }
+            : f
+        ),
+      },
+    ],
+  };
+  const result = validateSubmission(cfg, {
+    field_1: "Someone",
+    field_2: "1234 5678 9012",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.deepStrictEqual(result.uniqueKeys, [
+    { fieldId: 2, value: "123456789012", blocks: "active", lockYears: 4 },
+  ]);
+});
+
+test("a hidden unique field is neither required nor collected", () => {
+  const cfg = {
+    ...config,
+    pages: [
+      {
+        ...config.pages[0],
+        fields: config.pages[0].fields.map((f) =>
+          f.id === 7 ? { ...f, label: "Which purpose", unique: true } : f
+        ),
+      },
+    ],
+  };
+  // field 7 only shows when field 6 is "yes"
+  const result = validateSubmission(cfg, {
+    field_1: "Someone",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.strictEqual(result.errors.length, 0);
+  assert.deepStrictEqual(result.uniqueKeys, []);
+});
+
+test("forms with no unique field get an empty uniqueKeys list", () => {
+  const result = validateSubmission(config, {
+    field_1: "Someone",
+    field_3: "Kozhikode",
+    field_4: "Area A",
+    field_6: "no",
+  });
+  assert.deepStrictEqual(result.uniqueKeys, []);
+});

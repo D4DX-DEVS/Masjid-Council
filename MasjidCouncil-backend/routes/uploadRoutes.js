@@ -177,4 +177,11 @@ router.post(
     handleUpload
 );
 
+// POST /upload-submission-file - an admin replacing an attachment on a submission they
+// are correcting. Its own route rather than a widening of upload-admin-files: that one
+// belongs to the publications editor and is switched off with it, and a form correction
+// must not depend on whether publications happen to be enabled. No IP cap, for the same
+// reason as above - the admin login is the gate.
+router.post("/upload-submission-file", authenticateAdmin, handleUpload);
+
 module.exports = router;

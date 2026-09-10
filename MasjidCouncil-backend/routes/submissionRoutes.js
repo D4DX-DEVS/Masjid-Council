@@ -4,41 +4,112 @@ const FormConfiguration = require("../models/formConfiguration");
 const validateSubmission = require("../lib/validateSubmission");
 const { str, exactCI, containsCI } = require("../lib/queryHelpers");
 const { authenticateAdmin } = require("../middleware/auth");
+const { isUploadedDocumentUrl } = require("../utils/documentUrl");
 
 const router = express.Router();
 
 const ALLOWED_STATUSES = ["pending", "under_review", "approved", "rejected"];
 const PAID_METHODS = ["bank", "cheque", "cash", "upi"];
 
-// Admin / super admin only see an application once the area admin has physically
-// verified it and left a comment. Khateeb registration has no field-verification
-// step, so it is not gated.
+// Area verification is a recommendation, not an approval — it is one comment field
+// an area admin fills in. It used to hide an application from admin / super admin
+// entirely until it arrived, which meant a slow or absent area admin silently froze
+// an application where nobody could see it. Now every submission is visible from the
+// moment it is filed; an un-verified one is tagged in the list and banner-flagged on
+// the detail page, and admin / super admin may decide on it without waiting.
+// Khateeb registration has no field-verification step at all.
 const AREA_GATED = new Set(["welfarefund", "mosquefund", "affiliation"]);
 
-// Reading: gated forms need a comment. Super admin can pull the un-verified
-// backlog with ?unverified=1 — the escape hatch for areas with no area admin yet.
-const areaGate = (formType, req) => {
+// Optional list filter, replacing the old super-admin-only ?unverified=1 escape
+// hatch: ?verification=pending narrows to the un-verified backlog, ?verification=done
+// to what the area admin has already seen. Anything else means "no filter".
+const verificationFilter = (formType, req) => {
   if (!AREA_GATED.has(formType)) return {};
-  if (req.user.role === "superadmin" && str(req.query.unverified) === "1") {
-    return { "areaVerification.comment": null };
+  const wanted = str(req.query.verification);
+  if (wanted === "pending") return { "areaVerification.comment": null };
+  if (wanted === "done") return { "areaVerification.comment": { $ne: null } };
+  return {};
+};
+
+const NOT_FOUND = "Submission not found";
+
+// Whose name goes on a decision or an edit. Super admins authenticate against env
+// credentials and have no Admin row, so their username lives on the token itself.
+const actorName = (req) =>
+  req.user.role === "superadmin"
+    ? req.user.username || "Super Admin"
+    : (req.user.adminData && req.user.adminData.username) || "Admin";
+
+// Look up whichever unique keys this submission carries and return a message when
+// one is already taken, or null when all of them are free. `blocks` and `lockYears`
+// come from the submitted keys, which validateSubmission snapshotted off the field.
+// File answers are urls that end up in an admin's <a href>. The forms are public, so
+// the value is attacker-controlled and `javascript:...` in an href runs on click —
+// accept only what our own upload endpoint could have produced. Returns an error
+// message, or null when every file field is fine.
+const badFileUrl = (config, formData) => {
+  for (const page of config.pages || []) {
+    for (const field of page.fields || []) {
+      if (field.type !== "file") continue;
+      const value = formData[`field_${field.id}`];
+      if (value === undefined || value === null || value === "") continue;
+      if (typeof value !== "string" || !isUploadedDocumentUrl(value)) {
+        return `${field.label}: attachments must be uploaded through this site`;
+      }
+    }
   }
-  return { "areaVerification.comment": { $ne: null } };
+  return null;
 };
 
-// Writing: no escape hatch. Nothing can be approved / paid / commented on
-// before the area admin has spoken.
-const verifiedOnly = (formType) =>
-  AREA_GATED.has(formType) ? { "areaVerification.comment": { $ne: null } } : {};
-
-// Same rule expressed for aggregates over every form type at once.
-const GATE_MATCH = {
-  $or: [
-    { formType: { $nin: [...AREA_GATED] } },
-    { "areaVerification.comment": { $ne: null } },
-  ],
+const fieldLabels = (config) => {
+  const labels = {};
+  for (const page of config.pages || []) {
+    for (const field of page.fields || []) labels[field.id] = field.label;
+  }
+  return labels;
 };
 
-const NOT_FOUND = "Submission not found, or the area admin has not verified it yet";
+const findDuplicate = async (formType, uniqueKeys, labels = {}, excludeId = null) => {
+  for (const key of uniqueKeys || []) {
+    const taken = [];
+
+    if (key.lockYears === null || key.lockYears === undefined) {
+      taken.push({ status: "approved" });
+    } else {
+      const cutoff = new Date();
+      cutoff.setFullYear(cutoff.getFullYear() - Number(key.lockYears));
+      taken.push({
+        status: "approved",
+        // approvals predating approvedAt fall back to when the record was created
+        $or: [{ approvedAt: { $gte: cutoff } }, { approvedAt: null, createdAt: { $gte: cutoff } }],
+      });
+    }
+    if (key.blocks === "active") {
+      taken.push({ status: { $in: ["pending", "under_review"] } });
+    }
+
+    const query = {
+      formType,
+      uniqueKeys: { $elemMatch: { fieldId: key.fieldId, value: key.value } },
+      $or: taken,
+    };
+    if (excludeId) query._id = { $ne: excludeId };
+
+    const existing = await Submission.findOne(query).select("status referenceNumber");
+    if (!existing) continue;
+
+    const ref = existing.referenceNumber ? ` (ref: ${existing.referenceNumber})` : "";
+    const what = labels[key.fieldId] || "this value";
+    if (existing.status === "approved") {
+      const years = key.lockYears;
+      return years
+        ? `An application with this ${what} was already approved. A new application is allowed only after ${years} year${years === 1 ? "" : "s"}.`
+        : `An approved application already uses this ${what}${ref}. It cannot be used again.`;
+    }
+    return `An application with this ${what} is already under process${ref}.`;
+  }
+  return null;
+};
 
 // Same style as the legacy MAF numbers: prefix + timestamp + 3 random digits.
 const REF_PREFIX = { welfarefund: "WF", mosquefund: "MF", affiliation: "AF", khateeb: "KH" };
@@ -107,14 +178,13 @@ router.get("/stats/summary", authenticateAdmin, async (req, res) => {
     const year = new Date().getFullYear();
     const [byTypeStatus, monthly, recent] = await Promise.all([
       Submission.aggregate([
-        { $match: GATE_MATCH },
         { $group: { _id: { t: "$formType", s: "$status" }, n: { $sum: 1 } } },
       ]),
       Submission.aggregate([
-        { $match: { ...GATE_MATCH, createdAt: { $gte: new Date(year, 0, 1) } } },
+        { $match: { createdAt: { $gte: new Date(year, 0, 1) } } },
         { $group: { _id: { $month: "$createdAt" }, n: { $sum: 1 } } },
       ]),
-      Submission.find(GATE_MATCH)
+      Submission.find({})
         .sort({ createdAt: -1 })
         .limit(5)
         .select("formType applicantName status createdAt"),
@@ -126,20 +196,18 @@ router.get("/stats/summary", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Area-verified submissions still waiting for an admin decision — feeds the
-// dashboards' "action needed" card. Declared before /:formType like /stats/spending.
+// Submissions still waiting for an admin decision — feeds the dashboards' "action
+// needed" card. Un-verified ones are listed too: they are the ones most at risk of
+// being forgotten. Declared before /:formType like /stats/spending.
 router.get("/stats/action-needed", authenticateAdmin, async (req, res) => {
   try {
-    const match = {
-      "areaVerification.comment": { $ne: null },
-      status: { $in: ["pending", "under_review"] },
-    };
+    const match = { status: { $in: ["pending", "under_review"] } };
     const [counts, recent] = await Promise.all([
       Submission.aggregate([{ $match: match }, { $group: { _id: "$formType", count: { $sum: 1 } } }]),
       Submission.find(match)
-        .sort({ "areaVerification.verifiedAt": -1 })
+        .sort({ createdAt: -1 })
         .limit(5)
-        .select("formType applicantName district area status areaVerification.verifiedAt areaVerification.verifiedByName"),
+        .select("formType applicantName district area status createdAt areaVerification.verifiedAt areaVerification.verifiedByName"),
     ]);
     res.json({ success: true, data: { counts, recent } });
   } catch (error) {
@@ -165,39 +233,30 @@ router.post("/:formType", async (req, res) => {
       return res.status(400).json({ success: false, message: "formData is required" });
     }
 
-    const { errors, district, area, applicantName, phone, requestedAmount, ownContribution, aadhaarNumber } =
-      validateSubmission(config.toObject(), formData);
+    const plainConfig = config.toObject();
+
+    const badFile = badFileUrl(plainConfig, formData);
+    if (badFile) {
+      return res.status(400).json({ success: false, message: "Validation failed", errors: [badFile] });
+    }
+
+    const {
+      errors, uniqueKeys, district, area, applicantName, phone,
+      requestedAmount, ownContribution, aadhaarNumber,
+    } = validateSubmission(plainConfig, formData);
     if (errors.length > 0) {
       return res.status(400).json({ success: false, message: "Validation failed", errors });
     }
 
-    // One application per Aadhaar: an active (pending / under review) application
-    // blocks a new one; an approved application blocks re-applying for 4 years;
-    // a rejected application frees the Aadhaar immediately.
-    if (aadhaarNumber) {
-      const lockYears = Number(config.roleMapping && config.roleMapping.aadhaarLockYears);
-      const years = Number.isFinite(lockYears) && lockYears >= 0 ? lockYears : 4;
-      const cutoff = new Date();
-      cutoff.setFullYear(cutoff.getFullYear() - years);
-      const existing = await Submission.findOne({
-        formType: config.formType,
-        aadhaarNumber,
-        $or: [
-          { status: { $in: ["pending", "under_review"] } },
-          {
-            status: "approved",
-            // old approvals have no approvedAt; fall back to createdAt
-            $or: [{ approvedAt: { $gte: cutoff } }, { approvedAt: null, createdAt: { $gte: cutoff } }],
-          },
-        ],
-      }).select("status referenceNumber");
-      if (existing) {
-        const message =
-          existing.status === "approved"
-            ? `An application with this Aadhaar number was already approved. A new application is allowed only after ${years} year${years === 1 ? "" : "s"}.`
-            : `An application with this Aadhaar number is already under process${existing.referenceNumber ? ` (ref: ${existing.referenceNumber})` : ""}.`;
-        return res.status(409).json({ success: false, message });
-      }
+    // Duplicate applications, keyed on whichever fields the form marks unique.
+    // A rejected application always frees its key. What else blocks is the field's
+    // own choice: "approved" lets a second application queue behind a pending one
+    // (Masjid Fund — one grant per masjid, but applying twice is not the offence),
+    // "active" also reserves the key while an application is in process (Aadhaar —
+    // one application per person at a time).
+    const duplicate = await findDuplicate(config.formType, uniqueKeys, fieldLabels(plainConfig));
+    if (duplicate) {
+      return res.status(409).json({ success: false, message: duplicate });
     }
 
     const submission = await Submission.create({
@@ -212,6 +271,7 @@ router.post("/:formType", async (req, res) => {
       requestedAmount,
       ownContribution,
       aadhaarNumber,
+      uniqueKeys,
     });
 
     res.status(201).json({
@@ -233,7 +293,7 @@ router.get("/:formType", authenticateAdmin, async (req, res) => {
     const area = str(req.query.area);
     const search = str(req.query.search);
 
-    const query = { formType: req.params.formType, ...areaGate(req.params.formType, req) };
+    const query = { formType: req.params.formType, ...verificationFilter(req.params.formType, req) };
     if (status && ALLOWED_STATUSES.includes(status)) query.status = status;
     if (district) query.district = exactCI(district);
     if (area) query.area = exactCI(area);
@@ -283,9 +343,6 @@ router.get("/:formType/:id", authenticateAdmin, async (req, res) => {
     const submission = await Submission.findOne({
       _id: req.params.id,
       formType: req.params.formType,
-      // Super admin can always open a single record — they own the un-verified
-      // backlog. Approving it is still blocked until the area admin comments.
-      ...(req.user.role === "superadmin" ? {} : areaGate(req.params.formType, req)),
     });
     if (!submission) {
       return res.status(404).json({ success: false, message: NOT_FOUND });
@@ -327,10 +384,7 @@ router.patch("/:formType/:id/status", authenticateAdmin, async (req, res) => {
         ? amount
         : null;
       update.approvedAt = new Date();
-      update.approvedByName =
-        req.user.role === "superadmin"
-          ? req.user.username || "Super Admin"
-          : (req.user.adminData && req.user.adminData.username) || "Admin";
+      update.approvedByName = actorName(req);
     } else {
       // leaving approved state clears the grant so the report never counts it
       update.approvedAmount = null;
@@ -339,7 +393,7 @@ router.patch("/:formType/:id/status", authenticateAdmin, async (req, res) => {
     }
 
     const submission = await Submission.findOneAndUpdate(
-      { _id: req.params.id, formType: req.params.formType, ...verifiedOnly(req.params.formType) },
+      { _id: req.params.id, formType: req.params.formType },
       update,
       { new: true }
     );
@@ -365,10 +419,7 @@ router.patch("/:formType/:id/paid", authenticateAdmin, async (req, res) => {
       return res.status(400).json({ success: false, message: "paidAmount must be a positive number" });
     }
 
-    const byName =
-      req.user.role === "superadmin"
-        ? req.user.username || "Super Admin"
-        : (req.user.adminData && req.user.adminData.username) || "Admin";
+    const byName = actorName(req);
 
     const paidAt = clearing ? null : parseDate(req.body.paidAt) || new Date();
 
@@ -381,7 +432,7 @@ router.patch("/:formType/:id/paid", authenticateAdmin, async (req, res) => {
     }
 
     const submission = await Submission.findOneAndUpdate(
-      { _id: req.params.id, formType: req.params.formType, ...verifiedOnly(req.params.formType) },
+      { _id: req.params.id, formType: req.params.formType },
       {
         paidAmount,
         paidAt,
@@ -412,13 +463,10 @@ router.patch("/:formType/:id/office-comment", authenticateAdmin, async (req, res
       return res.status(400).json({ success: false, message: "comment is required" });
     }
 
-    const byName =
-      req.user.role === "superadmin"
-        ? req.user.username || "Super Admin"
-        : (req.user.adminData && req.user.adminData.username) || "Admin";
+    const byName = actorName(req);
 
     const submission = await Submission.findOneAndUpdate(
-      { _id: req.params.id, formType: req.params.formType, ...verifiedOnly(req.params.formType) },
+      { _id: req.params.id, formType: req.params.formType },
       {
         officeComment: {
           comment,
@@ -435,6 +483,101 @@ router.patch("/:formType/:id/office-comment", authenticateAdmin, async (req, res
     res.json({ success: true, message: "Office comment saved", data: submission });
   } catch (error) {
     console.error("Office comment error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Correct an applicant's answers. State admin and super admin both: a wrong bank
+// account or a mistyped amount is fixed by whoever is holding the file, and refusing
+// the edit only pushes the correction into a phone call and an unrecorded decision.
+//
+// The whole formData is replaced, not merged, so a field can be cleared. It is
+// re-validated against the live config exactly like a public submit, and the
+// denormalized columns are rebuilt from it — editing the district field and leaving
+// `district` pointing at the old one is how an application disappears from a list.
+router.patch("/:formType/:id/form-data", authenticateAdmin, async (req, res) => {
+  try {
+    const { formData } = req.body;
+    if (!formData || typeof formData !== "object" || Array.isArray(formData)) {
+      return res.status(400).json({ success: false, message: "formData is required" });
+    }
+
+    const submission = await Submission.findOne({
+      _id: req.params.id,
+      formType: req.params.formType,
+    });
+    if (!submission) {
+      return res.status(404).json({ success: false, message: NOT_FOUND });
+    }
+
+    const config = await FormConfiguration.findOne({ formType: req.params.formType });
+    if (!config) {
+      return res.status(404).json({ success: false, message: "Form configuration not found" });
+    }
+    const plainConfig = config.toObject();
+
+    // An admin session is no reason to accept `javascript:` in a form field either.
+    const badFile = badFileUrl(plainConfig, formData);
+    if (badFile) {
+      return res.status(400).json({ success: false, message: badFile });
+    }
+
+    const {
+      errors, uniqueKeys, district, area, applicantName, phone,
+      requestedAmount, ownContribution, aadhaarNumber,
+    } = validateSubmission(plainConfig, formData);
+    if (errors.length > 0) {
+      return res.status(400).json({ success: false, message: "Validation failed", errors });
+    }
+
+    // An edit can introduce a duplicate just as a new submission can. Exclude this
+    // record, or saving it unchanged would collide with itself.
+    const duplicate = await findDuplicate(
+      req.params.formType,
+      uniqueKeys,
+      fieldLabels(plainConfig),
+      submission._id
+    );
+    if (duplicate) {
+      return res.status(409).json({ success: false, message: duplicate });
+    }
+
+    submission.formData = formData;
+    submission.uniqueKeys = uniqueKeys;
+    submission.district = district;
+    submission.area = area;
+    submission.applicantName = applicantName;
+    submission.phone = phone;
+    submission.requestedAmount = requestedAmount;
+    submission.ownContribution = ownContribution;
+    submission.aadhaarNumber = aadhaarNumber;
+    submission.lastEditedByName = actorName(req);
+    submission.lastEditedAt = new Date();
+    await submission.save();
+
+    res.json({ success: true, message: "Application updated", data: submission });
+  } catch (error) {
+    console.error("Edit submission error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Delete an application outright. Files already in Spaces are left where they are:
+// the same url can appear on another record after an admin copied it across, and an
+// orphaned object costs storage while a wrongly deleted one costs the applicant their
+// evidence.
+router.delete("/:formType/:id", authenticateAdmin, async (req, res) => {
+  try {
+    const submission = await Submission.findOneAndDelete({
+      _id: req.params.id,
+      formType: req.params.formType,
+    });
+    if (!submission) {
+      return res.status(404).json({ success: false, message: NOT_FOUND });
+    }
+    res.json({ success: true, message: "Application deleted" });
+  } catch (error) {
+    console.error("Delete submission error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });

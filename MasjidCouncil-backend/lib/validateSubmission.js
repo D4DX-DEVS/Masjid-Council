@@ -4,6 +4,12 @@
 
 const STRUCTURAL_TYPES = ["title", "group", "html", "page"];
 
+// Duplicate keys are compared after normalization, so "MAF 1758-696285" and
+// "maf1758696285" are the same masjid and "1234 5678 9012" is the same Aadhaar.
+// Whatever this returns is what gets stored and queried — change it and old
+// submissions stop matching new ones.
+const normalizeKey = (value) => String(value).replace(/[\s-]/g, "").toUpperCase();
+
 const isEmpty = (value) => {
   if (value === undefined || value === null) return true;
   if (typeof value === "string") return value.trim() === "";
@@ -142,11 +148,13 @@ const validateField = (field, value, errors) => {
 /**
  * @param {object} config FormConfiguration (plain object or mongoose doc)
  * @param {object} formData { "field_<id>": value }
- * @returns {{ errors: string[], district: string, area: string, applicantName: string, phone: string }}
+ * @returns {{ errors: string[], uniqueKeys: {fieldId: number, value: string, blocks: string, lockYears: number|null}[],
+ *             district: string, area: string, applicantName: string, phone: string }}
  */
 const validateSubmission = (config, formData) => {
   const errors = [];
   const data = formData || {};
+  const uniqueKeys = [];
 
   for (const page of config.pages || []) {
     for (const field of page.fields || []) {
@@ -156,11 +164,31 @@ const validateSubmission = (config, formData) => {
       if (!visible) continue;
 
       const value = data[`field_${field.id}`];
-      if (required && isEmpty(value)) {
+      // A unique field is the form's duplicate key, so it is always mandatory —
+      // a key nobody filled in cannot identify anything. That holds even if the
+      // builder's own required flag was left off.
+      if ((required || field.unique) && isEmpty(value)) {
         errors.push(`${field.label} is required`);
         continue;
       }
-      if (!isEmpty(value)) validateField(field, value, errors);
+      if (isEmpty(value)) continue;
+
+      const errorsBefore = errors.length;
+      validateField(field, value, errors);
+
+      // Only collect a key the field's own rules accepted. Format comes from the
+      // field's validation.pattern, never from a hardcoded shape — an MAF
+      // affiliation number and a 12-digit Aadhaar are both legitimate keys.
+      if (field.unique && errors.length === errorsBefore) {
+        uniqueKeys.push({
+          fieldId: field.id,
+          value: normalizeKey(value),
+          blocks: field.uniqueBlocks === "active" ? "active" : "approved",
+          lockYears: Number.isFinite(Number(field.uniqueLockYears)) && field.uniqueLockYears !== null
+            ? Number(field.uniqueLockYears)
+            : null,
+        });
+      }
     }
   }
 
@@ -186,6 +214,7 @@ const validateSubmission = (config, formData) => {
 
   return {
     errors,
+    uniqueKeys,
     district: pick(mapping.districtFieldId),
     area: pick(mapping.areaFieldId),
     applicantName: pick(mapping.nameFieldId),
@@ -197,3 +226,4 @@ const validateSubmission = (config, formData) => {
 };
 
 module.exports = validateSubmission;
+module.exports.normalizeKey = normalizeKey;

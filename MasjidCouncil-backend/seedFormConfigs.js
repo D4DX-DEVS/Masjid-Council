@@ -149,7 +149,7 @@ const mosquefundConfig = {
       order: 1,
       fields: [
         { id: 1, label: "മസ്ജിദിന്റെ പേര്", type: "text", required: true, enabled: true },
-        { id: 2, label: "എം സി കെ അഫിലിയേഷൻ നമ്പർ", type: "text", required: true, enabled: true },
+        { id: 2, label: "എം സി കെ അഫിലിയേഷൻ നമ്പർ", type: "text", required: true, enabled: true, unique: true, uniqueBlocks: "approved", uniqueLockYears: null },
         { id: 3, label: "വിലാസം", type: "textarea", required: true, enabled: true },
         { id: 4, label: "മാനേജിംഗ് കമ്മിറ്റി / ട്രസ്റ്റ്", type: "text", required: false, enabled: true },
         { id: 5, label: "പ്രസിഡന്റ് / ചെയർമാൻ", type: "text", required: false, enabled: true },

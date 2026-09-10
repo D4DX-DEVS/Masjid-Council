@@ -129,16 +129,18 @@ const HeroSection = () => {
       {/* Hero — banner3-De89_Ox0.webp carries the mosque, green wash and the bottom wave.
           Shown at full size (no crop) from sm up; text scales in vw so it keeps
           its position on the banner at every width. */}
-      {/* ponytail: from sm up the box uses the banner's own 1751x898 aspect, so
-          object-cover becomes an exact fit — no top/bottom crop at any width and
-          the vw-scaled text stays glued to the same spot on the artwork. Mobile
-          keeps a fixed height (aspect box would be too short for the text). */}
-      <div id="home-section" className="relative bg-[#186b3a] h-[440px] sm:h-auto sm:aspect-[1751/898] overflow-hidden">
+      {/* ponytail: from sm up the box uses the banner's aspect minus the 72 blank rows
+          the artwork carries below the wave (1751x898 -> 1751x826), anchored to the top so
+          object-cover crops only that dead band. Without it the empty strip rendered as a
+          ~60px hole between the wave and the publications cards. Mobile keeps a fixed height
+          (an aspect box would be too short for the text) and stays centre-cropped, where
+          anchoring to the top would cut the wave off instead. */}
+      <div id="home-section" className="relative bg-[#186b3a] h-[440px] sm:h-auto sm:aspect-[1751/826] overflow-hidden">
         <img
           src={bannerBg}
           alt=""
           aria-hidden="true"
-          className={`absolute inset-0 w-full h-full object-cover object-[62%_center] transition-opacity duration-700 ease-out ${
+          className={`absolute inset-0 w-full h-full object-cover object-[62%_center] sm:object-[62%_top] transition-opacity duration-700 ease-out ${
             isImageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         />

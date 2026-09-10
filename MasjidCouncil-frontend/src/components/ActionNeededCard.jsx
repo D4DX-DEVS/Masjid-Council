@@ -12,9 +12,11 @@ const TYPE_LABELS = {
   khateeb: 'Khateeb',
 };
 
-// Dashboard card: submissions the area admin has verified that still await an
-// admin decision. Clicking a chip opens that form's submissions list; clicking
-// a row opens the request itself. Renders nothing when there is nothing to act on.
+// Dashboard card: submissions still awaiting an admin decision, whether or not the
+// area admin has verified them — an un-verified application is no longer hidden and
+// no longer blocked, so leaving it out of this card would just hide the backlog
+// somewhere else. Clicking a chip opens that form's submissions list; clicking a row
+// opens the request itself. Renders nothing when there is nothing to act on.
 const ActionNeededCard = ({ role }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem(role === 'superadmin' ? 'superAdminToken' : 'adminToken');
@@ -42,7 +44,7 @@ const ActionNeededCard = ({ role }) => {
             <ShieldCheck className="w-5 h-5 text-amber-600" />
           </span>
           <div>
-            <h2 className="font-bold text-gray-800 leading-tight">ഏരിയ വെരിഫൈ ചെയ്തു — തീരുമാനത്തിന് കാത്തിരിക്കുന്നു</h2>
+            <h2 className="font-bold text-gray-800 leading-tight">തീരുമാനത്തിന് കാത്തിരിക്കുന്ന അപേക്ഷകൾ</h2>
             <p className="text-xs text-gray-500">{total} അപേക്ഷ(കൾ) നടപടിക്ക് തയ്യാർ</p>
           </div>
         </div>
@@ -68,9 +70,18 @@ const ActionNeededCard = ({ role }) => {
           >
             <span className="font-medium text-gray-800 text-sm truncate">{s.applicantName || '—'}</span>
             <span className="text-xs text-gray-500">
-              {TYPE_LABELS[s.formType] || s.formType} · {s.area || s.district || ''} · ✔{' '}
-              {s.areaVerification?.verifiedByName}
-              {s.areaVerification?.verifiedAt && `, ${new Date(s.areaVerification.verifiedAt).toLocaleDateString()}`}
+              {TYPE_LABELS[s.formType] || s.formType} · {s.area || s.district || ''} ·{' '}
+              {/* Un-verified applications appear here too now, and they are the ones
+                  most likely to be forgotten — so say so rather than showing "✔ ". */}
+              {s.areaVerification?.verifiedByName ? (
+                <>
+                  ✔ {s.areaVerification.verifiedByName}
+                  {s.areaVerification.verifiedAt &&
+                    `, ${new Date(s.areaVerification.verifiedAt).toLocaleDateString()}`}
+                </>
+              ) : (
+                <span className="text-amber-700 font-medium">ഏരിയ വെരിഫിക്കേഷൻ ബാക്കി</span>
+              )}
             </span>
           </button>
         ))}

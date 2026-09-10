@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import RouteSeo from './components/RouteSeo';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import About from './pages/About';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -83,6 +84,7 @@ const Layout = () => {
   return (
     <>
       <RouteSeo />
+      <ScrollToTop />
       {!isAdminLogin && !isSuperAdminLogin && !isAdminRoute && !isSuperAdminRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />

@@ -3,13 +3,18 @@ import { useMemo, useState } from 'react';
 // Uploaded files are stored in formData as the plain CDN url of the upload, keyed by
 // `field_<id>` like every other answer. Nothing else in the submission records them, so
 // the config's `file` fields are the only way to find what the applicant attached.
+//
+// Every file field is returned, including the ones with nothing in them: an admin who
+// can edit needs to see the gap where a required document should be, not just the
+// documents that arrived. Callers that only display files filter on `url`.
 const collectAttachments = (config, submission) =>
   (config?.pages || [])
     .flatMap((page) => page.fields || [])
     .filter((field) => field.type === 'file')
-    .map((field) => ({ field, url: submission?.formData?.[`field_${field.id}`] }))
-    .filter((a) => typeof a.url === 'string' && a.url.trim() !== '')
-    .map((a) => ({ ...a, url: a.url.trim() }));
+    .map((field) => {
+      const raw = submission?.formData?.[`field_${field.id}`];
+      return { field, url: typeof raw === 'string' ? raw.trim() : '' };
+    });
 
 const fileName = (url) => {
   try {
@@ -28,10 +33,17 @@ const isImage = (url) => /\.(png|jpe?g|gif|webp)(\?|#|$)/i.test(url);
  * also gets a print checkbox and the ticked ones are rendered into a print-only block,
  * so an admin can print the application with, without, or with only some of the files.
  *
- * @param {{ config: object, submission: object, selectable?: boolean }} props
+ * With `onEditFile`, each row also offers to swap the document, and file fields the
+ * applicant left empty are listed too so a missing one can be supplied. Replacing and
+ * removing both run through the caller's field editor, so there is one upload path and
+ * one confirmation, not a second copy living here.
+ *
+ * @param {{ config: object, submission: object, selectable?: boolean,
+ *           onEditFile?: (field: object) => void }} props
  */
-const SubmissionAttachments = ({ config, submission, selectable = false }) => {
-  const attachments = useMemo(() => collectAttachments(config, submission), [config, submission]);
+const SubmissionAttachments = ({ config, submission, selectable = false, onEditFile }) => {
+  const all = useMemo(() => collectAttachments(config, submission), [config, submission]);
+  const attachments = useMemo(() => all.filter((a) => a.url !== ''), [all]);
   // Default: every file prints. Unticking is the deliberate act, not ticking.
   const [selectedIds, setSelectedIds] = useState(null);
   const isSelected = (id) => (selectedIds === null ? true : selectedIds.includes(id));
@@ -41,10 +53,12 @@ const SubmissionAttachments = ({ config, submission, selectable = false }) => {
       return base.includes(id) ? base.filter((x) => x !== id) : [...base, id];
     });
 
-  if (attachments.length === 0) return null;
+  // Nothing attached and no way to attach anything: the panel has nothing to say.
+  if (all.length === 0 || (attachments.length === 0 && !onEditFile)) return null;
 
   const selected = attachments.filter((a) => isSelected(a.field.id));
   const allOn = selected.length === attachments.length;
+  const rows = onEditFile ? all : attachments;
 
   return (
     // Renders inside the existing submission card on every console, so no card chrome here.
@@ -72,9 +86,14 @@ const SubmissionAttachments = ({ config, submission, selectable = false }) => {
 
       {/* On-screen list — every viewer sees this, print/PDF use the block below. */}
       <div className="print-hide pdf-hide grid sm:grid-cols-2 gap-3">
-        {attachments.map(({ field, url }) => (
-          <div key={field.id} className="flex items-start gap-3 border border-gray-200 rounded-xl p-3">
-            {selectable && (
+        {rows.map(({ field, url }) => (
+          <div
+            key={field.id}
+            className={`flex items-start gap-3 rounded-xl border p-3 ${
+              url ? 'border-gray-200' : 'border-dashed border-amber-300 bg-amber-50/40'
+            }`}
+          >
+            {selectable && url && (
               <input
                 type="checkbox"
                 checked={isSelected(field.id)}
@@ -83,7 +102,11 @@ const SubmissionAttachments = ({ config, submission, selectable = false }) => {
                 aria-label={`Print ${field.label}`}
               />
             )}
-            {isImage(url) ? (
+            {!url ? (
+              <span className="h-16 w-16 shrink-0 rounded-lg border border-dashed border-amber-300 bg-white flex items-center justify-center text-[11px] font-semibold text-amber-600">
+                ഇല്ല
+              </span>
+            ) : isImage(url) ? (
               <a href={url} target="_blank" rel="noreferrer" className="shrink-0">
                 <img
                   src={url}
@@ -98,10 +121,25 @@ const SubmissionAttachments = ({ config, submission, selectable = false }) => {
             )}
             <div className="min-w-0">
               <div className="text-xs text-gray-500">{field.label}</div>
-              <div className="text-sm text-gray-800 font-medium truncate">{fileName(url)}</div>
-              <a href={url} target="_blank" rel="noreferrer" className="text-xs text-emerald-700 underline">
-                തുറക്കുക
-              </a>
+              <div className={`text-sm font-medium truncate ${url ? 'text-gray-800' : 'text-amber-700'}`}>
+                {url ? fileName(url) : 'ഫയൽ ഇല്ല'}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                {url && (
+                  <a href={url} target="_blank" rel="noreferrer" className="text-xs text-emerald-700 underline">
+                    തുറക്കുക
+                  </a>
+                )}
+                {onEditFile && (
+                  <button
+                    type="button"
+                    onClick={() => onEditFile(field)}
+                    className="text-xs font-medium text-emerald-700 hover:underline"
+                  >
+                    {url ? 'ഫയൽ മാറ്റുക' : 'ഫയൽ ചേർക്കുക'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}

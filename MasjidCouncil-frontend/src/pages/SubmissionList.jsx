@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  BadgeCheck, ChevronLeft, ChevronRight, CheckCircle2, Clock, Inbox,
-  Layers, Search, TimerReset, XCircle,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Inbox, Search } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import PageHeader from '../components/PageHeader';
 import { SkeletonBar } from '../components/Skeleton';
+import { StatusPill, VerifyPill } from '../components/StatusBadge';
 import { cachedJson, peekJson } from '../lib/apiCache';
+import { STATUSES, VERIFICATION_FILTERS } from '../lib/submissionStatus';
 
 const PAGE_SIZE = 20;
 
@@ -21,17 +20,6 @@ const FORM_TYPE_LABELS = {
   khateeb: 'Khateeb — ഖത്തീബ് രജിസ്ട്രേഷൻ',
 };
 
-// One place per status: the filter tile, the row pill and its dot all read from here.
-const STATUSES = [
-  { key: 'all', label: 'എല്ലാം', en: 'All', icon: Layers, tint: 'text-gray-600 bg-gray-100', ring: 'ring-gray-900/15', dot: 'bg-gray-400', pill: 'bg-gray-100 text-gray-700' },
-  { key: 'pending', label: 'പെൻഡിംഗ്', en: 'Pending', icon: Clock, tint: 'text-amber-600 bg-amber-50', ring: 'ring-amber-500/40', dot: 'bg-amber-500', pill: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' },
-  { key: 'under_review', label: 'പരിശോധനയിൽ', en: 'Under review', icon: TimerReset, tint: 'text-blue-600 bg-blue-50', ring: 'ring-blue-500/40', dot: 'bg-blue-500', pill: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' },
-  { key: 'approved', label: 'അംഗീകരിച്ചു', en: 'Approved', icon: CheckCircle2, tint: 'text-emerald-600 bg-emerald-50', ring: 'ring-emerald-500/40', dot: 'bg-emerald-500', pill: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
-  { key: 'rejected', label: 'നിരസിച്ചു', en: 'Rejected', icon: XCircle, tint: 'text-rose-600 bg-rose-50', ring: 'ring-rose-500/40', dot: 'bg-rose-500', pill: 'bg-rose-50 text-rose-700 ring-1 ring-rose-200' },
-];
-
-const statusMeta = (key) => STATUSES.find((s) => s.key === key) || STATUSES[0];
-
 const initials = (name) =>
   (name || '?')
     .split(/\s+/)
@@ -43,28 +31,6 @@ const initials = (name) =>
 
 const shortDate = (value) =>
   value ? new Date(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-
-const StatusPill = ({ status }) => {
-  const m = statusMeta(status);
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${m.pill}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
-      {m.en}
-    </span>
-  );
-};
-
-const VerifyPill = ({ verified }) =>
-  verified ? (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
-      <BadgeCheck className="w-3.5 h-3.5" />
-      Verified
-    </span>
-  ) : (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-gray-50 text-gray-400 ring-1 ring-gray-200">
-      Awaiting
-    </span>
-  );
 
 // Approved amount, with the paid state underneath - the list is where admins
 // look first to see what a decided application actually cost.
@@ -99,9 +65,9 @@ const SubmissionList = ({ role }) => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
-  // Super admin only: the backlog of applications no area admin has verified yet
-  // (usually an area with no area admin assigned). Everyone else never sees these.
-  const [unverified, setUnverified] = useState(false);
+  // Every admin now sees every application. This narrows the list to the un-verified
+  // backlog (or to what the area admin has already seen) instead of hiding either.
+  const [verification, setVerification] = useState('all');
 
   // Debounce so each keystroke doesn't hit the server
   useEffect(() => {
@@ -112,12 +78,12 @@ const SubmissionList = ({ role }) => {
   // Any filter change restarts from page 1
   useEffect(() => {
     setPage(1);
-  }, [formType, status, debouncedSearch, unverified]);
+  }, [formType, status, debouncedSearch, verification]);
 
   const query = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
   if (status !== 'all') query.set('status', status);
   if (debouncedSearch) query.set('search', debouncedSearch);
-  if (unverified) query.set('unverified', '1');
+  if (verification !== 'all') query.set('verification', verification);
   const listUrl = `${API_BASE_URL}/api/submissions/${formType}?${query}`;
 
   useEffect(() => {
@@ -163,23 +129,27 @@ const SubmissionList = ({ role }) => {
         />
 
         <div className="p-4 sm:p-8 lg:p-10 pb-24 md:pb-10 max-w-[1440px] mx-auto space-y-5">
-          {/* Escape hatch: applications stuck because their area has no area admin.
-              Super admin only — nobody else is shown un-verified applications. */}
-          {role === 'superadmin' && (
-            <button
-              onClick={() => setUnverified((v) => !v)}
-              aria-pressed={unverified}
-              className={`w-full sm:w-auto rounded-2xl border px-4 py-2.5 text-sm font-semibold transition-all ${
-                unverified
-                  ? 'border-transparent ring-2 ring-amber-500/40 bg-amber-50 text-amber-800'
-                  : 'border-[#E5E7EB] bg-white text-gray-600 hover:border-gray-300'
-              }`}
-            >
-              {unverified
-                ? '← ഏരിയ വെരിഫൈ ചെയ്ത അപേക്ഷകളിലേക്ക് മടങ്ങുക'
-                : 'ഏരിയ അഡ്മിൻ വെരിഫൈ ചെയ്യാത്തവ കാണുക'}
-            </button>
-          )}
+          {/* Area verification is a filter now, not a gate: nothing is hidden, but the
+              un-verified backlog is one click away for whoever is chasing it. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              ഏരിയ വെരിഫിക്കേഷൻ
+            </span>
+            {VERIFICATION_FILTERS.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setVerification(key)}
+                aria-pressed={verification === key}
+                className={`min-h-11 sm:min-h-0 rounded-xl border px-3 py-2 text-sm font-semibold transition-all ${
+                  verification === key
+                    ? 'border-transparent ring-2 ring-amber-500/40 bg-amber-50 text-amber-800'
+                    : 'border-[#E5E7EB] bg-white text-gray-600 hover:border-gray-300'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
           {/* Status tiles double as the filter — one control, no dropdown to keep in sync */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">

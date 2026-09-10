@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { STRUCTURAL_TYPES, isEmptyValue } from '../components/DynamicFieldRenderer';
 import AdminSidebar from '../components/AdminSidebar';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
@@ -9,6 +10,9 @@ import DateField from '../components/DateField';
 import { usePdfExport } from '../hooks/usePdfExport';
 import PrintLetterhead from '../components/PrintLetterhead';
 import SubmissionAttachments from '../components/SubmissionAttachments';
+import { VerifyPill } from '../components/StatusBadge';
+import ConfirmDialog from '../components/ConfirmDialog';
+import EditFieldDialog from '../components/EditFieldDialog';
 import { invalidate } from '../lib/apiCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -57,8 +61,14 @@ export const FieldValue = ({ field, value }) => {
   return <span className="whitespace-pre-wrap">{String(value)}</span>;
 };
 
-// Shared read-only walk of the submission's formData using its config
-export const SubmissionData = ({ config, submission }) => (
+/**
+ * Shared read-only walk of the submission's formData using its config.
+ *
+ * Pass onEditField to make every answer editable — a pencil beside each label that
+ * hands the field back to the caller. The area and district pages pass nothing and
+ * so stay exactly as read-only as they were.
+ */
+export const SubmissionData = ({ config, submission, onEditField }) => (
   <>
     {[...(config?.pages || [])]
       .sort((a, b) => (a.order || 0) - (b.order || 0))
@@ -70,7 +80,19 @@ export const SubmissionData = ({ config, submission }) => (
               .filter((f) => !STRUCTURAL_TYPES.includes(f.type))
               .map((field) => (
                 <div key={field.id} className={field.type === 'row' || field.type === 'textarea' ? 'sm:col-span-2 min-w-0' : 'min-w-0'}>
-                  <dt className="text-xs text-gray-500">{field.label}</dt>
+                  <dt className="text-xs text-gray-500 flex items-center gap-1.5">
+                    {field.label}
+                    {onEditField && (
+                      <button
+                        type="button"
+                        onClick={() => onEditField(field)}
+                        aria-label={`Edit ${field.label}`}
+                        className="print-hide pdf-hide text-gray-300 transition-colors hover:text-emerald-700"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    )}
+                  </dt>
                   <dd className="text-sm text-gray-800 font-medium">
                     <FieldValue field={field} value={submission.formData?.[`field_${field.id}`]} />
                   </dd>
@@ -81,6 +103,26 @@ export const SubmissionData = ({ config, submission }) => (
       ))}
   </>
 );
+
+// Plain-text summary of one pending edit, for the confirmation. Row tables and long
+// answers are summarised rather than dumped — the point is to make an accidental edit
+// obvious, not to reproduce the whole answer inside a dialog.
+const shortValue = (field, value) => {
+  if (isEmptyValue(value)) return 'ശൂന്യം (empty)';
+  if (field.type === 'file') return typeof value === 'string' ? value.split('/').pop() : 'file';
+  if (Array.isArray(value)) {
+    return field.type === 'row' ? `${value.length} rows` : value.join(', ');
+  }
+  const text = String(value);
+  return text.length > 80 ? `${text.slice(0, 80)}…` : text;
+};
+
+const describeEdit = ({ field, value }, submission) => {
+  const before = shortValue(field, submission?.formData?.[`field_${field.id}`]);
+  const after = shortValue(field, value);
+  const what = field.type === 'file' ? 'ഫയൽ' : field.label;
+  return `${what}: "${before}" → "${after}". The applicant's own answer is replaced, and the change is recorded against your name.`;
+};
 
 // Payment is handed over off-platform; this only records how it was done.
 const PAID_METHOD_LABELS = {
@@ -128,6 +170,14 @@ const SubmissionDetails = ({ role }) => {
   const [editingPaid, setEditingPaid] = useState(false);
   const [paidMessage, setPaidMessage] = useState('');
   const [message, setMessage] = useState('');
+  // Field correction and record deletion — both admin-only, both confirmed.
+  const [editingField, setEditingField] = useState(null);
+  // The typed-but-not-yet-saved value, held while the confirmation is on screen.
+  const [pendingEdit, setPendingEdit] = useState(null);
+  const [savingField, setSavingField] = useState(false);
+  const [fieldError, setFieldError] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { contentRef, downloading, handleDownload } = usePdfExport(`submission-${formType}`);
 
   const authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -170,6 +220,67 @@ const SubmissionDetails = ({ role }) => {
       setMessage(data.message);
     } else {
       setMessage(data.message || 'Failed');
+    }
+  };
+
+  // Save one corrected answer. The whole formData goes up so the server can
+  // re-validate and rebuild the denormalized columns from a consistent document.
+  const openFieldEditor = (field) => {
+    setFieldError('');
+    setEditingField(field);
+  };
+
+  const saveField = async () => {
+    if (!pendingEdit) return;
+    setSavingField(true);
+    setFieldError('');
+    try {
+      const formData = { ...(submission.formData || {}), [`field_${pendingEdit.field.id}`]: pendingEdit.value };
+      const res = await fetch(`${API_BASE_URL}/api/submissions/${formType}/${id}/form-data`, {
+        method: 'PATCH',
+        headers: authHeaders,
+        body: JSON.stringify({ formData }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        invalidate(); // the lists cache a name/district this may have just changed
+        setSubmission(data.data);
+        setPendingEdit(null);
+        setEditingField(null);
+        setMessage('അപേക്ഷ പുതുക്കി');
+      } else {
+        // Keep the editor open on the rejected value so it can be corrected.
+        setPendingEdit(null);
+        setFieldError((data.errors && data.errors.join(', ')) || data.message || 'Save failed');
+      }
+    } catch {
+      setPendingEdit(null);
+      setFieldError('Save failed');
+    } finally {
+      setSavingField(false);
+    }
+  };
+
+  const deleteSubmission = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/submissions/${formType}/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      const data = await res.json();
+      if (data.success) {
+        invalidate();
+        navigate(listPath);
+      } else {
+        setConfirmingDelete(false);
+        setMessage(data.message || 'Delete failed');
+      }
+    } catch {
+      setConfirmingDelete(false);
+      setMessage('Delete failed');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -254,6 +365,13 @@ const SubmissionDetails = ({ role }) => {
             >
               {downloading ? 'Preparing…' : '⬇ Download PDF'}
             </button>
+            <button
+              onClick={() => setConfirmingDelete(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-red-200 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
           </div>
         </div>
 
@@ -272,14 +390,43 @@ const SubmissionDetails = ({ role }) => {
                 {new Date(submission.createdAt).toLocaleString()}
               </p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[submission.status] || ''}`}>
-              {submission.status}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[submission.status] || ''}`}>
+                {submission.status}
+              </span>
+              <VerifyPill verified={!!submission.areaVerification?.comment} />
+            </div>
           </div>
 
-          <SubmissionData config={config} submission={submission} />
+          {/* An un-verified application is no longer hidden and no longer blocked, so
+              say plainly what is missing — the decision below is still allowed. */}
+          {!submission.areaVerification?.comment && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={2} />
+              <p className="text-sm text-amber-900">
+                ഏരിയ അഡ്മിൻ ഇതുവരെ ഈ അപേക്ഷ വെരിഫൈ ചെയ്തിട്ടില്ല.{' '}
+                <span className="text-amber-800">
+                  വേണമെങ്കിൽ വെരിഫിക്കേഷൻ ഇല്ലാതെ തന്നെ തീരുമാനമെടുക്കാം.
+                </span>
+              </p>
+            </div>
+          )}
 
-          <SubmissionAttachments config={config} submission={submission} selectable />
+          <SubmissionData config={config} submission={submission} onEditField={openFieldEditor} />
+
+          <SubmissionAttachments
+            config={config}
+            submission={submission}
+            selectable
+            onEditFile={openFieldEditor}
+          />
+
+          {submission.lastEditedAt && (
+            <p className="text-xs text-gray-500 mb-3">
+              ഈ അപേക്ഷ തിരുത്തിയത്: {submission.lastEditedByName || 'Admin'} —{' '}
+              {new Date(submission.lastEditedAt).toLocaleString()}
+            </p>
+          )}
 
           {(submission.requestedAmount != null || submission.approvedAmount != null) && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-3">
@@ -602,6 +749,40 @@ const SubmissionDetails = ({ role }) => {
           )}
         </div>
       </div>
+
+      {editingField && (
+        <EditFieldDialog
+          field={editingField}
+          value={submission.formData?.[`field_${editingField.id}`]}
+          saving={savingField || !!pendingEdit}
+          error={fieldError}
+          onSave={(value) => setPendingEdit({ field: editingField, value })}
+          onCancel={() => { setEditingField(null); setFieldError(''); }}
+        />
+      )}
+
+      {/* Editing a submitted application overwrites what the applicant actually wrote,
+          so the change is stated back in full before it is written. */}
+      <ConfirmDialog
+        open={!!pendingEdit}
+        title="Save this change?"
+        description={pendingEdit ? describeEdit(pendingEdit, submission) : ''}
+        confirmLabel="Save change"
+        destructive={false}
+        loading={savingField}
+        onConfirm={saveField}
+        onCancel={() => setPendingEdit(null)}
+      />
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete this application?"
+        description="The application and everything recorded on it — the answers, the decision, the office comment — are removed for good. Uploaded files stay in storage but nothing will point at them."
+        confirmLabel="Delete application"
+        loading={deleting}
+        onConfirm={deleteSubmission}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </>
   );
 };

@@ -62,12 +62,15 @@ const buildTable = (field, value) => {
 };
 
 const DynamicField = ({ field, value, onChange, required, uploading, onFileSelect }) => {
-  const label = (
+  // A blank label means the caller is showing it elsewhere (the edit dialog puts it in
+  // the title bar). Rendering the row anyway leaves a stray required-asterisk floating
+  // above the input.
+  const label = field.label ? (
     <label className="block text-sm font-semibold text-gray-700 mb-1.5">
       {field.label}
       {required && <span className="text-red-500 ml-1">*</span>}
     </label>
-  );
+  ) : null;
   const help = field.helpText ? (
     <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
   ) : null;
