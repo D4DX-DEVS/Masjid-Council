@@ -3,6 +3,7 @@ import { authHeaders } from '../lib/auth';
 import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
 import { usePdfExport } from '../hooks/usePdfExport';
+import PrintLetterhead from '../components/PrintLetterhead';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
@@ -315,6 +316,11 @@ const SuperAdminAffiliationDetails = () => {
         </div>
 
         <div className="p-4 space-y-3 mt-2" ref={contentRef}>
+          <PrintLetterhead
+            title="മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ"
+            referenceNumber={affiliation.affiliationNumber}
+            date={affiliation.createdAt ? new Date(affiliation.createdAt).toLocaleDateString('en-GB') : ''}
+          />
           {/* Application Summary */}
           <section className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6">
             <h2 className="text-sm sm:text-base font-semibold mb-2 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>

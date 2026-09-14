@@ -20,6 +20,10 @@ body {
 
 /* Browser print (Ctrl+P / Print button): chrome hidden, application content only.
    .pdf-hide doubles up so PDF-excluded editors stay out of paper prints too. */
+/* Paper margin for Ctrl+P. The PDF export applies its own 10mm margin in
+   usePdfExport.js — this is the browser-print counterpart. */
+@page { size: A4; margin: 12mm; }
+
 @media print {
   body { background: #fff !important; }
   .print-hide, .pdf-hide { display: none !important; }
