@@ -3,6 +3,7 @@ import { authHeaders } from '../lib/auth';
 import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
 import { usePdfExport } from '../hooks/usePdfExport';
+import PrintLetterhead from '../components/PrintLetterhead';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
@@ -381,6 +382,11 @@ const SuperAdminMosqueFundDetails = () => {
         </div>
 
         <div className="space-y-6" ref={contentRef}>
+          <PrintLetterhead
+            title="മസ്ജിദ് ഫണ്ട് അപേക്ഷ"
+            referenceNumber={displayData.applicationId || displayData._id?.slice(-8)}
+            date={displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString('en-GB') : ''}
+          />
           {/* Application Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">അപേക്ഷ സംഗ്രഹം</h2>

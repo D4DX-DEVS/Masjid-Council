@@ -139,6 +139,8 @@ const STATUS_LABELS = {
   rejected: 'നിരസിച്ചു — Rejected',
 };
 
+const PRINT_OPTS_KEY = 'mc:submission-print-opts';
+
 const STATUS_STYLES = {
   pending: 'bg-yellow-100 text-yellow-800',
   under_review: 'bg-blue-100 text-blue-800',
@@ -179,6 +181,27 @@ const SubmissionDetails = ({ role }) => {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { contentRef, downloading, handleDownload } = usePdfExport(`submission-${formType}`);
+
+  // What the paper / PDF copy carries. Internal workflow chrome — the status pill and
+  // the "area admin hasn't verified this" note — is off by default: the printed copy
+  // goes outside the office, where that chrome reads as part of the application.
+  // The choice is per-admin and sticky, so it survives a reload.
+  const [printOpts, setPrintOpts] = useState(() => {
+    try {
+      return { badges: false, notice: false, ...JSON.parse(localStorage.getItem(PRINT_OPTS_KEY) || '{}') };
+    } catch {
+      return { badges: false, notice: false };
+    }
+  });
+  const togglePrintOpt = (key) => {
+    setPrintOpts((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      try { localStorage.setItem(PRINT_OPTS_KEY, JSON.stringify(next)); } catch { /* private mode */ }
+      return next;
+    });
+  };
+  // Both channels need hiding: @media print reads .print-hide, the PDF capture skips .pdf-hide.
+  const hideInPrint = (show) => (show ? '' : ' print-hide pdf-hide');
 
   const authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
@@ -375,6 +398,30 @@ const SubmissionDetails = ({ role }) => {
           </div>
         </div>
 
+        {/* Print / PDF setup. Lives outside contentRef and is print-hidden itself, so it
+            never appears on the copy it configures. */}
+        <div className="print-hide flex flex-wrap items-center gap-x-4 gap-y-1 mb-3 text-xs text-gray-600">
+          <span className="font-semibold text-gray-500">പ്രിന്റ് / PDF-ൽ ഉൾപ്പെടുത്തുക:</span>
+          <label className="inline-flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={printOpts.badges}
+              onChange={() => togglePrintOpt('badges')}
+              className="h-3.5 w-3.5 accent-gray-800"
+            />
+            സ്റ്റാറ്റസ് / വെരിഫിക്കേഷൻ ബാഡ്ജ്
+          </label>
+          <label className="inline-flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={printOpts.notice}
+              onChange={() => togglePrintOpt('notice')}
+              className="h-3.5 w-3.5 accent-gray-800"
+            />
+            വെരിഫിക്കേഷൻ അറിയിപ്പ്
+          </label>
+        </div>
+
         <div ref={contentRef}>
         <PrintLetterhead
           title={config?.title}
@@ -390,7 +437,7 @@ const SubmissionDetails = ({ role }) => {
                 {new Date(submission.createdAt).toLocaleString()}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className={`flex flex-wrap items-center gap-2${hideInPrint(printOpts.badges)}`}>
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[submission.status] || ''}`}>
                 {submission.status}
               </span>
@@ -401,7 +448,7 @@ const SubmissionDetails = ({ role }) => {
           {/* An un-verified application is no longer hidden and no longer blocked, so
               say plainly what is missing — the decision below is still allowed. */}
           {!submission.areaVerification?.comment && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2.5">
+            <div className={`bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2.5${hideInPrint(printOpts.notice)}`}>
               <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={2} />
               <p className="text-sm text-amber-900">
                 ഏരിയ അഡ്മിൻ ഇതുവരെ ഈ അപേക്ഷ വെരിഫൈ ചെയ്തിട്ടില്ല.{' '}

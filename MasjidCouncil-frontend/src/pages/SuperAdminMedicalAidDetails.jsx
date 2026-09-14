@@ -4,6 +4,7 @@ import { ProfileMenu } from '../components/PageHeader';
 import { invalidate } from '../lib/apiCache';
 import { getPurposeLabel, getRequiredDocuments, isViewableUrl } from '../lib/welfareFundDocs';
 import { usePdfExport } from '../hooks/usePdfExport';
+import PrintLetterhead from '../components/PrintLetterhead';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
@@ -335,6 +336,11 @@ const SuperAdminMedicalAidDetails = () => {
           </div>
 
         <div className="space-y-6" ref={contentRef}>
+          <PrintLetterhead
+            title="ഇമാം മുഅദ്ദിൻ ക്ഷേമനിധി അപേക്ഷ"
+            referenceNumber={displayData.applicationId || displayData._id?.slice(-8)}
+            date={displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString('en-GB') : ''}
+          />
           {/* Application Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Application Summary</h2>

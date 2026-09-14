@@ -15,6 +15,13 @@ export const SITE_NAME = 'Masjid Council Kerala';
 export const OG_IMAGE = `${SITE_URL}/og-image.png`;
 export const LOGO_URL = `${SITE_URL}/logo-512.png`;
 
+// Contact block, printed on the letterhead of every downloaded / printed application
+// (see components/PrintLetterhead.jsx) and mirrored in the Organization JSON-LD below.
+export const ORG_ADDRESS = 'Hira Centre, PB No. 833, Mavoor Road, Kozhikode - 4, Kerala 673004';
+export const ORG_PHONE = '+91 95624 78805';
+export const ORG_EMAIL = 'masjidcouncilkerala@gmail.com';
+export const ORG_SITE = 'www.masjidcouncilkerala.org';
+
 /**
  * @typedef {object} RouteMeta
  * @property {string} path        Route path, exactly as it appears in the URL.
