@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin-login
 Disallow: /superadmin-login
+Disallow: /homepage-preview
 Disallow: /admin-home
 Disallow: /superadmin-dashboard
 Disallow: /affiliation-list

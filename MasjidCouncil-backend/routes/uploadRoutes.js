@@ -182,6 +182,23 @@ router.post(
 // belongs to the publications editor and is switched off with it, and a form correction
 // must not depend on whether publications happen to be enabled. No IP cap, for the same
 // reason as above - the admin login is the gate.
+// POST /upload-banner-file - the banners page. Its own route for the same reason as above:
+// switching banners off for state admins must close this, and must not touch publications.
+router.post(
+    "/upload-banner-file",
+    authenticateAdmin,
+    requireFeature("banners"),
+    handleUpload
+);
+
+// POST /upload-homepage-file - images for the home page customiser, closed with that feature.
+router.post(
+    "/upload-homepage-file",
+    authenticateAdmin,
+    requireFeature("homepage"),
+    handleUpload
+);
+
 router.post("/upload-submission-file", authenticateAdmin, handleUpload);
 
 module.exports = router;

@@ -480,3 +480,33 @@ body:has(.mc-form) {
 
 .mc-prose hr { border: 0; border-top: 1px solid #e5e7eb; margin-block: 2em; }
 .mc-prose strong { font-weight: 700; color: #111827; }
+
+/* Homepage Design editor motion. Short and eased out, so the panel feels like it slides
+   rather than snaps; all of it is dropped for visitors who ask for reduced motion. */
+@keyframes hp-panel-forward {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hp-panel-back {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hp-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hp-drop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.hp-panel-forward { animation: hp-panel-forward 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.hp-panel-back { animation: hp-panel-back 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.hp-rise { animation: hp-rise 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.hp-drop { animation: hp-drop 0.18s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-panel-forward,
+  .hp-panel-back,
+  .hp-rise,
+  .hp-drop { animation: none; }
+}
