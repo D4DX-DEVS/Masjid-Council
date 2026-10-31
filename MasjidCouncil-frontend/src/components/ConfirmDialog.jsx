@@ -1,5 +1,5 @@
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { AlertTriangle, HelpCircle } from 'lucide-react';
+import { AlertTriangle, HelpCircle, Loader2 } from 'lucide-react';
 
 /**
  * Confirmation for an action that cannot be undone.
@@ -67,12 +67,14 @@ const ConfirmDialog = ({
               <button
                 type="button"
                 onClick={onConfirm}
-                className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                disabled={loading}
+                className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 disabled:opacity-70 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   destructive
                     ? 'bg-red-600 hover:bg-red-700 focus-visible:ring-red-500'
                     : 'bg-[#1F6B3A] hover:bg-[#2E7D4F] focus-visible:ring-green-600'
                 }`}
               >
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {confirmLabel}
               </button>
             </AlertDialog.Action>

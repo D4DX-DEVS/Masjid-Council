@@ -14,6 +14,8 @@ const BASE = `${API_BASE_URL}/api/admin-access`;
 export const FEATURE_LABELS = {
   formBuilder: 'Form Builder',
   publications: 'Publications',
+  banners: 'Banners',
+  homepage: 'Homepage Design',
 };
 
 const json = async (response) => {

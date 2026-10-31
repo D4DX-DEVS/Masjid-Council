@@ -19,6 +19,14 @@ const FEATURES = {
     label: "Publications",
     default: true,
   },
+  banners: {
+    label: "Banners",
+    default: true,
+  },
+  homepage: {
+    label: "Homepage Design",
+    default: true,
+  },
 };
 
 const FEATURE_KEYS = Object.keys(FEATURES);

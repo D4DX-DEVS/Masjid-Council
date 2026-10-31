@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee, Wrench , BookOpen} from 'lucide-react';
+import { Menu, X, Home, FileText, Heart, Building2, CalendarDays, Database, IndianRupee, Wrench , BookOpen, Image as ImageIcon, LayoutTemplate} from 'lucide-react';
 import logo from '../assets/logo.webp';
 import dxLogo from '../assets/dx-logo-sml.webp';
 import { fetchAdminAccess } from '../lib/adminAccess';
@@ -50,6 +50,12 @@ const AdminSidebar = ({ items }) => {
     { to: '/spending-report', icon: IndianRupee, label: 'Spending', short: 'Spend' },
     ...(allowed('publications')
       ? [{ to: '/admin-publications', icon: BookOpen, label: 'Publications', short: 'Books' }]
+      : []),
+    ...(allowed('banners')
+      ? [{ to: '/admin-banners', icon: ImageIcon, label: 'Banners', short: 'Banners' }]
+      : []),
+    ...(allowed('homepage')
+      ? [{ to: '/admin-homepage', icon: LayoutTemplate, label: 'Homepage Design', short: 'Design' }]
       : []),
   ];
 

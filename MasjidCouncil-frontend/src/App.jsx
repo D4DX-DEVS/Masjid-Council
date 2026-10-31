@@ -37,6 +37,9 @@ import SpendingReport from './pages/SpendingReport';
 import PublicationReader from './pages/PublicationReader';
 import PublicationsAdmin from './pages/PublicationsAdmin';
 import PublicationEditor from './pages/PublicationEditor';
+import BannersAdmin from './pages/BannersAdmin';
+import HomepageCustomizer from './pages/HomepageCustomizer';
+import HomepagePreview from './pages/HomepagePreview';
 
 
 // Helper component to wrap Routes and conditional navbar
@@ -69,8 +72,8 @@ const Layout = () => {
   ];
 
   // Parameterized dashboard routes hide the navbar too
-  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/district-home', '/district-submissions', '/spending-report', '/admin-publications', '/admin-form-builder'];
-  const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report', '/superadmin-publications'];
+  const adminPrefixes = ['/submissions', '/area-home', '/area-submissions', '/district-home', '/district-submissions', '/spending-report', '/admin-publications', '/admin-form-builder', '/admin-banners', '/admin-homepage'];
+  const superAdminPrefixes = ['/superadmin-submissions', '/superadmin-form-builder', '/superadmin-spending-report', '/superadmin-publications', '/superadmin-banners', '/superadmin-homepage'];
 
   const isAdminRoute =
     adminRoutes.includes(location.pathname) ||
@@ -80,12 +83,14 @@ const Layout = () => {
     superAdminPrefixes.some((p) => location.pathname.startsWith(p));
   const isAdminLogin = location.pathname === '/admin-login';
   const isSuperAdminLogin = location.pathname === '/superadmin-login';
+  // The preview renders its own navbar, inside the wrapper that stops its clicks.
+  const isHomepagePreview = location.pathname === '/homepage-preview';
 
   return (
     <>
       <RouteSeo />
       <ScrollToTop />
-      {!isAdminLogin && !isSuperAdminLogin && !isAdminRoute && !isSuperAdminRoute && <Navbar />}
+      {!isAdminLogin && !isSuperAdminLogin && !isAdminRoute && !isSuperAdminRoute && !isHomepagePreview && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -147,6 +152,15 @@ const Layout = () => {
         <Route path="/superadmin-publications/:id" element={<PublicationEditor role="superadmin" />} />
         <Route path="/admin-publications" element={<PublicationsAdmin role="admin" />} />
         <Route path="/admin-publications/:id" element={<PublicationEditor role="admin" />} />
+
+        {/* Home page banner carousel */}
+        <Route path="/superadmin-banners" element={<BannersAdmin role="superadmin" />} />
+        <Route path="/admin-banners" element={<BannersAdmin role="admin" />} />
+
+        {/* Home page customiser and the frame it previews in */}
+        <Route path="/superadmin-homepage" element={<HomepageCustomizer role="superadmin" />} />
+        <Route path="/admin-homepage" element={<HomepageCustomizer role="admin" />} />
+        <Route path="/homepage-preview" element={<HomepagePreview />} />
       </Routes>
     </>
   );
