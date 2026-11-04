@@ -59,7 +59,7 @@ const BannerLink = ({ banner, children }) => {
   );
 };
 
-const BannerCarousel = () => {
+const BannerCarousel = ({ preview = false }) => {
   const [banners, setBanners] = useState(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -67,15 +67,27 @@ const BannerCarousel = () => {
 
   useEffect(() => {
     let active = true;
-    fetchBanners()
-      .then((data) => active && setBanners(Array.isArray(data) ? data : []))
-      .catch(() => active && setBanners([]));
+    const load = () =>
+      fetchBanners({ fresh: preview })
+        .then((data) => active && setBanners(Array.isArray(data) ? data : []))
+        .catch(() => active && setBanners([]));
+    load();
+    // In the editor preview, banners are often changed in another tab: reload them when the
+    // admin comes back so the preview never shows a banner as it was before the edit.
+    const onVisible = () => document.visibilityState === 'visible' && load();
+    if (preview) document.addEventListener('visibilitychange', onVisible);
     return () => {
       active = false;
+      document.removeEventListener('visibilitychange', onVisible);
     };
-  }, []);
+  }, [preview]);
 
   const count = banners?.length || 0;
+
+  // A reload (preview) can return fewer banners than the slide being shown.
+  useEffect(() => {
+    if (count && index >= count) setIndex(0);
+  }, [count, index]);
 
   useEffect(() => {
     if (count < 2 || paused || prefersReducedMotion()) return undefined;

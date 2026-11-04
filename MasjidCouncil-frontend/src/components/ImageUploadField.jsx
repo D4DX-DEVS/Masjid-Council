@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
-import { ImagePlus, Loader2, RotateCcw, Trash2 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Crop, ImagePlus, Loader2, RotateCcw, Trash2 } from 'lucide-react';
+import ImageCropDialog from './ImageCropDialog';
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const IMAGE_TYPES = 'image/jpeg,image/png,image/webp,image/gif';
@@ -22,12 +23,17 @@ const ImageUploadField = ({
   onRemove,
   onRestore,
   onError,
+  crop,
 }) => {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  // { src, name, revoke } while the editor is open.
+  const [editing, setEditing] = useState(null);
 
-  const pick = async (file) => {
-    if (!file) return;
+  // Free the blob: URL of a picked file once the editor closes.
+  useEffect(() => () => editing?.revoke && URL.revokeObjectURL(editing.src), [editing]);
+
+  const send = async (file) => {
     if (file.size > MAX_IMAGE_BYTES) {
       onError('Image is larger than 5 MB.');
       return;
@@ -40,8 +46,24 @@ const ImageUploadField = ({
       onError(error.message);
     } finally {
       setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
     }
+  };
+
+  const pick = (file) => {
+    if (inputRef.current) inputRef.current.value = '';
+    if (!file) return;
+    // GIFs would lose their animation on a canvas; upload them untouched.
+    if (crop && file.type !== 'image/gif') {
+      // The source may be large; the edited output is resized and size-checked on upload.
+      setEditing({ src: URL.createObjectURL(file), name: file.name, revoke: true });
+      return;
+    }
+    send(file);
+  };
+
+  const finishEdit = (file) => {
+    setEditing(null);
+    send(file);
   };
 
   const secondary =
@@ -70,6 +92,17 @@ const ImageUploadField = ({
               {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
               Replace
             </button>
+            {crop && (
+              <button
+                type="button"
+                onClick={() => setEditing({ src: previewSrc, name: 'image', revoke: false })}
+                disabled={uploading}
+                className={`${secondary} border border-gray-200 text-gray-700 hover:bg-gray-50`}
+              >
+                <Crop className="h-4 w-4" />
+                Crop / edit
+              </button>
+            )}
             {onRestore && (
               <button
                 type="button"
@@ -122,6 +155,17 @@ const ImageUploadField = ({
         aria-label={label}
         onChange={(e) => pick(e.target.files?.[0])}
       />
+      {editing && (
+        <ImageCropDialog
+          src={editing.src}
+          fileName={editing.name}
+          title={`Edit ${label.replace(/\s*\(optional\)$/i, '').toLowerCase()}`}
+          aspects={crop.aspects}
+          defaultAspect={crop.defaultAspect}
+          onDone={finishEdit}
+          onCancel={() => setEditing(null)}
+        />
+      )}
     </div>
   );
 };

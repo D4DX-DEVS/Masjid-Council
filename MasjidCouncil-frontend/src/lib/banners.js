@@ -14,7 +14,10 @@ const json = async (response) => {
 const adminJsonHeaders = () => ({ ...authHeaders(), 'Content-Type': 'application/json' });
 
 // Public list for the home page carousel: enabled banners only, in display order.
-export const fetchBanners = async () => (await json(await fetch(BASE))).data;
+// The response is cached for a minute; `fresh` (the editor preview) revalidates every time so
+// an admin sees a banner edit at once instead of a copy from before it.
+export const fetchBanners = async ({ fresh = false } = {}) =>
+  (await json(await fetch(BASE, fresh ? { cache: 'no-cache' } : undefined))).data;
 
 export const fetchBannersAdmin = async () =>
   (await json(await fetch(`${BASE}/admin/all`, { headers: authHeaders() }))).data;

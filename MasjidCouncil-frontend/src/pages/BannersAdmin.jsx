@@ -252,19 +252,35 @@ const BannersAdmin = ({ role = 'superadmin' }) => {
                     </button>
                   </div>
 
-                  <img
-                    src={banner.image?.url}
-                    alt=""
-                    className={`aspect-[4/1] w-full shrink-0 rounded-lg bg-gray-50 object-cover ring-1 ring-gray-100 sm:w-48 ${
-                      banner.enabled ? '' : 'opacity-50 grayscale'
-                    }`}
-                  />
+                  <div className={`flex shrink-0 items-end gap-2 ${banner.enabled ? '' : 'opacity-50 grayscale'}`}>
+                    <figure className="min-w-0 flex-1 sm:w-48 sm:flex-none">
+                      <img
+                        src={banner.image?.url}
+                        alt=""
+                        className="aspect-[4/1] w-full rounded-lg bg-gray-50 object-cover ring-1 ring-gray-100"
+                      />
+                      <figcaption className="mt-1 text-[11px] text-gray-400">Desktop</figcaption>
+                    </figure>
+                    <figure className="w-16 shrink-0">
+                      {banner.mobileImage?.url ? (
+                        <img
+                          src={banner.mobileImage.url}
+                          alt=""
+                          className="aspect-[3/4] w-full rounded-lg bg-gray-50 object-cover ring-1 ring-gray-100"
+                        />
+                      ) : (
+                        <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg border border-dashed border-gray-200 px-1 text-center text-[10px] leading-tight text-gray-400">
+                          Uses desktop
+                        </div>
+                      )}
+                      <figcaption className="mt-1 text-[11px] text-gray-400">Mobile</figcaption>
+                    </figure>
+                  </div>
 
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-gray-900">{banner.title}</p>
                     <p className="mt-0.5 truncate text-xs text-gray-500">
                       {banner.linkUrl || 'No link'}
-                      {banner.mobileImage?.url ? ' · has mobile image' : ''}
                     </p>
                     <span
                       className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
