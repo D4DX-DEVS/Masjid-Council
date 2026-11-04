@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Loader2, Save, X } from 'lucide-react';
+import { Loader2, Monitor, Save, Smartphone, X } from 'lucide-react';
 import ImageUploadField from './ImageUploadField';
 import { uploadBannerImage } from '../lib/banners';
 
@@ -16,6 +16,85 @@ const EMPTY = {
   linkUrl: '',
   openInNewTab: true,
   enabled: true,
+};
+
+// Crop shapes offered in the editor. The wide one matches the carousel's recommended 2160 × 500.
+const DESKTOP_CROP = {
+  aspects: [
+    { label: 'Wide 4.3 : 1', value: 2160 / 500 },
+    { label: '3 : 1', value: 3 },
+    { label: '16 : 9', value: 16 / 9 },
+    { label: 'Free', value: null },
+  ],
+};
+const MOBILE_CROP = {
+  aspects: [
+    { label: 'Original shape', value: null },
+    { label: '4 : 3', value: 4 / 3 },
+    { label: 'Square 1 : 1', value: 1 },
+    { label: 'Portrait 4 : 5', value: 4 / 5 },
+  ],
+};
+
+/** Shows how the banner will look in the home page carousel on a desktop and on a phone. */
+const BannerPreview = ({ image, mobileImage, title }) => {
+  const [view, setView] = useState('desktop');
+  if (!image) return null;
+  const phoneSrc = mobileImage || image;
+  const tab = (key, Icon, text) => (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={view === key}
+      onClick={() => setView(key)}
+      className={`inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors ${
+        view === key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
+      }`}
+    >
+      <Icon className="h-4 w-4" />
+      {text}
+    </button>
+  );
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className="text-sm font-medium text-gray-700">Preview</span>
+        <div role="tablist" aria-label="Preview device" className="inline-flex rounded-lg bg-gray-100 p-1">
+          {tab('desktop', Monitor, 'Desktop')}
+          {tab('mobile', Smartphone, 'Mobile')}
+        </div>
+      </div>
+      <div className="flex justify-center rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
+        {view === 'desktop' ? (
+          <div className="w-full overflow-hidden rounded-lg bg-white shadow ring-1 ring-gray-200">
+            <div className="flex items-center gap-1 border-b border-gray-100 px-2 py-1.5">
+              <span className="h-2 w-2 rounded-full bg-gray-300" />
+              <span className="h-2 w-2 rounded-full bg-gray-300" />
+              <span className="h-2 w-2 rounded-full bg-gray-300" />
+            </div>
+            <div className="p-2">
+              <img src={image} alt={title} className="block h-auto w-full rounded-md" />
+            </div>
+          </div>
+        ) : (
+          <div className="w-56 rounded-[1.75rem] bg-gray-900 p-2 shadow-lg">
+            <div className="overflow-hidden rounded-[1.25rem] bg-white">
+              <div className="mx-auto my-1.5 h-1.5 w-12 rounded-full bg-gray-200" />
+              <div className="px-2 pb-6">
+                <img src={phoneSrc} alt={title} className="block h-auto w-full rounded-lg shadow ring-1 ring-gray-100" />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      {view === 'mobile' && !mobileImage && (
+        <p className="mt-1 text-xs text-amber-700">
+          No mobile image yet, so phones show the wide image. Upload one above for readable text.
+        </p>
+      )}
+    </div>
+  );
 };
 
 const isValidLink = (link) =>
@@ -94,18 +173,20 @@ const BannerFormDialog = ({ banner, onSave, onCancel, saving, error, confirm }) 
               <ImageUploadField
                 label="Banner image"
                 required
-                hint="Wide image, about 2160 × 500 px. JPG, PNG or WEBP, up to 5 MB."
+                hint="Wide image, about 2160 × 500 px. You can crop after picking. JPG, PNG or WEBP, up to 5 MB."
                 previewSrc={draft.image?.url}
                 upload={uploadBannerImage}
+                crop={DESKTOP_CROP}
                 onUploaded={(image) => set({ image })}
                 onError={setLocalError}
               />
 
               <ImageUploadField
                 label="Mobile image (optional)"
-                hint="Shown on phones instead of the wide image, e.g. 1080 × 1080 px. Leave empty to use the wide one."
+                hint="Shown on phones instead of the wide image, e.g. 1080 × 1080 or 1448 × 1086 px. You can crop after picking. Leave empty to use the wide one."
                 previewSrc={draft.mobileImage?.url}
                 upload={uploadBannerImage}
+                crop={MOBILE_CROP}
                 onUploaded={(mobileImage) => set({ mobileImage })}
                 onRemove={() =>
                   confirm({
@@ -117,6 +198,12 @@ const BannerFormDialog = ({ banner, onSave, onCancel, saving, error, confirm }) 
                   })
                 }
                 onError={setLocalError}
+              />
+
+              <BannerPreview
+                image={draft.image?.url}
+                mobileImage={draft.mobileImage?.url}
+                title={draft.title}
               />
 
               <label className="block">

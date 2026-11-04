@@ -55,7 +55,7 @@ const HomeSections = ({ config, editable = false }) => {
               data-hp-label={editable ? `${SECTION_META[sectionType(section)]?.label} · click to edit` : undefined}
               className={editable ? 'relative' : undefined}
             >
-              <Block section={section} theme={config.theme} />
+              <Block section={section} theme={config.theme} preview={editable} />
             </div>
           );
         })}
