@@ -2,10 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "nodemon server.js",
-    "test": "node --test lib/*.test.js scripts/lib/*.test.js",
+    "start": "wrangler dev",
+    "build:web": "node scripts/cloudflare/buildWeb.js",
+    "deploy": "npm run build:web && wrangler deploy",
+    "test": "node --no-warnings=ExperimentalWarning --test lib/*.test.js scripts/lib/*.test.js db/*.test.js",
     "seed:publications": "node scripts/seedPublications.js"
   },
   "keywords": [],
@@ -13,17 +15,21 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1102.0",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mingo": "^7.2.7",
     "mongoose": "^8.16.4",
     "multer": "^2.0.2",
     "node-fetch": "^2.7.0",
-    "nodemon": "^3.1.10",
     "sanitize-html": "^2.17.7"
+  },
+  "devDependencies": {
+    "wrangler": "^4.157.0",
+    "@aws-sdk/client-s3": "^3.1102.0",
+    "nodemon": "^3.1.10",
+    "dotenv": "^17.2.0"
   }
 }

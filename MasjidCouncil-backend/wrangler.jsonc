@@ -1,0 +1,43 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "masjid-council-api",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // Mongoose's default driver requires `mongodb` at load; the D1 driver replaces it, so the
+  // real package (and its TCP/TLS stack) is kept out of the bundle.
+  "alias": {
+    "mongodb": "./db/mongodb-stub.js",
+    // Mongoose's package.json points bundlers at a browser build without drivers.
+    "mongoose": "./node_modules/mongoose/index.js"
+  },
+  "observability": { "enabled": true },
+  // The React frontend (built by `npm run build:web`). Files are served straight from the
+  // edge; /api/* and /files/* always reach the Worker, and any other unmatched path falls
+  // through to it so it can answer with the SPA shell (see src/worker.mjs).
+  "assets": {
+    "directory": "../MasjidCouncil-frontend/dist",
+    "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "none",
+    "run_worker_first": ["/api/*", "/files/*"]
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "masjid-council-db", "database_id": "b9cc4bfc-779c-492e-8e46-9c44606ae592" }
+  ],
+  "r2_buckets": [
+    { "binding": "UPLOADS", "bucket_name": "masjid-council-uploads" }
+  ],
+  // Secrets (set with `wrangler secret put`, or .dev.vars locally):
+  //   JWT_SECRET, SUPER_ADMIN_USERNAME, SUPER_ADMIN_PASSWORD, DXING_API_KEY, DXING_INSTANCE_ID
+  "vars": {
+    "NODE_ENV": "production",
+    "CORS_ORIGINS": "https://masjidcouncilkerala.org",
+    "FILES_PUBLIC_URL": "https://masjid-council-api.d4dx-erp.workers.dev/files",
+    "UPLOAD_FOLDER": "MCK uploads",
+    "MAX_FILE_SIZE": "5242880",
+    "DISTRICT_API_ENDPOINT": "https://cenloginbackend.d4dx.co/api/districts",
+    "AREA_API_ENDPOINT": "https://cenloginbackend.d4dx.co/api/areas/district/{districtId}",
+    "UNIT_API_ENDPOINT": "https://cenloginbackend.d4dx.co/api"
+  }
+}

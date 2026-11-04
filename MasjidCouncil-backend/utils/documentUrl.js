@@ -7,13 +7,14 @@ const withScheme = (value) => {
     return /^https?:\/\//.test(value) ? value : `https://${value}`;
 };
 
-const CDN_ENDPOINT = withScheme(process.env.DO_SPACES_CDN_ENDPOINT).replace(/\/$/, "");
+// Public base url of the R2 uploads bucket, as served by this Worker's /files route.
+const FILES_PUBLIC_URL = withScheme(process.env.FILES_PUBLIC_URL).replace(/\/$/, "");
 
 const isUploadedDocumentUrl = (value) => {
     if (typeof value !== "string" || value.length === 0) return false;
-    if (CDN_ENDPOINT) return value.startsWith(`${CDN_ENDPOINT}/`);
-    // No CDN configured (local dev): fall back to a plain scheme allowlist.
+    if (FILES_PUBLIC_URL) return value.startsWith(`${FILES_PUBLIC_URL}/`);
+    // No public url configured (local dev): fall back to a plain scheme allowlist.
     return /^https?:\/\//i.test(value);
 };
 
-module.exports = { isUploadedDocumentUrl };
+module.exports = { isUploadedDocumentUrl, FILES_PUBLIC_URL };

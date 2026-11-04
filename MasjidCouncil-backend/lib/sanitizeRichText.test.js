@@ -3,7 +3,7 @@ const assert = require("node:assert");
 
 // The sanitizer reads the CDN host at require time via utils/documentUrl, so this has to be
 // set before the module graph loads.
-process.env.DO_SPACES_CDN_ENDPOINT = "cdn.example.com";
+process.env.FILES_PUBLIC_URL = "cdn.example.com";
 
 const { sanitizeRichText } = require("./sanitizeRichText");
 

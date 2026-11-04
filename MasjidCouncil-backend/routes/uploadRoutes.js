@@ -2,22 +2,15 @@ const express = require("express");
 const multer = require("multer");
 const crypto = require("crypto");
 const path = require("path");
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { authenticateAdmin } = require("../middleware/auth");
 const { requireFeature } = require("../lib/featureAccess");
+const { FILES_PUBLIC_URL } = require("../utils/documentUrl");
+const { putObject, isStorageConfigured } = require("../lib/fileStorage");
 
 const router = express.Router();
 
-// .env stores the endpoints without a scheme, but the SDK needs a full URL.
-const withScheme = (value) => {
-    if (!value) return "";
-    return /^https?:\/\//.test(value) ? value : `https://${value}`;
-};
-
-const MAX_FILE_SIZE = Number(process.env.DO_MAX_FILE_SIZE) || 5 * 1024 * 1024;
-const FOLDER = process.env.DO_SPACES_FOLDER || "uploads";
-const BUCKET = process.env.DO_SPACES_BUCKET;
-const CDN_ENDPOINT = withScheme(process.env.DO_SPACES_CDN_ENDPOINT).replace(/\/$/, "");
+const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024;
+const FOLDER = process.env.UPLOAD_FOLDER || "uploads";
 
 const ALLOWED_MIME_TYPES = [
     "application/pdf",
@@ -28,17 +21,7 @@ const ALLOWED_MIME_TYPES = [
     "image/webp",
 ];
 
-const spaces = new S3Client({
-    forcePathStyle: false,
-    region: "us-east-1", // DO Spaces ignores the region but the SDK requires one
-    endpoint: withScheme(process.env.DO_SPACES_ENDPOINT),
-    credentials: {
-        accessKeyId: process.env.DO_SPACES_KEY,
-        secretAccessKey: process.env.DO_SPACES_SECRET,
-    },
-});
-
-// Files go straight to Spaces, so they never touch this server's disk.
+// Files go straight to R2, so they never touch this server's disk.
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: MAX_FILE_SIZE },
@@ -103,7 +86,7 @@ const handleUpload = (req, res) => {
             });
         }
 
-        if (!BUCKET || !CDN_ENDPOINT || !process.env.DO_SPACES_KEY) {
+        if (!FILES_PUBLIC_URL || !isStorageConfigured()) {
             return res.status(500).json({
                 success: false,
                 message: "File storage is not configured",
@@ -116,21 +99,13 @@ const handleUpload = (req, res) => {
             for (const file of req.files) {
                 const key = buildKey(file);
 
-                await spaces.send(
-                    new PutObjectCommand({
-                        Bucket: BUCKET,
-                        Key: key,
-                        Body: file.buffer,
-                        ContentType: file.mimetype,
-                        ACL: "public-read",
-                    })
-                );
+                await putObject(key, file.buffer, file.mimetype);
 
                 data[file.fieldname] = {
                     originalName: file.originalname,
-                    // DO_SPACES_FOLDER may contain spaces, so the url has to be encoded
-                    // even though the S3 key itself stays raw.
-                    cdnUrl: `${CDN_ENDPOINT}/${encodeURI(key)}`,
+                    // UPLOAD_FOLDER may contain spaces, so the url has to be encoded
+                    // even though the object key itself stays raw.
+                    cdnUrl: `${FILES_PUBLIC_URL}/${encodeURI(key)}`,
                     key,
                 };
             }

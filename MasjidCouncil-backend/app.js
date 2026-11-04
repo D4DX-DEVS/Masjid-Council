@@ -1,6 +1,7 @@
-require('dotenv').config();
+// The Express app. Runs on Cloudflare Workers through src/worker.mjs (node:http compat); data
+// lives in D1 behind a Mongoose driver (db/d1Driver.js), uploads in R2.
+require("./db/connect");
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 
 const mosqueAffiliationRoutes = require("./routes/mosqueAffiliationRoutes");
@@ -12,6 +13,15 @@ const uploadRoutes = require("./routes/uploadRoutes");
 // const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
+
+// Behind Cloudflare there is no socket peer address to speak of; the client's address arrives
+// in CF-Connecting-IP. The login and upload rate limiters key on req.ip, so without this every
+// visitor would share one bucket.
+app.use((req, _res, next) => {
+    const ip = req.headers["cf-connecting-ip"];
+    if (ip) Object.defineProperty(req, "ip", { value: ip, configurable: true });
+    next();
+});
 
 // CORS_ORIGINS="https://masjidcouncil.example,https://admin.masjidcouncil.example"
 // Unset means "any origin", which is only acceptable in development.
@@ -44,23 +54,6 @@ app.use(cors({
 app.use("/api/publications", express.json({ limit: "12mb" }));
 app.use(express.json({ limit: "1mb" }));
 
-// MongoDB connection with retry logic
-const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI, {
-            serverSelectionTimeoutMS: 10000,
-            socketTimeoutMS: 45000,
-        });
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.error("MongoDB connection error:", error.message);
-        console.log("Retrying connection in 5 seconds...");
-        setTimeout(connectDB, 5000);
-    }
-};
-
-connectDB();
-
 //Routes
 // Shared upload endpoint - mounted under both funds so each form keeps its own path.
 app.use("/api/mosqueFund", uploadRoutes);
@@ -86,8 +79,4 @@ app.use("/api/homepage", require("./routes/homepageRoutes"));
 app.use("/api/admin-access", require("./routes/adminAccessRoutes"));
 // app.use("/api/admin", adminRoutes);
 
-PORT = process.env.PORT;
-app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
-});
-
+module.exports = app;

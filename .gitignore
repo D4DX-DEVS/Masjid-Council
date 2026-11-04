@@ -9,3 +9,7 @@ build/
 .playwright-mcp/
 *.stackdump
 .DS_Store
+
+# Cloudflare Workers local state
+.dev.vars
+.wrangler/
